@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <getopt.h>
 /*#include "fonts/sfmono6.h"*/
 /*#include "fonts/sfmono8.h"*/
 /*#include "fonts/sfmono10.h"*/
@@ -17,6 +18,12 @@ pixel[1] = ((((data[1] - 33) & 0xF) << 4) | ((data[2] - 33) >> 2)); \
 pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
 data += 4; \
 }
+
+static const char *shortArgs = "s";
+static const struct option longArgs[] = {
+  { "stand-alone", no_argument, 0, 's' },
+  { 0,             0,           0, 0   }
+};
 
 typedef struct __Font
 {
@@ -74,8 +81,8 @@ static u_int16_t alphaBlend(const u_int8_t _alpha, const RGB *_bkgnd,
   u_int16_t p;
   double a = _alpha / 255.0, ai = 1.0 - a;
 
-  p = (u_int16_t)((_color->r * a + _bkgnd->r * ai) * 0x1f);
-  p <<= 11;
+  p  = (u_int16_t)((_color->r * a + _bkgnd->r * ai) * 0x1f);
+  p <<= 6;
 
   p |= (u_int16_t)((_color->g * a + _bkgnd->g * ai) * 0x3f);
   p <<= 5;
@@ -146,11 +153,17 @@ static int run = 1;
 
 static void signalHandler(int _signo)
 {
-  if (_signo == SIGINT)
+  switch (_signo)
+  {
+  case SIGINT:
+  case SIGTERM:
+  case SIGHUP:
     run = 0;
+    break;
+  }
 }
 
-int main()
+static int go()
 {
   Font f;
   RGB bkgnd, color;
@@ -170,7 +183,7 @@ int main()
   bkgnd.b = 0.0;
 
   color.r = 1.0;
-  color.g = 0.0;
+  color.g = 1.0;
   color.b = 1.0;
 
   out.w = 320;
@@ -202,4 +215,43 @@ int main()
   free(out.bmp);
 
   return 0;
+}
+
+int main(int _argc, char* _argv[])
+{
+  pid_t pid, sid;
+  int c, standAlone = 0;
+
+  while ((c = getopt_long(_argc, _argv, shortArgs, longArgs, 0)) != -1)
+  {
+    switch (c)
+    {
+    case 's':
+      standAlone = 1;
+      break;
+    }
+  }
+
+  if (standAlone)
+    return go();
+
+  pid = fork();
+
+  if (pid < 0)
+    return -1;
+  if (pid > 0)
+    return 0;
+
+  umask(0);
+
+  sid = setsid();
+
+  if (sid < 0)
+    return -1;
+
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
+  close(STDERR_FILENO);
+
+  return go();
 }
