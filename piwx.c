@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include "sfmono8.h"
-#include "sfmono10.h"
-#include "sfmono16.h"
+#include "fonts/sfmono6.h"
+#include "fonts/sfmono8.h"
+#include "fonts/sfmono10.h"
+#include "fonts/sfmono16.h"
 
 #define FONT_PIXEL(data,pixel) {\
 pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \
