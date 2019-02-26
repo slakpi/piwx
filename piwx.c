@@ -18,13 +18,6 @@ pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
 data += 4; \
 }
 
-#define ALPHA_BLEND_R(c, b, a)\
-a = (unsigned char)((c * a / 255.0 + b * (1.0 - a / 255.0)) * 0x1f)
-#define ALPHA_BLEND_G(c, b, a)\
-a = (unsigned char)((c * a / 255.0 + b * (1.0 - a / 255.0)) * 0x3f)
-#define ALPHA_BLEND_B(c, b, a)\
-a = (unsigned char)((c * a / 255.0 + b * (1.0 - a / 255.0)) * 0x1f)
-
 typedef struct __Font
 {
   const u_int8_t *bmp;
@@ -76,6 +69,23 @@ static void getCharacterCell(char _c, const Font *_font, Cell *_cell)
   _cell->offset = (_font->w - _font->cw) * 4;
 }
 
+static u_int16_t alphaBlend(const u_int8_t _alpha, const RGB *_bkgnd,
+  const RGB *_color)
+{
+  u_int16_t p;
+  double a = _alpha / 255.0, ai = 1.0 - a;
+
+  p = (u_int16_t)((_color->r * a + _bkgnd->r * ai) * 0x1f);
+  p <<= 11;
+
+  p |= (u_int16_t)((_color->g * a + _bkgnd->g * ai) * 0x3f);
+  p <<= 5;
+
+  p |= (u_int16_t)((_color->b * a + _bkgnd->b * ai) * 0x1f);
+
+  return p;
+}
+
 static void drawCharacter(u_int16_t *_out, int _offset, const Cell *_cell,
   const RGB *_bkgnd, const RGB *_color)
 {
@@ -88,13 +98,7 @@ static void drawCharacter(u_int16_t *_out, int _offset, const Cell *_cell,
     for (int c = 0; c < _cell->w; ++c)
     {
       FONT_PIXEL(p, px);
-
-      ALPHA_BLEND_R(_color->r, _bkgnd->r, px[0]);
-      ALPHA_BLEND_G(_color->g, _bkgnd->g, px[1]);
-      ALPHA_BLEND_B(_color->b, _bkgnd->b, px[2]);
-
-      *o++ = (u_int16_t)(((px[0] & 0x1f) << 11) | (((px[1]) & 0x3f) << 5) |
-        (px[2] & 0x1f));
+      *o++ = alphaBlend(px[0], _bkgnd, _color);
     }
 
     p += _cell->offset;
@@ -167,8 +171,8 @@ int main()
   bkgnd.b = 0.0;
 
   color.r = 1.0;
-  color.g = 1.0;
-  color.b = 0.0;
+  color.g = 0.0;
+  color.b = 1.0;
 
   out.w = 320;
   out.h = 240;
@@ -178,6 +182,7 @@ int main()
   while (run)
   {
     fb = open("/dev/fb1", O_WRONLY);
+
     if (fb < 0)
     {
       fprintf(stderr, "Failed to open framebuffer device.\n");
