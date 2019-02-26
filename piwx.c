@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
-#include "fonts/sfmono6.h"
-#include "fonts/sfmono8.h"
-#include "fonts/sfmono10.h"
+/*#include "fonts/sfmono6.h"*/
+/*#include "fonts/sfmono8.h"*/
+/*#include "fonts/sfmono10.h"*/
 #include "fonts/sfmono16.h"
 
 #define FONT_PIXEL(data,pixel) {\
@@ -20,14 +20,14 @@ data += 4; \
 
 typedef struct __Font
 {
-  const u_int8_t *bmp;
+  const char *bmp;
   int w, h;
   int cw, ch;
 } Font;
 
 typedef struct __Cell
 {
-  const u_int8_t *start;
+  const char *start;
   int w, h;
   int offset;
 } Cell;
@@ -55,7 +55,6 @@ static inline int max(int _a, int _b)
 
 static void getCharacterCell(char _c, const Font *_font, Cell *_cell)
 {
-  int x, y;
   memset(_cell, 0, sizeof(Cell));
 
   if (_c & 0x80)
@@ -89,7 +88,7 @@ static u_int16_t alphaBlend(const u_int8_t _alpha, const RGB *_bkgnd,
 static void drawCharacter(u_int16_t *_out, int _offset, const Cell *_cell,
   const RGB *_bkgnd, const RGB *_color)
 {
-  const u_int8_t *p = _cell->start;
+  const char *p = _cell->start;
   u_int16_t *o = _out;
   u_int8_t px[3];
 
