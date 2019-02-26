@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-O3 -Wall -g -c
 LDFLAGS=
-LIBS=-lcurl
+LIBS=-lcurl -lxml2
 OBJ=piwx.o
 
 %.o: %.c
