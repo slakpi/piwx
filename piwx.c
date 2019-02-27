@@ -11,9 +11,11 @@
 /*#include "fonts/sfmono8.h"*/
 /*#include "fonts/sfmono10.h"*/
 #include "fonts/sfmono16.h"
+#include "wxicons/background.h"
+#include "wxicons/thunderstorms.h"
 #include "wx.h"
 
-#define FONT_PIXEL(data,pixel) {\
+#define PIXEL(data,pixel) {\
 pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \
 pixel[1] = ((((data[1] - 33) & 0xF) << 4) | ((data[2] - 33) >> 2)); \
 pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
@@ -94,7 +96,22 @@ static u_int16_t alphaBlend(const u_int8_t _alpha, const RGB *_bkgnd,
   return p;
 }
 
-static void drawCharacter(u_int16_t *_out, int _offset, const Cell *_cell,
+static u_int16_t downSample(const u_int8_t _px[3])
+{
+  u_int16_t p;
+
+  p  = (u_int16_t)(_px[0] / 255.0 * 0x1f);
+  p <<= 6;
+
+  p |= (u_int16_t)(_px[1] / 255.0 * 0x3f);
+  p <<= 5;
+
+  p |= (u_int16_t)(_px[2] / 255.0 * 0x1f);
+
+  return p;
+}
+
+static void drawCell(u_int16_t *_out, int _offset, const Cell *_cell,
   const RGB *_bkgnd, const RGB *_color)
 {
   const char *p = _cell->start;
@@ -105,8 +122,12 @@ static void drawCharacter(u_int16_t *_out, int _offset, const Cell *_cell,
   {
     for (int c = 0; c < _cell->w; ++c)
     {
-      FONT_PIXEL(p, px);
-      *o++ = alphaBlend(px[0], _bkgnd, _color);
+      PIXEL(p, px);
+
+      if (!_color)
+        *o++ = downSample(px);
+      else
+        *o++ = alphaBlend(px[0], _bkgnd, _color);
     }
 
     p += _cell->offset;
@@ -140,11 +161,39 @@ static void drawString(Surface *_out, int _x, int _y, const Font *_font,
 
     out = _out->bmp + cy * _out->w + cx;
     offset = _out->w - c.w;
-    drawCharacter(out, offset, &c, _bkgnd, _color);
+    drawCell(out, offset, &c, _bkgnd, _color);
 
     ++p;
     cx += c.w;
   }
+}
+
+static void drawBackground(Surface *_out)
+{
+  Cell c;
+  RGB bkgnd, color;
+
+  bkgnd.r = 0.0;
+  bkgnd.g = 0.0;
+  bkgnd.b = 0.0;
+
+  color.r = 1.0;
+  color.g = 1.0;
+  color.b = 1.0;
+
+  c.start = BACKGROUND_data;
+  c.w = BACKGROUND_width;
+  c.h = BACKGROUND_height;
+  c.offset = 0;
+
+  //drawCell(_out->bmp, 0, &c, &bkgnd, &color);
+
+  c.start = THUNDERSTORMS_data;
+  c.w = THUNDERSTORMS_width;
+  c.h = THUNDERSTORMS_height;
+  c.offset = 0;
+
+  drawCell(_out->bmp + 246 + _out->w * (40 - c.h / 2), _out->w - c.w, &c, 0, 0);
 }
 
 static const char* ids[] = {
@@ -204,6 +253,7 @@ static int go()
     }
 
     memset(out.bmp, 0, sizeof(u_int16_t) * out.w * out.h);
+    drawBackground(&out);
     drawString(&out, 0, 0, &f, &bkgnd, &color, ids[i], 4);
     write(fb, out.bmp, sizeof(u_int16_t) * out.w * out.h);
     close(fb);
