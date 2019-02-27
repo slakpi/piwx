@@ -3,15 +3,9 @@
 
 static const unsigned int SFMONO10_width = 416;
 static const unsigned int SFMONO10_height = 408;
-static const unsigned int SFMONO10_cellWidth = 26;
-static const unsigned int SFMONO10_cellHeight = 51;
+static const unsigned int SFMONO10_cellWidth = 416 / 16;
+static const unsigned int SFMONO10_cellHeight = 408 / 8;
 
-#define SFMONO10_PIXEL(data,pixel) {\
-pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \
-pixel[1] = ((((data[1] - 33) & 0xF) << 4) | ((data[2] - 33) >> 2)); \
-pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
-data += 4; \
-}
 static const char *SFMONO10_data =
 	"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"

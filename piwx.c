@@ -11,6 +11,7 @@
 /*#include "fonts/sfmono8.h"*/
 /*#include "fonts/sfmono10.h"*/
 #include "fonts/sfmono16.h"
+#include "wx.h"
 
 #define FONT_PIXEL(data,pixel) {\
 pixel[0] = (((data[0] - 33) << 2) | ((data[1] - 33) >> 4)); \
@@ -19,10 +20,11 @@ pixel[2] = ((((data[2] - 33) & 0x3) << 6) | ((data[3] - 33))); \
 data += 4; \
 }
 
-static const char *shortArgs = "s";
+static const char *shortArgs = "st:";
 static const struct option longArgs[] = {
-  { "stand-alone", no_argument, 0, 's' },
-  { 0,             0,           0, 0   }
+  { "stand-alone", no_argument,       0, 's' },
+  { "test",        required_argument, 0, 't' },
+  { 0,             0,                 0,  0  }
 };
 
 typedef struct __Font
@@ -217,10 +219,16 @@ static int go()
   return 0;
 }
 
+static void testSunriseSunset()
+{
+  struct tm sunrise, sunset;
+  getSunriseSunset(&sunrise, &sunset);
+}
+
 int main(int _argc, char* _argv[])
 {
   pid_t pid, sid;
-  int c, standAlone = 0;
+  int c, t = 0, standAlone = 0;
 
   while ((c = getopt_long(_argc, _argv, shortArgs, longArgs, 0)) != -1)
   {
@@ -229,7 +237,19 @@ int main(int _argc, char* _argv[])
     case 's':
       standAlone = 1;
       break;
+    case 't':
+      t = atoi(optarg);
+      break;
     }
+  }
+
+  switch (t)
+  {
+  case 0:
+    break;
+  case 1:
+    testSunriseSunset();
+    return 0;
   }
 
   if (standAlone)

@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-O3 -Wall -g -c
 LDFLAGS=
 LIBS=-lcurl -lxml2
-OBJ=piwx.o
+OBJ=piwx.o wx.o
 
 %.o: %.c
 	@echo Compiling $<...
@@ -10,7 +10,7 @@ OBJ=piwx.o
 
 piwx: $(OBJ)
 	@echo Linking $@...
-	@$(CC) -o $@ $< $(LDFLAGS) $(LIBS)
+	@$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 all: piwx
 
