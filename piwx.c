@@ -7,6 +7,7 @@
 #include <string.h>
 #include <signal.h>
 #include <getopt.h>
+#include "gfx.h"
 #include "wx.h"
 
 static const char *shortArgs = "st:";
@@ -32,9 +33,13 @@ static void signalHandler(int _signo)
 
 static int go()
 {
+  Font font16 = allocateFont(font_16pt);
+
   while (run)
   {
   }
+
+  freeFont(font16);
 
   return 0;
 }

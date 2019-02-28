@@ -1,15 +1,27 @@
 #ifndef GFX_H
 #define GFX_H
 
-#include <sys/types.h>
+typedef void* Surface;
 
-typedef struct __Surface
+Surface allocateSurface(int _w, int _h);
+void freeSurface(Surface _surface);
+
+typedef void* Bitmap;
+
+Bitmap allocateBitmap(const char *_pngFile);
+void freeBitmap(Bitmap _bmp);
+
+typedef void* Font;
+
+typedef enum __FontSize
 {
-  u_int8_t *bmp; /* RGBA bitmap */
-  int w, h;
-} Surface;
+  font_16pt,
+  font_10pt,
+  font_8pt,
+  font_6pt
+} FontSize;
 
-void allocateSurface(int _w, int _h, Surface *_out);
-void freeSurface(Surface *_surface);
+Font allocateFont(FontSize _size);
+void freeFont(Font _font);
 
 #endif

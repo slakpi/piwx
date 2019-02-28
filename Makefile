@@ -10,7 +10,7 @@ OBJ=piwx.o wx.o gfx.o
 
 piwx: $(OBJ)
 	@echo Linking $@...
-	@$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
+	@$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS)
 
 all: piwx
 
