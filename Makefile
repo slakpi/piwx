@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-O3 -Wall -g -c
 LDFLAGS=
-LIBS=-lcurl -lxml2
-OBJ=piwx.o wx.o
+LIBS=-lcurl -lxml2 -lpng
+OBJ=piwx.o wx.o gfx.o
 
 %.o: %.c
 	@echo Compiling $<...
