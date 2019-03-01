@@ -171,6 +171,7 @@ int writeToFramebuffer(const Surface _surface)
 
   write(fb, buf, sizeof(u_int16_t) * px);
   close(fb);
+
   return 0;
 }
 
@@ -369,7 +370,7 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
     cmp.b = cmp.t + font->ch;
     compose(&cmp);
 
-    ++cx;
+    cx += font->cw;
     cmp.to += font->cw * 4;
   }
 }
