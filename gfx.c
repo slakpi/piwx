@@ -31,6 +31,7 @@ void freeSurface(Surface _surface)
 typedef struct __Bitmap
 {
   png_bytep *rows;
+  int color, bits;
   int w, h;
 } _Bitmap;
 
@@ -46,7 +47,7 @@ static _Bitmap* _allocateBitmap(const char *_png)
   png_byte sig[8];
   png_structp pngPtr = NULL;
   png_infop pngInfo = NULL;
-  int ok = 0, color, bits, y;
+  int ok = 0, y;
   _Bitmap *bmp = NULL;
 
   png = fopen(_png, "r");
@@ -75,13 +76,10 @@ static _Bitmap* _allocateBitmap(const char *_png)
   bmp = (_Bitmap*)malloc(sizeof(_Bitmap));
   bmp->w = png_get_image_width(pngPtr, pngInfo);
   bmp->h = png_get_image_height(pngPtr, pngInfo);
-  color = png_get_color_type(pngPtr, pngInfo);
-  bits = png_get_bit_depth(pngPtr, pngInfo);
+  bmp->color = png_get_color_type(pngPtr, pngInfo);
+  bmp->bits = png_get_bit_depth(pngPtr, pngInfo);
   png_set_interlace_handling(pngPtr);
   png_read_update_info(pngPtr, pngInfo);
-
-  if (color != PNG_COLOR_TYPE_RGBA || bits != 32)
-    goto cleanup;
 
   if (setjmp(png_jmpbuf(pngPtr)))
     goto cleanup;
@@ -150,7 +148,9 @@ Font allocateFont(FontSize _size)
   font = (_Font*)malloc(sizeof(_Font));
   font->bmp = _allocateBitmap(f);
 
-  if (!font->bmp)
+  if (!font->bmp || font->bmp->color != PNG_COLOR_TYPE_GRAY_ALPHA ||
+       font->bmp->bits != 8 || font->bmp->w % 16 != 0 ||
+       font->bmp->h % 8 != 0)
   {
     free(font);
     return NULL;
