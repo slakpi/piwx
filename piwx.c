@@ -33,12 +33,20 @@ static void signalHandler(int _signo)
 
 static int go()
 {
+  Surface sfc = allocateSurface(320, 240);
   Font font16 = allocateFont(font_16pt);
+  RGB c;
 
-  while (run)
-  {
-  }
+  c.r = 1.0;
+  c.g = 0.0;
+  c.b = 0.0;
+  c.a = 1.0;
+  setTextColor(font16, &c);
 
+  drawText(sfc, font16, 0, 0, "KHIO", 4);
+
+  writeToFramebuffer(sfc);
+  freeSurface(sfc);
   freeFont(font16);
 
   return 0;
