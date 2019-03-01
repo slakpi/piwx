@@ -34,20 +34,23 @@ static void signalHandler(int _signo)
 static int go()
 {
   Surface sfc = allocateSurface(320, 240);
-  Font font16 = allocateFont(font_16pt);
+  Font font = allocateFont(font_16pt);
+  Bitmap icon = allocateBitmap("wxicons/wx_thunderstorms.png");
   RGB c;
 
   c.r = 1.0;
-  c.g = 0.0;
-  c.b = 0.0;
+  c.g = 1.0;
+  c.b = 1.0;
   c.a = 1.0;
-  setTextColor(font16, &c);
+  setTextColor(font, &c);
 
-  drawText(sfc, font16, 0, 0, "KHIO", 4);
+  drawText(sfc, font, 0, 0, "KHIO", 4);
+  drawBitmapInBox(sfc, icon, 236, 0, 320, 82);
 
   writeToFramebuffer(sfc);
   freeSurface(sfc);
-  freeFont(font16);
+  freeFont(font);
+  freeBitmap(icon);
 
   return 0;
 }

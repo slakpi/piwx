@@ -9,6 +9,16 @@
 #include <png.h>
 #include "gfx.h"
 
+static inline int min(int _a, int _b)
+{
+  return (_a < _b ? _a : _b);
+}
+
+static inline int max(int _a, int _b)
+{
+  return (_a > _b ? _a : _b);
+}
+
 typedef struct __Bitmap
 {
   png_bytep *rows;
@@ -256,6 +266,41 @@ void freeBitmap(Bitmap _bmp)
   _freeBitmap((_Bitmap*)_bmp);
 }
 
+void drawBitmap(Surface _surface, const Bitmap _bitmap, int _x, int _y)
+{
+  _Surface *sfc = (_Surface*)_surface;
+  _Bitmap *bmp = (_Bitmap*)_bitmap;
+  Compose cmp;
+  int cx, cy, bytes;
+
+  cx = min(max(_x, 0), sfc->w - 1);
+  cy = min(max(_y, 0), sfc->h - 1);
+
+  if (bmp->color == PNG_COLOR_TYPE_GRAY)
+    bytes = 1;
+  else
+    bytes = 4;
+
+  cmp.from = bmp;
+  cmp.l = 0;
+  cmp.t = 0;
+  cmp.r = min(sfc->w - cx, bmp->w) * bytes;
+  cmp.b = min(sfc->h - cy, bmp->h);
+
+  cmp.to = sfc->bmp + (cy * sfc->w + cx) * 4;
+  cmp.toff = (sfc->w - min(sfc->w - cx, bmp->w)) * 4;
+
+  compose(&cmp);
+}
+
+void drawBitmapInBox(Surface _surface, const Bitmap _bitmap, int _l, int _t,
+  int _r, int _b)
+{
+  _Bitmap *bmp = (_Bitmap*)_bitmap;
+  drawBitmap(_surface, _bitmap, _l + ((_r - _l) - bmp->w) / 2,
+    _t + ((_b - _t) - bmp->h) / 2);
+}
+
 typedef struct __Font
 {
   _Bitmap *bmp;
@@ -337,15 +382,18 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
   if (font->cw > sfc->w || font->ch > sfc->h)
     return;
 
+  cx = min(max(_x, 0), sfc->w - 1);
+  cy = min(max(_y, 0), sfc->h - 1);
+
+  if (cx + font->cw > sfc->w || cy + font->ch > sfc->h)
+    return;
+
   cmp.from = font->bmp;
   cmp.color = font->color;
   cmp.bkgnd = font->bkgnd;
 
-  cmp.to = sfc->bmp + (_y * sfc->w + _x) * 4;
+  cmp.to = sfc->bmp + (cy * sfc->w + cx) * 4;
   cmp.toff = (sfc->w - font->cw) * 4;
-
-  cx = _x;
-  cy = _y;
 
   for (i = 0; i < _len; ++i)
   {

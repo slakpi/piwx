@@ -16,6 +16,9 @@ typedef void* Bitmap;
 
 Bitmap allocateBitmap(const char *_pngFile);
 void freeBitmap(Bitmap _bmp);
+void drawBitmap(Surface _surface, const Bitmap _bmp, int _x, int _y);
+void drawBitmapInBox(Surface _surface, const Bitmap _bmp, int _l, int _t,
+  int _r, int _b);
 
 typedef void* Font;
 
