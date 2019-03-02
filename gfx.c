@@ -40,36 +40,30 @@ typedef struct __Compose
 
 static void mix(const RGB *_a, const RGB *_b, RGB *_out)
 {
-  double aa, ba;
   RGB tmp;
+  double ba;
 
-  if (_a->a > 1.0 - DBL_EPSILON)
+  if (_b->a > 1.0 - DBL_EPSILON)
   {
-    *_out = *_a;
+    tmp.r = _a->r * _a->a + _b->r * (1.0 - _a->a);
+    tmp.g = _a->g * _a->a + _b->g * (1.0 - _a->a);
+    tmp.b = _a->b * _a->a + _b->b * (1.0 - _a->a);
+    *_out = tmp;
     return;
   }
 
-  if (_a->a < 1.0e-6)
-  {
-    *_out = *_b;
-    return;
-  }
-
-  tmp.r = tmp.g = tmp.b = 0.0;
-  tmp.a = 1.0 - (1.0 - _a->a) * (1.0 - _b->a);
+  ba = _b->a * (1.0 - _a->a);
+  tmp.a = _a->a + ba;
 
   if (tmp.a < 1.0e-6)
   {
-    tmp.a = 0.0;
+    _out->r = _out->g = _out->b = _out->a = 0.0;
     return;
   }
 
-  aa = _a->a / tmp.a;
-  ba = _b->a * (1.0 - _b->a) / tmp.a;
-  tmp.r = _a->r * aa + _b->r * ba;
-  tmp.g = _a->g * aa + _b->g * ba;
-  tmp.b = _a->b * aa + _b->b * ba;
-
+  tmp.r = (_a->r * _a->a + _b->r * ba) / tmp.a;
+  tmp.g = (_a->g * _a->a + _b->g * ba) / tmp.a;
+  tmp.b = (_a->b * _a->a + _b->b * ba) / tmp.a;
   *_out = tmp;
 }
 
@@ -149,6 +143,67 @@ void freeSurface(Surface _surface)
   free(sfc);
 }
 
+int writeToFile(const Surface _surface, const char *_file)
+{
+  _Surface *sfc = (_Surface*)_surface;
+  FILE *png = NULL;
+  png_structp pngPtr = NULL;
+  png_infop pngInfo = NULL;
+  size_t rowBytes;
+  png_bytep *rows = NULL;
+  int ok = 0, y;
+
+  png = fopen(_file, "wb");
+  if (!png)
+    goto cleanup;
+
+  pngPtr = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+  if (!pngPtr)
+    goto cleanup;
+
+  pngInfo = png_create_info_struct(pngPtr);
+  if (!pngInfo)
+    goto cleanup;
+
+  png_init_io(pngPtr, png);
+
+  if (setjmp(png_jmpbuf(pngPtr)))
+    goto cleanup;
+
+  png_set_IHDR(pngPtr, pngInfo, sfc->w, sfc->h, 8, PNG_COLOR_TYPE_RGBA,
+    PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+
+  png_write_info(pngPtr, pngInfo);
+
+  rowBytes = png_get_rowbytes(pngPtr, pngInfo);
+  rows = (png_bytep*)malloc(sizeof(png_bytep) * sfc->h);
+  rows[0] = (png_bytep)sfc->bmp;
+  for (y = 1; y < sfc->h; ++y)
+    rows[y] = rows[y - 1] + rowBytes;
+
+  if (setjmp(png_jmpbuf(pngPtr)))
+    goto cleanup;
+
+  png_write_image(pngPtr, rows);
+
+  if (setjmp(png_jmpbuf(pngPtr)))
+    goto cleanup;
+  
+  png_write_end(pngPtr, NULL);
+
+  ok = 1;
+
+cleanup:
+  if (png)
+    fclose(png);
+  if (pngPtr)
+    png_destroy_read_struct(&pngPtr, &pngInfo, NULL);
+  if (rows)
+    free(rows);
+  
+  return ok;
+}
+
 int writeToFramebuffer(const Surface _surface)
 {
   const _Surface *sfc = (const _Surface*)_surface;
@@ -187,6 +242,7 @@ int writeToFramebuffer(const Surface _surface)
 
 static void _freeBitmap(_Bitmap *_bmp)
 {
+  free(_bmp->rows[0]);
   free(_bmp->rows);
   free(_bmp);
 }
@@ -198,6 +254,7 @@ static _Bitmap* _allocateBitmap(const char *_png)
   png_structp pngPtr = NULL;
   png_infop pngInfo = NULL;
   int ok = 0, y;
+  size_t rowBytes;
   _Bitmap *bmp = NULL;
 
   png = fopen(_png, "r");
@@ -234,9 +291,11 @@ static _Bitmap* _allocateBitmap(const char *_png)
   if (setjmp(png_jmpbuf(pngPtr)))
     goto cleanup;
 
+  rowBytes = png_get_rowbytes(pngPtr, pngInfo);
   bmp->rows = (png_bytep*)malloc(sizeof(png_bytep) * bmp->h);
-  for (y = 0; y < bmp->h; ++y)
-    bmp->rows[y] = (png_byte*)malloc(png_get_rowbytes(pngPtr, pngInfo));
+  bmp->rows[0] = (png_byte*)malloc(rowBytes * bmp->h);
+  for (y = 1; y < bmp->h; ++y)
+    bmp->rows[y] = bmp->rows[y - 1] + rowBytes;
 
   png_read_image(pngPtr, bmp->rows);
 

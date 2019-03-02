@@ -31,7 +31,7 @@ static void signalHandler(int _signo)
   }
 }
 
-static int go()
+static int go(int _test)
 {
   Surface sfc = allocateSurface(320, 240);
   Font font = allocateFont(font_16pt);
@@ -47,7 +47,11 @@ static int go()
   drawText(sfc, font, 0, 0, "KHIO", 4);
   drawBitmapInBox(sfc, icon, 236, 0, 320, 82);
 
-  writeToFramebuffer(sfc);
+  if (!_test)
+    writeToFramebuffer(sfc);
+  else
+    writeToFile(sfc, "test.png");
+
   freeSurface(sfc);
   freeFont(font);
   freeBitmap(icon);
@@ -86,10 +90,14 @@ int main(int _argc, char* _argv[])
   case 1:
     testSunriseSunset();
     return 0;
+  case 2:
+    standAlone = 1;
+    t = 1;
+    break;
   }
 
   if (standAlone)
-    return go();
+    return go(t);
 
   pid = fork();
 
@@ -113,5 +121,5 @@ int main(int _argc, char* _argv[])
   signal(SIGTERM, signalHandler);
   signal(SIGHUP, signalHandler);
 
-  return go();
+  return go(0);
 }
