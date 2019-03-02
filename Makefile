@@ -1,4 +1,6 @@
 CC=gcc
+CFLAGS=-O3 -Wall -g -c
+LDFLAGS=
 LIBS=-lcurl -lxml2 -lpng -ljansson
 OBJ=piwx.o wx.o gfx.o
 
