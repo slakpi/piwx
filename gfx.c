@@ -26,7 +26,6 @@ typedef struct __Bitmap
   int w, h;
 } _Bitmap;
 
-
 typedef struct __Compose
 {
   _Bitmap *from;

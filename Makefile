@@ -1,7 +1,5 @@
 CC=gcc
-CFLAGS=-O3 -Wall -g -c
-LDFLAGS=
-LIBS=-lcurl -lxml2 -lpng
+LIBS=-lcurl -lxml2 -lpng -ljansson
 OBJ=piwx.o wx.o gfx.o
 
 %.o: %.c
@@ -10,7 +8,7 @@ OBJ=piwx.o wx.o gfx.o
 
 piwx: $(OBJ)
 	@echo Linking $@...
-	@$(CC) -g -o $@ $^ $(LDFLAGS) $(LIBS)
+	@$(CC) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 all: piwx
 
