@@ -56,8 +56,8 @@ static int go(int _test)
 
 static void testSunriseSunset()
 {
-  struct tm sunrise, sunset;
-  getSunriseSunset(&sunrise, &sunset);
+  time_t sunrise, sunset;
+  getSunriseSunset(45, -122, &sunrise, &sunset);
 }
 
 int main(int _argc, char* _argv[])

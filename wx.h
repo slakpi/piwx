@@ -3,6 +3,7 @@
 
 #include <time.h>
 
-int getSunriseSunset(struct tm *_sunrise, struct tm *_sunset);
+int getSunriseSunset(double _lat, double _long, time_t *_sunrise,
+  time_t *_sunset);
 
 #endif
