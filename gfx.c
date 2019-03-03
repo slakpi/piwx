@@ -150,7 +150,7 @@ int writeToFile(const Surface _surface, const char *_file)
   png_infop pngInfo = NULL;
   size_t rowBytes;
   png_bytep *rows = NULL;
-  int ok = 0, y;
+  int ok = -1, y;
 
   png = fopen(_file, "wb");
   if (!png)
@@ -190,7 +190,7 @@ int writeToFile(const Surface _surface, const char *_file)
   
   png_write_end(pngPtr, NULL);
 
-  ok = 1;
+  ok = 0;
 
 cleanup:
   if (png)
@@ -252,7 +252,7 @@ static _Bitmap* _allocateBitmap(const char *_png)
   png_byte sig[8];
   png_structp pngPtr = NULL;
   png_infop pngInfo = NULL;
-  int ok = 0, y;
+  int ok = -1, y;
   size_t rowBytes;
   _Bitmap *bmp = NULL;
 
@@ -298,14 +298,14 @@ static _Bitmap* _allocateBitmap(const char *_png)
 
   png_read_image(pngPtr, bmp->rows);
 
-  ok = 1;
+  ok = 0;
 
 cleanup:
   if (png)
     fclose(png);
   if (pngPtr)
     png_destroy_read_struct(&pngPtr, &pngInfo, NULL);
-  if (bmp && !ok)
+  if (bmp && ok != 0)
   {
     _freeBitmap(bmp);
     bmp = NULL;
