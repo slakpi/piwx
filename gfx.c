@@ -47,6 +47,7 @@ static void mix(const RGB *_a, const RGB *_b, RGB *_out)
     tmp.r = _a->r * _a->a + _b->r * (1.0 - _a->a);
     tmp.g = _a->g * _a->a + _b->g * (1.0 - _a->a);
     tmp.b = _a->b * _a->a + _b->b * (1.0 - _a->a);
+    tmp.a = 1.0;
     *_out = tmp;
     return;
   }
