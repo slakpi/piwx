@@ -5,10 +5,10 @@
 #include "gfx.h"
 #include "wx.h"
 
-static const char *shortArgs = "st:";
+static const char *shortArgs = "st";
 static const struct option longArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
-  { "test",        required_argument, 0, 't' },
+  { "test",        no_argument,       0, 't' },
   { 0,             0,                 0,  0  }
 };
 
@@ -32,6 +32,10 @@ static int go(int _test)
   Font font = allocateFont(font_16pt);
   Bitmap icon = allocateBitmap("wxicons/wx_thunderstorms.png");
   RGB c;
+  WxStation *wx;
+
+  wx = queryWx(1, "KHIO");
+  freeStations(wx);
 
   c.r = 1.0;
   c.g = 1.0;
@@ -54,12 +58,6 @@ static int go(int _test)
   return 0;
 }
 
-static void testSunriseSunset()
-{
-  struct tm sunrise, sunset;
-  getSunriseSunset(&sunrise, &sunset);
-}
-
 int main(int _argc, char* _argv[])
 {
   pid_t pid, sid;
@@ -73,22 +71,10 @@ int main(int _argc, char* _argv[])
       standAlone = 1;
       break;
     case 't':
-      t = atoi(optarg);
+      standAlone = 1;
+      t = 1;
       break;
     }
-  }
-
-  switch (t)
-  {
-  case 0:
-    break;
-  case 1:
-    testSunriseSunset();
-    return 0;
-  case 2:
-    standAlone = 1;
-    t = 1;
-    break;
   }
 
   if (standAlone)
