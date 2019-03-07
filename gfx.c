@@ -8,6 +8,7 @@
 #include <float.h>
 #include <png.h>
 #include "gfx.h"
+#include "config_helpers.h"
 
 static inline int min(int _a, int _b)
 {
@@ -188,7 +189,7 @@ int writeToFile(const Surface _surface, const char *_file)
 
   if (setjmp(png_jmpbuf(pngPtr)))
     goto cleanup;
-  
+
   png_write_end(pngPtr, NULL);
 
   ok = 0;
@@ -200,7 +201,7 @@ cleanup:
     png_destroy_read_struct(&pngPtr, &pngInfo, NULL);
   if (rows)
     free(rows);
-  
+
   return ok;
 }
 
@@ -317,7 +318,8 @@ cleanup:
 
 Bitmap allocateBitmap(const char *_png)
 {
-  return (Bitmap)_allocateBitmap(_png);
+  char path[4096];
+  return (Bitmap)_allocateBitmap(getPathForBitmap(_png, path, 4096));
 }
 
 void freeBitmap(Bitmap _bmp)
@@ -369,29 +371,30 @@ typedef struct __Font
 
 Font allocateFont(FontSize _size)
 {
+  char path[4096];
   const char *f;
   _Font *font;
 
   switch (_size)
   {
   case font_16pt:
-    f = "fonts/sfmono16.png";
+    f = "sfmono16.png";
     break;
   case font_10pt:
-    f = "fonts/sfmono10.png";
+    f = "sfmono10.png";
     break;
   case font_8pt:
-    f = "fonts/sfmono8.png";
+    f = "sfmono8.png";
     break;
   case font_6pt:
-    f = "fonts/sfmono6.png";
+    f = "sfmono6.png";
     break;
   default:
     return NULL;
   }
 
   font = (_Font*)malloc(sizeof(_Font));
-  font->bmp = _allocateBitmap(f);
+  font->bmp = _allocateBitmap(getPathForFont(f, path, 4096));
 
   if (!font->bmp || font->bmp->color != PNG_COLOR_TYPE_GRAY ||
        font->bmp->bits != 8 || font->bmp->w % 16 != 0 ||

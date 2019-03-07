@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <unistd.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <getopt.h>
@@ -30,7 +31,7 @@ static int go(int _test)
 {
   Surface sfc = allocateSurface(320, 240);
   Font font = allocateFont(font_16pt);
-  Bitmap icon = allocateBitmap("wxicons/wx_thunderstorms.png");
+  Bitmap icon = allocateBitmap("wx_thunderstorms.png");
   RGB c;
   WxStation *wx;
 
