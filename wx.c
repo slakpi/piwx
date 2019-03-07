@@ -429,6 +429,7 @@ WxStation* queryWx(int _stations, ...)
     }
 
     readStation(p, hash, n);
+    getSunriseSunset(n->lat, n->lon, &n->sunrise, &n->sunset);
 
     p = p->next;
   }
