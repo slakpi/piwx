@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
@@ -137,7 +138,7 @@ static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
 
   if (parseUTCDateTime(&dtSunrise, json_string_value(sunrise)) != 0)
     goto cleanup;
-  
+
   if (parseUTCDateTime(&dtSunset, json_string_value(sunset)) != 0)
     goto cleanup;
 
@@ -163,7 +164,7 @@ typedef enum __Tag
   tagInvalid = -1,
 
   tagResponse = 1,
-  
+
   tagData,
 
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
@@ -216,6 +217,32 @@ static Tag getTag(xmlHashTablePtr _hash, const xmlChar *_tag)
     return tagInvalid;
 
   return (Tag)p;
+}
+
+typedef struct __METARCallbackData
+{
+  xmlParserCtxtPtr ctxt;
+} METARCallbackData;
+
+static size_t metarCallback(char *_ptr, size_t _size, size_t _nmemb,
+  void *_userdata)
+{
+  METARCallbackData *data = (METARCallbackData*)_userdata;
+  size_t res = _nmemb;
+
+  if (!data->ctxt)
+  {
+    data->ctxt = xmlCreatePushParserCtxt(NULL, NULL, _ptr, _nmemb, NULL);
+    if (!data->ctxt)
+      res = 0;
+  }
+  else
+  {
+    if (xmlParseChunk(data->ctxt, _ptr, _nmemb, 0) != 0)
+      res = 0;
+  }
+
+  return res;
 }
 
 static void readLayers(xmlNodePtr _node, xmlHashTablePtr _hash,
@@ -286,10 +313,12 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 
 WxStation* queryWx(int _stations, ...)
 {
-  FILE *fp = NULL;
-  char chunk[1024];
-  int res;
-  xmlParserCtxtPtr ctxt;
+  va_list args;
+  CURL *curlLib;
+  CURLcode res;
+  char url[4096];
+  size_t count, len;
+  METARCallbackData data;
   xmlDocPtr doc = NULL;
   xmlNodePtr p;
   xmlHashTablePtr hash = NULL;
@@ -297,26 +326,58 @@ WxStation* queryWx(int _stations, ...)
   WxStation *start = NULL, *cur, *n;
   int ok = 0;
 
-  fp = fopen("test/metar.xml", "r");
-  if (!fp)
+  if (_stations < 1)
     return NULL;
-  
-  res = fread(chunk, 1, 1024, fp);
-  if (res < 1)
+
+  strncpy(url,
+    "https://aviationweather.gov/adds/dataserver_current/httpparam?"
+    "dataSource=metars&"
+    "requestType=retrieve&"
+    "format=xml&"
+    "hoursBeforeNow=1&"
+    "stationString=",
+    4096);
+  count = 4096 - strlen(url);
+
+  va_start(args, _stations);
+
+  for (int i = 0; i < _stations; ++i)
+  {
+    const char *station = va_arg(args, const char*);
+    len = strlen(station);
+    if (i < _stations - 1)
+      len += 3;
+
+    if (len > count)
+      break;
+
+    strcat(url, station);
+    if (i < _stations - 1)
+      strcat(url, "%20");
+  }
+
+  va_end(args);
+
+  curlLib = curl_easy_init();
+  if (!curlLib)
+    return NULL;
+
+  data.ctxt = NULL;
+  curl_easy_setopt(curlLib, CURLOPT_URL, url);
+  curl_easy_setopt(curlLib, CURLOPT_WRITEFUNCTION, metarCallback);
+  curl_easy_setopt(curlLib, CURLOPT_WRITEDATA, &data);
+  res = curl_easy_perform(curlLib);
+  curl_easy_cleanup(curlLib);
+
+  if (data.ctxt)
+  {
+    xmlParseChunk(data.ctxt, NULL, 0, 1);
+    doc = data.ctxt->myDoc;
+    xmlFreeParserCtxt(data.ctxt);
+  }
+
+  if (res != CURLE_OK)
     goto cleanup;
-
-  ctxt = xmlCreatePushParserCtxt(NULL, NULL, chunk, res, NULL);
-  
-  while ((res = fread(chunk, 1, 1024, fp)) > 0)
-    xmlParseChunk(ctxt, chunk, res, 0);
-  
-  xmlParseChunk(ctxt, chunk, 0, 1);
-
-  doc = ctxt->myDoc;
-
-  xmlFreeParserCtxt(ctxt);
-  fclose(fp);
-  fp = NULL;
 
   hash = xmlHashCreate(tagLast);
   initHash(hash);
@@ -340,7 +401,7 @@ WxStation* queryWx(int _stations, ...)
     tag = getTag(hash, p->name);
     if (tag == tagData)
       break;
-    
+
     p = p->next;
   }
 
@@ -375,8 +436,6 @@ WxStation* queryWx(int _stations, ...)
   ok = 1;
 
 cleanup:
-  if (fp)
-    fclose(fp);
   if (doc)
     xmlFreeDoc(doc);
   if (hash)

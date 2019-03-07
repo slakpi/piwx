@@ -35,7 +35,7 @@ static int go(int _test)
   RGB c;
   WxStation *wx;
 
-  wx = queryWx(1, "KHIO");
+  wx = queryWx(3, "KHIO", "KMMV", "KUAO");
   freeStations(wx);
 
   c.r = 1.0;
