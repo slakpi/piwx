@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<response xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XML-Schema-instance" version="1.2" xsi:noNamespaceSchemaLocation="http://aviationweather.gov/adds/schema/metar1_2.xsd">
+  <request_index>59681253</request_index>
+  <data_source name="metars"/>
+  <request type="retrieve"/>
+  <errors/>
+  <warnings/>
+  <time_taken_ms>7</time_taken_ms>
+  <data num_results="6">
+    <METAR>
+      <raw_text>KDEN 282053Z 13016KT 10SM FEW085 SCT100 BKN120 BKN200 09/01 A2984 RMK AO2 SLP099 T00890006 58020</raw_text>
+      <station_id>KDEN</station_id>
+      <observation_time>2019-02-28T20:53:00Z</observation_time>
+      <latitude>39.85</latitude>
+      <longitude>-104.65</longitude>
+      <temp_c>8.9</temp_c>
+      <dewpoint_c>0.6</dewpoint_c>
+      <wind_dir_degrees>130</wind_dir_degrees>
+      <wind_speed_kt>16</wind_speed_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>29.840551</altim_in_hg>
+      <sea_level_pressure_mb>1009.9</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="8500"/>
+      <sky_condition sky_cover="SCT" cloud_base_ft_agl="10000"/>
+      <sky_condition sky_cover="BKN" cloud_base_ft_agl="12000"/>
+      <sky_condition sky_cover="BKN" cloud_base_ft_agl="20000"/>
+      <flight_category>VFR</flight_category>
+      <three_hr_pressure_tendency_mb>-2.0</three_hr_pressure_tendency_mb>
+      <metar_type>METAR</metar_type>
+      <elevation_m>1640.0</elevation_m>
+    </METAR>
+    <METAR>
+      <raw_text>KSEA 282053Z 26005KT 10SM FEW035 FEW250 08/M04 A3008 RMK AO2 SLP195 T00831044 58004</raw_text>
+      <station_id>KSEA</station_id>
+      <observation_time>2019-02-28T20:53:00Z</observation_time>
+      <latitude>47.45</latitude>
+      <longitude>-122.32</longitude>
+      <temp_c>8.3</temp_c>
+      <dewpoint_c>-4.4</dewpoint_c>
+      <wind_dir_degrees>260</wind_dir_degrees>
+      <wind_speed_kt>5</wind_speed_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>30.079725</altim_in_hg>
+      <sea_level_pressure_mb>1019.5</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="3500"/>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="25000"/>
+      <flight_category>VFR</flight_category>
+      <three_hr_pressure_tendency_mb>-0.4</three_hr_pressure_tendency_mb>
+      <metar_type>METAR</metar_type>
+      <elevation_m>136.0</elevation_m>
+    </METAR>
+    <METAR>
+      <raw_text>PHNL 282053Z 02009G17KT 10SM FEW025 SCT045 BKN055 23/12 A3010 RMK AO2 SLP192 T02330117 50001</raw_text>
+      <station_id>PHNL</station_id>
+      <observation_time>2019-02-28T20:53:00Z</observation_time>
+      <latitude>21.33</latitude>
+      <longitude>-157.92</longitude>
+      <temp_c>23.3</temp_c>
+      <dewpoint_c>11.7</dewpoint_c>
+      <wind_dir_degrees>20</wind_dir_degrees>
+      <wind_speed_kt>9</wind_speed_kt>
+      <wind_gust_kt>17</wind_gust_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>30.100393</altim_in_hg>
+      <sea_level_pressure_mb>1019.2</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="2500"/>
+      <sky_condition sky_cover="SCT" cloud_base_ft_agl="4500"/>
+      <sky_condition sky_cover="BKN" cloud_base_ft_agl="5500"/>
+      <flight_category>VFR</flight_category>
+      <three_hr_pressure_tendency_mb>0.1</three_hr_pressure_tendency_mb>
+      <metar_type>METAR</metar_type>
+      <elevation_m>4.0</elevation_m>
+    </METAR>
+    <METAR>
+      <raw_text>KDEN 281953Z 12018KT 10SM FEW100 SCT150 BKN200 09/01 A2987 RMK AO2 SLP111 T00940006</raw_text>
+      <station_id>KDEN</station_id>
+      <observation_time>2019-02-28T19:53:00Z</observation_time>
+      <latitude>39.85</latitude>
+      <longitude>-104.65</longitude>
+      <temp_c>9.4</temp_c>
+      <dewpoint_c>0.6</dewpoint_c>
+      <wind_dir_degrees>120</wind_dir_degrees>
+      <wind_speed_kt>18</wind_speed_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>29.870079</altim_in_hg>
+      <sea_level_pressure_mb>1011.1</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="10000"/>
+      <sky_condition sky_cover="SCT" cloud_base_ft_agl="15000"/>
+      <sky_condition sky_cover="BKN" cloud_base_ft_agl="20000"/>
+      <flight_category>VFR</flight_category>
+      <metar_type>SPECI</metar_type>
+      <elevation_m>1640.0</elevation_m>
+    </METAR>
+    <METAR>
+      <raw_text>KSEA 281953Z 30003KT 10SM FEW030 FEW200 07/M04 A3009 RMK AO2 SLP198 T00721044</raw_text>
+      <station_id>KSEA</station_id>
+      <observation_time>2019-02-28T19:53:00Z</observation_time>
+      <latitude>47.45</latitude>
+      <longitude>-122.32</longitude>
+      <temp_c>7.2</temp_c>
+      <dewpoint_c>-4.4</dewpoint_c>
+      <wind_dir_degrees>300</wind_dir_degrees>
+      <wind_speed_kt>3</wind_speed_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>30.088583</altim_in_hg>
+      <sea_level_pressure_mb>1019.8</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="3000"/>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="20000"/>
+      <flight_category>VFR</flight_category>
+      <metar_type>METAR</metar_type>
+      <elevation_m>136.0</elevation_m>
+    </METAR>
+    <METAR>
+      <raw_text>PHNL 281953Z 01008KT 10SM FEW025 SCT042 BKN050 22/12 A3011 RMK AO2 SLP195 T02170117</raw_text>
+      <station_id>PHNL</station_id>
+      <observation_time>2019-02-28T19:53:00Z</observation_time>
+      <latitude>21.33</latitude>
+      <longitude>-157.92</longitude>
+      <temp_c>21.7</temp_c>
+      <dewpoint_c>11.7</dewpoint_c>
+      <wind_dir_degrees>10</wind_dir_degrees>
+      <wind_speed_kt>8</wind_speed_kt>
+      <visibility_statute_mi>10.0</visibility_statute_mi>
+      <altim_in_hg>30.109253</altim_in_hg>
+      <sea_level_pressure_mb>1019.5</sea_level_pressure_mb>
+      <quality_control_flags>
+        <auto_station>TRUE</auto_station>
+      </quality_control_flags>
+      <sky_condition sky_cover="FEW" cloud_base_ft_agl="2500"/>
+      <sky_condition sky_cover="SCT" cloud_base_ft_agl="4200"/>
+      <sky_condition sky_cover="BKN" cloud_base_ft_agl="5000"/>
+      <flight_category>VFR</flight_category>
+      <metar_type>METAR</metar_type>
+      <elevation_m>4.0</elevation_m>
+    </METAR>
+  </data>
+</response>

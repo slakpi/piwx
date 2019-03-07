@@ -4,6 +4,8 @@
 #include <string.h>
 #include <curl/curl.h>
 #include <jansson.h>
+#include <libxml/parser.h>
+#include <libxml/tree.h>
 #include "wx.h"
 
 typedef struct __Response
@@ -85,7 +87,7 @@ static size_t sunriseSunsetCallback(char *_ptr, size_t _size, size_t _nmemb,
   return _nmemb;
 }
 
-int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
+static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
   time_t *_sunset)
 {
   CURL *curlLib;
@@ -154,4 +156,260 @@ cleanup:
   }
 
   return ok;
+}
+
+typedef enum __Tag
+{
+  tagInvalid = -1,
+
+  tagResponse = 1,
+  
+  tagData,
+
+  tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
+  tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
+  tagWindGust,    tagVis,           tagAlt,           tagCategory,
+
+  tagFirst = tagResponse,
+  tagLast = tagCategory
+} Tag;
+
+static const Tag tags[] = {
+  tagResponse,
+
+  tagData,
+
+  tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
+  tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
+  tagWindGust,    tagVis,           tagAlt,           tagCategory
+};
+
+static const char* tagNames[] = {
+  "response",
+
+  "data",
+
+  "raw_text",       "station_id",     "observation_time",       "latitude",
+  "longitude",      "temp_c",         "dewpoint_c",             "wind_dir_degrees",
+  "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
+  "flight_category",
+
+  NULL
+};
+
+static void initHash(xmlHashTablePtr _hash)
+{
+  for (long i = 0; tagNames[i]; ++i)
+    xmlHashAddEntry(_hash, (xmlChar*)tagNames[i], (void*)tags[i]);
+}
+
+static void hashDealloc(void *_payload, xmlChar *_name)
+{
+
+}
+
+static Tag getTag(xmlHashTablePtr _hash, const xmlChar *_tag)
+{
+  void *p = xmlHashLookup(_hash, _tag);
+
+  if (!p)
+    return tagInvalid;
+
+  return (Tag)p;
+}
+
+static void readLayers(xmlNodePtr _node, xmlHashTablePtr _hash,
+  WxStation *_station)
+{
+
+}
+
+static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
+  WxStation *_station)
+{
+  Tag tag;
+  struct tm obs;
+  xmlNodePtr c = _node->children;
+
+  while (c)
+  {
+    if (c->type == XML_TEXT_NODE)
+    {
+      c = c->next;
+      continue;
+    }
+
+    tag = getTag(_hash, c->name);
+    switch (tag)
+    {
+    case tagRawText:
+      _station->raw = strdup((char*)c->children->content);
+      break;
+    case tagStationId:
+      _station->id = strdup((char*)c->children->content);
+      break;
+    case tagObsTime:
+      parseUTCDateTime(&obs, (char*)c->children->content);
+      _station->obsTime = mktime(&obs);
+      break;
+    case tagLat:
+      _station->lat = strtod((char*)c->children->content, NULL);
+      break;
+    case tagLon:
+      _station->lon = strtod((char*)c->children->content, NULL);
+      break;
+    case tagTemp:
+      _station->temp = strtod((char*)c->children->content, NULL);
+      break;
+    case tagDewpoint:
+      _station->dewPoint = strtod((char*)c->children->content, NULL);
+      break;
+    case tagWindDir:
+      _station->windDir = atoi((char*)c->children->content);
+      break;
+    case tagWindSpeed:
+      _station->windSpeed = atoi((char*)c->children->content);
+      break;
+    case tagVis:
+      _station->visibility = strtod((char*)c->children->content, NULL);
+      break;
+    case tagAlt:
+      _station->alt = strtod((char*)c->children->content, NULL);
+      break;
+    default:
+      break;
+    }
+
+    c = c->next;
+  }
+}
+
+WxStation* queryWx(int _stations, ...)
+{
+  FILE *fp = NULL;
+  char chunk[1024];
+  int res;
+  xmlParserCtxtPtr ctxt;
+  xmlDocPtr doc = NULL;
+  xmlNodePtr p;
+  xmlHashTablePtr hash = NULL;
+  Tag tag;
+  WxStation *start = NULL, *cur, *n;
+  int ok = 0;
+
+  fp = fopen("test/metar.xml", "r");
+  if (!fp)
+    return NULL;
+  
+  res = fread(chunk, 1, 1024, fp);
+  if (res < 1)
+    goto cleanup;
+
+  ctxt = xmlCreatePushParserCtxt(NULL, NULL, chunk, res, NULL);
+  
+  while ((res = fread(chunk, 1, 1024, fp)) > 0)
+    xmlParseChunk(ctxt, chunk, res, 0);
+  
+  xmlParseChunk(ctxt, chunk, 0, 1);
+
+  doc = ctxt->myDoc;
+
+  xmlFreeParserCtxt(ctxt);
+  fclose(fp);
+  fp = NULL;
+
+  hash = xmlHashCreate(tagLast);
+  initHash(hash);
+
+  p = doc->children;
+  while (p)
+  {
+    tag = getTag(hash, p->name);
+    if (tag == tagResponse)
+      break;
+
+    p = p->next;
+  }
+
+  if (!p)
+    goto cleanup;
+
+  p = p->children;
+  while (p)
+  {
+    tag = getTag(hash, p->name);
+    if (tag == tagData)
+      break;
+    
+    p = p->next;
+  }
+
+  if (!p)
+    goto cleanup;
+
+  p = p->children;
+  while (p)
+  {
+    if (p->type == XML_TEXT_NODE)
+    {
+      p = p->next;
+      continue;
+    }
+
+    n = (WxStation*)malloc(sizeof(WxStation));
+    memset(n, 0, sizeof(WxStation));
+
+    if (!start)
+      start = cur = n;
+    else
+    {
+      cur->next = n;
+      cur = n;
+    }
+
+    readStation(p, hash, n);
+
+    p = p->next;
+  }
+
+  ok = 1;
+
+cleanup:
+  if (fp)
+    fclose(fp);
+  if (doc)
+    xmlFreeDoc(doc);
+  if (hash)
+    xmlHashFree(hash, hashDealloc);
+  if (start && !ok)
+  {
+    freeStations(start);
+    start = NULL;
+  }
+
+  return start;
+}
+
+void freeStations(WxStation *_stations)
+{
+  WxStation *p;
+  SkyCondition *s;
+
+  while (_stations)
+  {
+    p = _stations;
+    _stations = _stations->next;
+
+    free(p->id);
+    free(p->raw);
+
+    while (p->layers)
+    {
+      s = p->layers;
+      p->layers = p->layers->next;
+      free(s);
+    }
+
+    free(p);
+  }
 }
