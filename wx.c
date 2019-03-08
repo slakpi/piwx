@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
@@ -311,23 +310,18 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
   }
 }
 
-WxStation* queryWx(int _stations, ...)
+WxStation* queryWx(const char *_stations)
 {
-  va_list args;
   CURL *curlLib;
   CURLcode res;
   char url[4096];
-  size_t count, len;
   METARCallbackData data;
   xmlDocPtr doc = NULL;
   xmlNodePtr p;
   xmlHashTablePtr hash = NULL;
   Tag tag;
   WxStation *start = NULL, *cur, *n;
-  int ok = 0;
-
-  if (_stations < 1)
-    return NULL;
+  int ok = 0, count, len;
 
   strncpy(url,
     "https://aviationweather.gov/adds/dataserver_current/httpparam?"
@@ -337,26 +331,13 @@ WxStation* queryWx(int _stations, ...)
     "hoursBeforeNow=1&"
     "stationString=",
     4096);
+
   count = 4096 - strlen(url);
+  len = strlen(_stations);
+  if (len >= count)
+    return NULL;
 
-  va_start(args, _stations);
-
-  for (int i = 0; i < _stations; ++i)
-  {
-    const char *station = va_arg(args, const char*);
-    len = strlen(station);
-    if (i < _stations - 1)
-      len += 3;
-
-    if (len > count)
-      break;
-
-    strcat(url, station);
-    if (i < _stations - 1)
-      strcat(url, "%20");
-  }
-
-  va_end(args);
+  strcat(url, _stations);
 
   curlLib = curl_easy_init();
   if (!curlLib)

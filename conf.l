@@ -5,12 +5,44 @@
 
 %{
 
+#include <string.h>
+#include "../config_helpers.h"
+#include "../conf.h"
 #include "conf.parser.h"
 
 %}
 
+COMMENT     #.*$
+WS          [\v\r\n\t ]+
+
+%x STR
+
 %%
 
-. { return 0; }
+'\"' {
+  BEGIN(STR);
+}
+
+<STR>[^\"]+ { 
+  yylval->str = strndup(yytext, yyleng);
+  return TOKEN_STRING;
+}
+
+<STR>'\"' {
+  BEGIN(INITIAL);
+}
+
+"stations" {
+  yylval->param = confStations;
+  return TOKEN_PARAM;
+}
+
+{COMMENT} { }
+
+{WS} { }
+
+'=' { return '='; }
+
+';' { return ';'; }
 
 %%

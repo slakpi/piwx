@@ -42,7 +42,7 @@ typedef struct __WxStation
   struct __WxStation *next;
 } WxStation;
 
-WxStation* queryWx(int _stations, ...);
+WxStation* queryWx(const char *_stations);
 void freeStations(WxStation *_stations);
 
 #endif

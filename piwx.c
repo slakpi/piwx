@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <getopt.h>
+#include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
 
@@ -29,13 +30,14 @@ static void signalHandler(int _signo)
 
 static int go(int _test)
 {
+  PiwxConfig *cfg = getPiwxConfig();
   Surface sfc = allocateSurface(320, 240);
   Font font = allocateFont(font_16pt);
   Bitmap icon = allocateBitmap("wx_thunderstorms.png");
   RGB c;
   WxStation *wx;
 
-  wx = queryWx(3, "KHIO", "KMMV", "KUAO");
+  wx = queryWx(cfg->stationQuery);
   freeStations(wx);
 
   c.r = 1.0;
@@ -55,6 +57,7 @@ static int go(int _test)
   freeSurface(sfc);
   freeFont(font);
   freeBitmap(icon);
+  freePiwxConfig(cfg);
 
   return 0;
 }

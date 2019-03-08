@@ -2,4 +2,5 @@
 *.o
 test.png
 piwx
+piwx.conf
 build

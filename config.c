@@ -1,6 +1,55 @@
 #include <string.h>
 #include <config.h>
 
+typedef void* yyscan_t;
+
+#include "config_helpers.h"
+#include "conf.h"
+#include "conf.parser.h"
+#include "conf.lexer.h"
+
+PiwxConfig* getPiwxConfig()
+{
+  FILE *cfgFile;
+  yyscan_t scanner;
+  PiwxConfig *cfg = (PiwxConfig*)malloc(sizeof(PiwxConfig));
+
+  cfg->installPrefix = strdup(INSTALL_PREFIX);
+  cfg->imageResources = strdup(IMAGE_RESOURCES);
+  cfg->fontResources = strdup(FONT_RESOURCES);
+  cfg->configFile = strdup(CONFIG_FILE);
+  cfg->stationQuery = NULL;
+
+  cfgFile = fopen(CONFIG_FILE, "r");
+  if (!cfgFile)
+    return cfg;
+
+  yylex_init(&scanner);
+  yyset_in(cfgFile, scanner);
+  yyparse(scanner, cfg);
+  yylex_destroy(scanner);
+
+  fclose(cfgFile);
+
+  return cfg;
+}
+
+void freePiwxConfig(PiwxConfig *_cfg)
+{
+  if (_cfg->installPrefix)
+    free(_cfg->installPrefix);
+  if (_cfg->imageResources)
+    free(_cfg->imageResources);
+  if (_cfg->fontResources)
+    free(_cfg->fontResources);
+  if (_cfg->configFile)
+    free(_cfg->configFile);
+  if (_cfg->stationQuery)
+    free(_cfg->stationQuery);
+
+  free(_cfg);
+}
+
 static char* appendFileToPath(const char *_prefix, const char *_file, char *_path, size_t _len)
 {
   size_t pl = strlen(_prefix), fl = strlen(_file);
