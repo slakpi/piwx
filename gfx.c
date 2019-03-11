@@ -144,6 +144,12 @@ void freeSurface(Surface _surface)
   free(sfc);
 }
 
+void clearSurface(Surface _surface)
+{
+  _Surface *sfc = (_Surface*)_surface;
+  memset(sfc->bmp, 0, sizeof(u_int8_t) * sfc->w * 4 * sfc->h);
+}
+
 int writeToFile(const Surface _surface, const char *_file)
 {
   _Surface *sfc = (_Surface*)_surface;

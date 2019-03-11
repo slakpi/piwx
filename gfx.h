@@ -10,6 +10,7 @@ typedef void* Surface;
 
 Surface allocateSurface(int _w, int _h);
 void freeSurface(Surface _surface);
+void clearSurface(Surface _surface);
 int writeToFile(const Surface _surface, const char *_file);
 int writeToFramebuffer(const Surface _surface);
 
