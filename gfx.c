@@ -254,13 +254,13 @@ static void _freeBitmap(_Bitmap *_bmp)
   free(_bmp);
 }
 
-static _Bitmap* _allocateBitmap(const char *_png)
+static _Bitmap* _allocateBitmap(const char *_png, int _colorFormat, int _bits)
 {
   FILE *png = NULL;
   png_byte sig[8];
   png_structp pngPtr = NULL;
   png_infop pngInfo = NULL;
-  int ok = -1, y;
+  int ok = 0, y;
   size_t rowBytes;
   _Bitmap *bmp = NULL;
 
@@ -295,6 +295,9 @@ static _Bitmap* _allocateBitmap(const char *_png)
   png_set_interlace_handling(pngPtr);
   png_read_update_info(pngPtr, pngInfo);
 
+  if (bmp->color != _colorFormat || bmp->bits != _bits)
+    goto cleanup;
+
   if (setjmp(png_jmpbuf(pngPtr)))
     goto cleanup;
 
@@ -306,14 +309,14 @@ static _Bitmap* _allocateBitmap(const char *_png)
 
   png_read_image(pngPtr, bmp->rows);
 
-  ok = 0;
+  ok = 1;
 
 cleanup:
   if (png)
     fclose(png);
   if (pngPtr)
     png_destroy_read_struct(&pngPtr, &pngInfo, NULL);
-  if (bmp && ok != 0)
+  if (bmp && !ok)
   {
     _freeBitmap(bmp);
     bmp = NULL;
@@ -325,7 +328,8 @@ cleanup:
 Bitmap allocateBitmap(const char *_png)
 {
   char path[4096];
-  return (Bitmap)_allocateBitmap(getPathForBitmap(_png, path, 4096));
+  return (Bitmap)_allocateBitmap(getPathForBitmap(_png, path, 4096),
+    PNG_COLOR_TYPE_RGBA, 8);
 }
 
 void freeBitmap(Bitmap _bmp)
@@ -400,11 +404,10 @@ Font allocateFont(FontSize _size)
   }
 
   font = (_Font*)malloc(sizeof(_Font));
-  font->bmp = _allocateBitmap(getPathForFont(f, path, 4096));
+  font->bmp = _allocateBitmap(getPathForFont(f, path, 4096),
+    PNG_COLOR_TYPE_GRAY, 8);
 
-  if (!font->bmp || font->bmp->color != PNG_COLOR_TYPE_GRAY ||
-       font->bmp->bits != 8 || font->bmp->w % 16 != 0 ||
-       font->bmp->h % 8 != 0)
+  if (!font->bmp || font->bmp->w % 16 != 0 || font->bmp->h % 8 != 0)
   {
     free(font);
     return NULL;
