@@ -168,10 +168,11 @@ typedef enum __Tag
 
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
   tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
-  tagWindGust,    tagVis,           tagAlt,           tagCategory,
+  tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
+  tagSkyCond,
 
   tagFirst = tagResponse,
-  tagLast = tagCategory
+  tagLast = tagSkyCond
 } Tag;
 
 static const Tag tags[] = {
@@ -181,7 +182,8 @@ static const Tag tags[] = {
 
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
   tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
-  tagWindGust,    tagVis,           tagAlt,           tagCategory
+  tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
+  tagSkyCond
 };
 
 static const char* tagNames[] = {
@@ -192,7 +194,7 @@ static const char* tagNames[] = {
   "raw_text",       "station_id",     "observation_time",       "latitude",
   "longitude",      "temp_c",         "dewpoint_c",             "wind_dir_degrees",
   "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
-  "flight_category",
+  "flight_category","wx_string",      "sky_condition",
 
   NULL
 };
@@ -244,18 +246,14 @@ static size_t metarCallback(char *_ptr, size_t _size, size_t _nmemb,
   return res;
 }
 
-static void readLayers(xmlNodePtr _node, xmlHashTablePtr _hash,
-  WxStation *_station)
-{
-
-}
-
 static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
   WxStation *_station)
 {
   Tag tag;
   struct tm obs;
+  SkyCondition *skyCur = NULL, *skyN;
   xmlNodePtr c = _node->children;
+  xmlAttr *a;
 
   while (c)
   {
@@ -266,6 +264,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
     }
 
     tag = getTag(_hash, c->name);
+
     switch (tag)
     {
     case tagRawText:
@@ -301,6 +300,41 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
       break;
     case tagAlt:
       _station->alt = strtod((char*)c->children->content, NULL);
+      break;
+    case tagWxString:
+      _station->wxString = strdup((char*)c->children->content);
+      break;
+    case tagSkyCond:
+      a = c->properties;
+      skyN = (SkyCondition*)malloc(sizeof(SkyCondition));
+
+      if (!_station->layers)
+        _station->layers = skyCur = skyN;
+      else
+      {
+        skyCur->next = skyN;
+        skyCur = skyN;
+      }
+
+      while (a)
+      {
+        if (strcmp((char*)a->name, "sky_cover") == 0)
+        {
+          if (strcmp((char*)a->children->content, "SCT") == 0)
+            skyN->coverage = skyScattered;
+          else if (strcmp((char*)a->children->content, "FEW") == 0)
+            skyN->coverage = skyFew;
+          else if (strcmp((char*)a->children->content, "BKN") == 0)
+            skyN->coverage = skyBroken;
+          else if (strcmp((char*)a->children->content, "OVC") == 0)
+            skyN->coverage = skyOvercast;
+        }
+        else if (strcmp((char*)a->name, "cloud_base_ft_agl") == 0)
+          skyN->height = atoi((char*)a->children->content);
+
+        a = a->next;
+      }
+
       break;
     default:
       break;

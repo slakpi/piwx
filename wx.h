@@ -6,6 +6,7 @@
 typedef enum __CloudCover
 {
   skyClear,
+  skyScattered,
   skyFew,
   skyBroken,
   skyOvercast
@@ -33,6 +34,7 @@ typedef struct __WxStation
   time_t obsTime;
   double lat, lon;
   time_t sunrise, sunset;
+  char *wxString;
   SkyCondition *layers;
   int windDir, windSpeed;
   int visibility;
