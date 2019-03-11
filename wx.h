@@ -5,7 +5,7 @@
 
 typedef enum __CloudCover
 {
-  skyClear,
+  skyInvalid,
   skyScattered,
   skyFew,
   skyBroken,
@@ -21,6 +21,7 @@ typedef struct __SkyCondition
 
 typedef enum __FlightCategory
 {
+  catInvalid,
   catVFR,
   catMVFR,
   catIFR,

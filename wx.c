@@ -103,7 +103,8 @@ static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
   if (!curlLib)
     return -1;
 
-  snprintf(url, 257, "https://api.sunrise-sunset.org/json?lat=%f&lng=%f&formatted=0",
+  snprintf(url, 257, "https://api.sunrise-sunset.org/json?"
+    "lat=%f&lng=%f&formatted=0",
     _lat, _lon);
 
   initResponse(&json);
@@ -171,8 +172,13 @@ typedef enum __Tag
   tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
   tagSkyCond,
 
+  tagSkyCover,    tagCloudBase,
+
+  tagSCT,         tagFEW,           tagBKN,           tagOVC,
+  tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
+
   tagFirst = tagResponse,
-  tagLast = tagSkyCond
+  tagLast = tagLIFR
 } Tag;
 
 static const Tag tags[] = {
@@ -183,7 +189,12 @@ static const Tag tags[] = {
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
   tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
   tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
-  tagSkyCond
+  tagSkyCond,
+
+  tagSkyCover,    tagCloudBase,
+
+  tagSCT,         tagFEW,           tagBKN,           tagOVC,
+  tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
 };
 
 static const char* tagNames[] = {
@@ -195,6 +206,11 @@ static const char* tagNames[] = {
   "longitude",      "temp_c",         "dewpoint_c",             "wind_dir_degrees",
   "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
   "flight_category","wx_string",      "sky_condition",
+
+  "sky_condition",  "cloud_base_ft_agl",
+
+  "SCT",            "FEW",            "BKN",                    "OVC",
+  "VFR",            "MVFR",           "IFR",                    "LIFR",
 
   NULL
 };
@@ -304,6 +320,29 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
     case tagWxString:
       _station->wxString = strdup((char*)c->children->content);
       break;
+    case tagCategory:
+      tag = getTag(_hash, c->children->content);
+
+      switch (tag)
+      {
+      case tagVFR:
+        _station->cat = catVFR;
+        break;
+      case tagMVFR:
+        _station->cat = catMVFR;
+        break;
+      case tagIFR:
+        _station->cat = catIFR;
+        break;
+      case tagLIFR:
+        _station->cat = catLIFR;
+        break;
+      default:
+        _station->cat = catInvalid;
+        break;
+      }
+
+      break;
     case tagSkyCond:
       a = c->properties;
       skyN = (SkyCondition*)malloc(sizeof(SkyCondition));
@@ -318,19 +357,39 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 
       while (a)
       {
-        if (strcmp((char*)a->name, "sky_cover") == 0)
+        tag = getTag(_hash, a->name);
+
+        switch (tag)
         {
-          if (strcmp((char*)a->children->content, "SCT") == 0)
+        case tagSkyCover:
+          tag = getTag(_hash, a->children->content);
+
+          switch (tag)
+          {
+          case tagSCT:
             skyN->coverage = skyScattered;
-          else if (strcmp((char*)a->children->content, "FEW") == 0)
+            break;
+          case tagFEW:
             skyN->coverage = skyFew;
-          else if (strcmp((char*)a->children->content, "BKN") == 0)
+            break;
+          case tagBKN:
             skyN->coverage = skyBroken;
-          else if (strcmp((char*)a->children->content, "OVC") == 0)
+            break;
+          case tagOVC:
             skyN->coverage = skyOvercast;
-        }
-        else if (strcmp((char*)a->name, "cloud_base_ft_agl") == 0)
+            break;
+          default:
+            skyN->coverage = skyInvalid;
+            break;
+          }
+
+          break;
+        case tagCloudBase:
           skyN->height = atoi((char*)a->children->content);
+          break;
+        default:
+          break;
+        }
 
         a = a->next;
       }
@@ -363,6 +422,7 @@ WxStation* queryWx(const char *_stations)
     "requestType=retrieve&"
     "format=xml&"
     "hoursBeforeNow=1&"
+    "mostRecentForEachStation=true&"
     "stationString=",
     4096);
 
