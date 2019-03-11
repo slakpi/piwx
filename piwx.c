@@ -3,6 +3,8 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <getopt.h>
+#include <time.h>
+#include <string.h>
 #include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
@@ -34,30 +36,75 @@ static int go(int _test)
   Surface sfc = allocateSurface(320, 240);
   Font font = allocateFont(font_16pt);
   Bitmap icon = allocateBitmap("wx_thunderstorms.png");
+  Bitmap dlIcon = allocateBitmap("downloading.png");
+  Bitmap dlErr = allocateBitmap("download_err.png");
   RGB c;
-  WxStation *wx;
+  WxStation *wx = NULL, *ptr = NULL;
+  time_t last = 0, now;
+  int first = 1;
 
-  wx = queryWx(cfg->stationQuery);
-  freeStations(wx);
+  do
+  {
+    if (!cfg->stationQuery)
+    {
+      drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
+      break;
+    }
 
-  c.r = 1.0;
-  c.g = 1.0;
-  c.b = 1.0;
-  c.a = 1.0;
-  setTextColor(font, &c);
+    now = time(0);
+    if (!wx || first || (now - last > 1200))
+    {
+      if (wx)
+        freeStations(wx);
 
-  drawText(sfc, font, 0, 0, "KHIO", 4);
-  drawBitmapInBox(sfc, icon, 236, 0, 320, 82);
+      clearSurface(sfc);
+      drawBitmapInBox(sfc, dlIcon, 0, 0, 320, 240);
+      writeToFramebuffer(sfc);
 
-  if (!_test)
+      wx = queryWx(cfg->stationQuery);
+      ptr = wx;
+      first = 0;
+      last = now;
+    }
+
+    if (!wx)
+    {
+      drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
+      sleep(60);
+      continue;
+    }
+
+    if (!ptr)
+      ptr = wx;
+
+    clearSurface(sfc);
+
+    c.r = 1.0;
+    c.g = 1.0;
+    c.b = 1.0;
+    c.a = 1.0;
+    setTextColor(font, &c);
+
+    drawText(sfc, font, 0, 0, ptr->id, strlen(ptr->id));
+
+    if (_test)
+    {
+      writeToFile(sfc, "test.png");
+      break;
+    }
+
     writeToFramebuffer(sfc);
-  else
-    writeToFile(sfc, "test.png");
+    ptr = ptr->next;
+    sleep(5);
+  } while (run);
 
   freeSurface(sfc);
   freeFont(font);
   freeBitmap(icon);
+  freeBitmap(dlIcon);
+  freeBitmap(dlErr);
   freePiwxConfig(cfg);
+  freeStations(wx);
 
   return 0;
 }
@@ -82,7 +129,10 @@ int main(int _argc, char* _argv[])
   }
 
   if (standAlone)
+  {
+    signal(SIGINT, signalHandler);
     return go(t);
+  }
 
   pid = fork();
 
