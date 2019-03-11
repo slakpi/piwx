@@ -7,11 +7,12 @@
 
 #include <string.h>
 #include "../config_helpers.h"
-#include "../conf.h"
-#include "conf.parser.h"
+#include "../conf_file.h"
+#include "conf_file.parser.h"
 
 %}
 
+INT         [0-9]+
 COMMENT     #.*$
 WS          [\v\r\n\t ]+
 
@@ -28,8 +29,18 @@ WS          [\v\r\n\t ]+
 
 <STR>"\"" { BEGIN(INITIAL); }
 
+{INT} {
+  yylval->val = atoi(yytext);
+  return TOKEN_VALUE;
+}
+
 "stations" {
   yylval->param = confStations;
+  return TOKEN_PARAM;
+}
+
+"cycletime" {
+  yylval->param = confCycleTime;
   return TOKEN_PARAM;
 }
 

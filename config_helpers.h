@@ -8,6 +8,7 @@ typedef struct __PiwxConfig
   char *fontResources;
   char *configFile;
   char *stationQuery;
+  int cycleTime;
 } PiwxConfig;
 
 PiwxConfig* getPiwxConfig();

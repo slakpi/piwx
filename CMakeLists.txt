@@ -20,13 +20,13 @@ find_package(FLEX REQUIRED)
 find_package(LibXml2 REQUIRED)
 
 BISON_TARGET(ConfParser
-  conf.y
-  ${CMAKE_CURRENT_BINARY_DIR}/conf.parser.c
-  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf.parser.h)
+  conf_file.y
+  ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.h)
 FLEX_TARGET(ConfLexer
-  conf.l
-  ${CMAKE_CURRENT_BINARY_DIR}/conf.lexer.c
-  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf.lexer.h)
+  conf_file.l
+  ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.h)
 ADD_FLEX_BISON_DEPENDENCY(ConfLexer ConfParser)
 
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})

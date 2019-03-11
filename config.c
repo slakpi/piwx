@@ -4,9 +4,9 @@
 typedef void* yyscan_t;
 
 #include "config_helpers.h"
-#include "conf.h"
-#include "conf.parser.h"
-#include "conf.lexer.h"
+#include "conf_file.h"
+#include "conf_file.parser.h"
+#include "conf_file.lexer.h"
 
 PiwxConfig* getPiwxConfig()
 {
@@ -19,6 +19,7 @@ PiwxConfig* getPiwxConfig()
   cfg->fontResources = strdup(FONT_RESOURCES);
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->stationQuery = NULL;
+  cfg->cycleTime = 60;
 
   cfgFile = fopen(CONFIG_FILE, "r");
   if (!cfgFile)
