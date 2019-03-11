@@ -19,30 +19,26 @@ WS          [\v\r\n\t ]+
 
 %%
 
-'\"' {
-  BEGIN(STR);
-}
+"\"" { BEGIN(STR); }
 
 <STR>[^\"]+ { 
   yylval->str = strndup(yytext, yyleng);
   return TOKEN_STRING;
 }
 
-<STR>'\"' {
-  BEGIN(INITIAL);
-}
+<STR>"\"" { BEGIN(INITIAL); }
 
 "stations" {
   yylval->param = confStations;
   return TOKEN_PARAM;
 }
 
+"=" { return '='; }
+
+";" { return ';'; }
+
 {COMMENT} { }
 
 {WS} { }
-
-'=' { return '='; }
-
-';' { return ';'; }
 
 %%
