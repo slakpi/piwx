@@ -9,7 +9,7 @@ typedef void* yyscan_t;
 #include "conf_file.parser.h"
 #include "conf_file.lexer.h"
 
-static void yyerror(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
+static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
 {
 
 }
@@ -23,6 +23,7 @@ static void yyerror(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
 }
 
 %define api.pure
+%define api.prefix {conf_}
 %parse-param {yyscan_t _scanner}
 %lex-param {yyscan_t _scanner}
 %parse-param {PiwxConfig *_cfg}

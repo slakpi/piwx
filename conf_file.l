@@ -1,3 +1,4 @@
+%option prefix="conf_"
 %option noyywrap
 %option never-interactive
 %option reentrant
@@ -9,6 +10,8 @@
 #include "../config_helpers.h"
 #include "../conf_file.h"
 #include "conf_file.parser.h"
+
+#define YYSTYPE CONF_STYPE
 
 %}
 

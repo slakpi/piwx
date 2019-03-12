@@ -6,6 +6,9 @@ typedef void* yyscan_t;
 #include "config_helpers.h"
 #include "conf_file.h"
 #include "conf_file.parser.h"
+
+#define YYSTYPE CONF_STYPE
+
 #include "conf_file.lexer.h"
 
 PiwxConfig* getPiwxConfig()
@@ -25,10 +28,10 @@ PiwxConfig* getPiwxConfig()
   if (!cfgFile)
     return cfg;
 
-  yylex_init(&scanner);
-  yyset_in(cfgFile, scanner);
-  yyparse(scanner, cfg);
-  yylex_destroy(scanner);
+  conf_lex_init(&scanner);
+  conf_set_in(cfgFile, scanner);
+  conf_parse(scanner, cfg);
+  conf_lex_destroy(scanner);
 
   fclose(cfgFile);
 
