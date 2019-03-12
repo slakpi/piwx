@@ -28,6 +28,30 @@ typedef enum __FlightCategory
   catLIFR
 } FlightCategory;
 
+typedef enum __DominantWeather
+{
+  wxClearDay,             /* Clear; no other weather. */
+  wxClearNight,
+  wxScatteredOrFewDay,    /* Scattered or few; no other weather. */
+  wxScatteredOrFewNight,
+  wxBrokenDay,            /* Broken; no other weather. */
+  wxBrokenNight,
+  wxOvercast,             /* Overcast; no other weather. */
+  wxLightMistHaze,        /* BR, HZ */
+  wxLightDrizzleRain,     /* VC/- DZ, RA */
+  wxRain,                 /* [+] DZ, RA */
+  wxFlurries,             /* VC SN, SG */
+  wxLightSnow,            /* - SN, SG */
+  wxSnow,                 /* [+] SN, SG */
+  wxLightFreezingRain,    /* VC/- FZ + DZ or RA, IC, PL, GR, GS */
+  wxFreezingRain,         /* [+] FZ + DZ or RA, IC, PL, GR, GS */
+  wxObscuration,          /* FG, FU, DU, SS, DS */
+  wxVolcanicAsh,          /* VA */
+  wxLightTstormsSqualls,  /* VC/- TS, SQ */
+  wxTstormsSqualls,       /* [+] TS, SQ */
+  wxFunnelCloud,          /* FC */
+} DominantWeather;
+
 typedef struct __WxStation
 {
   char *id;
@@ -35,6 +59,7 @@ typedef struct __WxStation
   time_t obsTime;
   double lat, lon;
   time_t sunrise, sunset;
+  DominantWeather wx;
   char *wxString;
   SkyCondition *layers;
   int windDir, windSpeed;
