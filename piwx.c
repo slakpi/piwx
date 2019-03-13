@@ -35,9 +35,9 @@ static int go(int _test)
   PiwxConfig *cfg = getPiwxConfig();
   Surface sfc = allocateSurface(320, 240);
   Font font = allocateFont(font_16pt);
-  Bitmap icon = allocateBitmap("wx_thunderstorms.png");
   Bitmap dlIcon = allocateBitmap("downloading.png");
   Bitmap dlErr = allocateBitmap("download_err.png");
+  Bitmap icon = NULL;
   RGB c;
   WxStation *wx = NULL, *ptr = NULL;
   time_t last = 0, now;
@@ -47,7 +47,9 @@ static int go(int _test)
   {
     if (!cfg->stationQuery)
     {
+      clearSurface(sfc);
       drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
+      writeToFramebuffer(sfc);
       break;
     }
 
@@ -87,6 +89,77 @@ static int go(int _test)
 
     drawText(sfc, font, 0, 0, ptr->id, strlen(ptr->id));
 
+    switch (ptr->wx)
+    {
+    case wxClearDay:
+      icon = allocateBitmap("wx_clear_day.png");
+      break;
+    case wxClearNight:
+      icon = allocateBitmap("wx_clear_night.png");
+      break;
+    case wxScatteredOrFewDay:
+      icon = allocateBitmap("wx_few_day.png");
+      break;
+    case wxScatteredOrFewNight:
+      icon = allocateBitmap("wx_few_night.png");
+      break;
+    case wxBrokenDay:
+      icon = allocateBitmap("wx_broken_day.png");
+      break;
+    case wxBrokenNight:
+      icon = allocateBitmap("wx_broken_night.png");
+      break;
+    case wxOvercast:
+      icon = allocateBitmap("wx_overcast.png");
+      break;
+    case wxLightMistHaze:
+    case wxObscuration:
+      icon = allocateBitmap("wx_fog_haze.png");
+      break;
+    case wxLightDrizzleRain:
+      icon = allocateBitmap("wx_chance_rain.png");
+      break;
+    case wxRain:
+      icon = allocateBitmap("wx_rain.png");
+      break;
+    case wxFlurries:
+      icon = allocateBitmap("wx_flurries.png");
+      break;
+    case wxLightSnow:
+      icon = allocateBitmap("wx_chance_snow.png");
+      break;
+    case wxSnow:
+      icon = allocateBitmap("wx_snow.png");
+      break;
+    case wxLightFreezingRain:
+      icon = allocateBitmap("wx_chance_fzra.png");
+      break;
+    case wxFreezingRain:
+      icon = allocateBitmap("wx_fzra.png");
+      break;
+    case wxVolcanicAsh:
+      icon = allocateBitmap("wx_volcanic_ash.png");
+      break;
+    case wxLightTstormsSqualls:
+      icon = allocateBitmap("wx_chance_ts.png");
+      break;
+    case wxTstormsSqualls:
+      icon = allocateBitmap("wx_thunderstorms.png");
+      break;
+    case wxFunnelCloud:
+      icon = allocateBitmap("wx_funnel_cloud.png");
+      break;
+    default:
+      break;
+    }
+
+    if (icon)
+    {
+      drawBitmapInBox(sfc, icon, 236, 0, 320, 81);
+      freeBitmap(icon);
+      icon = NULL;
+    }
+
     if (_test)
     {
       writeToFile(sfc, "test.png");
@@ -100,7 +173,6 @@ static int go(int _test)
 
   freeSurface(sfc);
   freeFont(font);
-  freeBitmap(icon);
   freeBitmap(dlIcon);
   freeBitmap(dlErr);
   freePiwxConfig(cfg);

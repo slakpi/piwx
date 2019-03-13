@@ -7,6 +7,11 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include "wx.h"
+#include "wxtype.h"
+
+typedef void* yyscan_t;
+
+#include "wxtype.lexer.h"
 
 typedef struct __Response
 {
@@ -207,7 +212,7 @@ static const char* tagNames[] = {
   "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
   "flight_category","wx_string",      "sky_condition",
 
-  "sky_condition",  "cloud_base_ft_agl",
+  "sky_cover",      "cloud_base_ft_agl",
 
   "SCT",            "FEW",            "BKN",                    "OVC",
   "VFR",            "MVFR",           "IFR",                    "LIFR",
@@ -346,6 +351,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
     case tagSkyCond:
       a = c->properties;
       skyN = (SkyCondition*)malloc(sizeof(SkyCondition));
+      memset(skyN, 0, sizeof(SkyCondition));
 
       if (!_station->layers)
         _station->layers = skyCur = skyN;
@@ -401,6 +407,150 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 
     c = c->next;
   }
+}
+
+static void classifyDominantWeather(WxStation *_station)
+{
+  yyscan_t scanner;
+  YY_BUFFER_STATE buf;
+  int c, h, n, intensity, descriptor;
+  SkyCondition *s;
+
+  _station->wx = wxInvalid;
+
+  s = _station->layers;
+  h = 99999;
+  n = _station->obsTime < _station->sunrise ||
+      _station->obsTime >= _station->sunset;
+
+  while (s)
+  {
+    if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay)
+      _station->wx = (n ? wxScatteredOrFewNight : wxScatteredOrFewDay);
+    else if (s->coverage < skyOvercast && s->height < h &&
+             _station->wx < wxBrokenDay)
+    {
+      _station->wx = (n ? wxBrokenNight : wxBrokenDay);
+      h = s->height;
+    }
+    else if (_station->wx < wxOvercast && s->height < h)
+    {
+      _station->wx = wxOvercast;
+      h = s->height;
+    }
+
+    s = s->next;
+  }
+
+  if (_station->wx == wxInvalid)
+    _station->wx = (n ? wxClearNight : wxClearDay);
+
+  if (!_station->wxString)
+    return;
+
+  wxtype_lex_init(&scanner);
+  buf = wxtype__scan_string(_station->wxString, scanner);
+
+  intensity = -1;
+  descriptor = 0;
+
+  while ((c = wxtype_lex(scanner)) != 0)
+  {
+    if (intensity < 0 && c != ' ' && c != '-' && c != '+' && c != wxVC)
+      intensity = 2;
+
+    switch (c)
+    {
+    case ' ':
+      intensity = -1;
+      descriptor = 0;
+      break;
+    case wxVC:
+      intensity = 0;
+      break;
+    case '-':
+      intensity = 1;
+      break;
+    case '+':
+      intensity = 3;
+      break;
+    case wxMI: case wxPR: case wxBC: case wxDR:
+    case wxBL: case wxSH: case wxFZ:
+      descriptor = c;
+      break;
+    case wxTS:
+      if (intensity < 2 && _station->wx < wxLightTstormsSqualls)
+        _station->wx = wxLightTstormsSqualls;
+      else if (_station->wx < wxTstormsSqualls)
+        _station->wx = wxTstormsSqualls;
+
+      break;
+    case wxBR: case wxHZ:
+      if (_station->wx < wxLightMistHaze)
+        _station->wx = wxLightMistHaze;
+
+      break;
+    case wxDZ: case wxRA:
+      if (descriptor != wxFZ)
+      {
+        if (intensity < 2 && _station->wx < wxLightDrizzleRain)
+          _station->wx = wxLightDrizzleRain;
+        else if (_station->wx < wxRain)
+          _station->wx = wxRain;
+      }
+      else
+      {
+        if (intensity < 2 && _station->wx < wxLightFreezingRain)
+          _station->wx = wxLightFreezingRain;
+        else if (_station->wx < wxFreezingRain)
+          _station->wx = wxFreezingRain;
+      }
+
+      break;
+    case wxSN: case wxSG:
+      if (intensity == 0 && _station->wx < wxFlurries)
+        _station->wx = wxFlurries;
+      else if (intensity == 1 && _station->wx < wxLightSnow)
+        _station->wx = wxLightSnow;
+      else if (_station->wx < wxSnow)
+        _station->wx = wxSnow;
+
+      break;
+    case wxIC: case wxPL: case wxGR: case wxGS:
+      if (intensity < 2 && _station->wx < wxLightFreezingRain)
+        _station->wx = wxLightFreezingRain;
+      else if (_station->wx < wxFreezingRain)
+        _station->wx = wxLightFreezingRain;
+
+      break;
+    case wxFG: case wxFU: case wxDU: case wxSS:
+    case wxDS:
+      if (_station->wx < wxObscuration)
+        _station->wx = wxObscuration;
+
+      break;
+    case wxVA:
+      if (_station->wx < wxVolcanicAsh)
+        _station->wx = wxVolcanicAsh;
+
+      break;
+    case wxSQ:
+      if (intensity < 2 && _station->wx < wxLightTstormsSqualls)
+        _station->wx = wxLightTstormsSqualls;
+      else if (_station->wx < wxTstormsSqualls)
+        _station->wx = wxTstormsSqualls;
+
+      break;
+    case wxFC:
+      if (_station->wx < wxFunnelCloud)
+        _station->wx = wxFunnelCloud;
+
+      break;
+    }
+  }
+
+  wxtype__delete_buffer(buf, scanner);
+  wxtype_lex_destroy(scanner);
 }
 
 WxStation* queryWx(const char *_stations)
@@ -505,6 +655,7 @@ WxStation* queryWx(const char *_stations)
 
     readStation(p, hash, n);
     getSunriseSunset(n->lat, n->lon, &n->sunrise, &n->sunset);
+    classifyDominantWeather(n);
 
     p = p->next;
   }

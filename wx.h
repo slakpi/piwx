@@ -30,6 +30,7 @@ typedef enum __FlightCategory
 
 typedef enum __DominantWeather
 {
+  wxInvalid,
   wxClearDay,             /* Clear; no other weather. */
   wxClearNight,
   wxScatteredOrFewDay,    /* Scattered or few; no other weather. */

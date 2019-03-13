@@ -29,6 +29,11 @@ FLEX_TARGET(ConfLexer
   DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.h)
 ADD_FLEX_BISON_DEPENDENCY(ConfLexer ConfParser)
 
+FLEX_TARGET(WxTypeLexer
+  wxtype.l
+  ${CMAKE_CURRENT_BINARY_DIR}/wxtype.lexer.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/wxtype.lexer.h)
+
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 add_executable(piwx
   gfx.c
@@ -36,7 +41,8 @@ add_executable(piwx
   config.c
   piwx.c
   ${BISON_ConfParser_OUTPUTS}
-  ${FLEX_ConfLexer_OUTPUTS})
+  ${FLEX_ConfLexer_OUTPUTS}
+  ${FLEX_WxTypeLexer_OUTPUTS})
 target_link_libraries(piwx curl xml2 png jansson)
 
 install(TARGETS piwx DESTINATION bin)
