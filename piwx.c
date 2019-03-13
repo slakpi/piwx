@@ -162,6 +162,31 @@ static int go(int _test)
       icon = NULL;
     }
 
+    switch (ptr->cat)
+    {
+    case catLIFR:
+      icon = allocateBitmap("cat_lifr.png");
+      break;
+    case catIFR:
+      icon = allocateBitmap("cat_ifr.png");
+      break;
+    case catMVFR:
+      icon = allocateBitmap("cat_mvfr.png");
+      break;
+    case catVFR:
+      icon = allocateBitmap("cat_vfr.png");
+      break;
+    default:
+      break;
+    }
+
+    if (icon)
+    {
+      drawBitmapInBox(sfc, icon, 174, 0, 236, 81);
+      freeBitmap(icon);
+      icon = NULL;
+    }
+
     if (_test)
     {
       writeToFile(sfc, "test.png");
