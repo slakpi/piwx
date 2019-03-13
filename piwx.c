@@ -203,7 +203,9 @@ static int go(int _test)
     }
 
     if (ptr->wxString)
-      drawText(sfc, font8, 0, 81, ptr->wxString, strlen(ptr->wxString));
+      drawText(sfc, font8, 5, 81, ptr->wxString, strlen(ptr->wxString));
+    else
+      drawText(sfc, font8, 5, 81, "No Present Wx", 13);
 
     switch ((ptr->windDir + 15) / 30 * 30)
     {
