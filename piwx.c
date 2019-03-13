@@ -5,6 +5,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <string.h>
+#include <stdio.h>
 #include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
@@ -34,7 +35,9 @@ static int go(int _test)
 {
   PiwxConfig *cfg = getPiwxConfig();
   Surface sfc = allocateSurface(320, 240);
-  Font font = allocateFont(font_16pt);
+  Font font16 = allocateFont(font_16pt);
+  Font font8 = allocateFont(font_8pt);
+  Font font6 = allocateFont(font_6pt);
   Bitmap dlIcon = allocateBitmap("downloading.png");
   Bitmap dlErr = allocateBitmap("download_err.png");
   Bitmap icon = NULL;
@@ -42,6 +45,7 @@ static int go(int _test)
   WxStation *wx = NULL, *ptr = NULL;
   time_t last = 0, now;
   int first = 1;
+  char buf[33];
 
   do
   {
@@ -87,9 +91,20 @@ static int go(int _test)
     c.g = 1.0;
     c.b = 1.0;
     c.a = 1.0;
-    setTextColor(font, &c);
+    setTextColor(font16, &c);
+    setTextColor(font8, &c);
+    setTextColor(font6, &c);
 
-    drawText(sfc, font, 0, 0, ptr->id, strlen(ptr->id));
+    icon = allocateBitmap("separators.png");
+
+    if (icon)
+    {
+      drawBitmapInBox(sfc, icon, 0, 0, 320, 240);
+      freeBitmap(icon);
+      icon = NULL;
+    }
+
+    drawText(sfc, font16, 0, 0, ptr->id, strlen(ptr->id));
 
     switch (ptr->wx)
     {
@@ -187,6 +202,96 @@ static int go(int _test)
       icon = NULL;
     }
 
+    if (ptr->wxString)
+      drawText(sfc, font8, 0, 81, ptr->wxString, strlen(ptr->wxString));
+
+    switch ((ptr->windDir + 15) / 30 * 30)
+    {
+    case 0:
+      if (ptr->windDir == 0)
+        icon = allocateBitmap("wind_calm.png");
+      else
+        icon = allocateBitmap("wind_360.png");
+
+      break;
+    case 30:
+      icon = allocateBitmap("wind_30.png");
+      break;
+    case 60:
+      icon = allocateBitmap("wind_60.png");
+      break;
+    case 90:
+      icon = allocateBitmap("wind_90.png");
+      break;
+    case 120:
+      icon = allocateBitmap("wind_120.png");
+      break;
+    case 150:
+      icon = allocateBitmap("wind_150.png");
+      break;
+    case 180:
+      icon = allocateBitmap("wind_180.png");
+      break;
+    case 210:
+      icon = allocateBitmap("wind_210.png");
+      break;
+    case 240:
+      icon = allocateBitmap("wind_240.png");
+      break;
+    case 270:
+      icon = allocateBitmap("wind_270.png");
+      break;
+    case 300:
+      icon = allocateBitmap("wind_300.png");
+      break;
+    case 330:
+      icon = allocateBitmap("wind_330.png");
+      break;
+    case 360:
+      icon = allocateBitmap("wind_360.png");
+      break;
+    default:
+      break;
+    }
+
+    if (icon)
+    {
+      drawBitmap(sfc, icon, 10, 132);
+      freeBitmap(icon);
+      icon = NULL;
+    }
+
+    if (ptr->windDir > 0)
+      snprintf(buf, 33, "%d", ptr->windDir);
+    else
+    {
+      if (ptr->windSpeed == 0)
+        strncpy(buf, "Calm", 33);
+      else
+        strncpy(buf, "Var.", 33);
+    }
+    drawText(sfc, font6, 84, 126, buf, strlen(buf));
+
+    if (ptr->windSpeed == 0)
+      strncpy(buf, "---", 33);
+    else
+      snprintf(buf, 33, "%d", ptr->windSpeed);
+
+    drawText(sfc, font6, 84, 149, buf, strlen(buf));
+
+    c.r = 1.0;
+    c.g = 0.0;
+    c.b = 0.0;
+    c.a = 1.0;
+    setTextColor(font6, &c);
+
+    if (ptr->windGust == 0)
+      strncpy(buf, "---", 33);
+    else
+      snprintf(buf, 33, "%d", ptr->windGust);
+
+    drawText(sfc, font6, 84, 172, buf, strlen(buf));
+
     if (_test)
     {
       writeToFile(sfc, "test.png");
@@ -198,12 +303,20 @@ static int go(int _test)
     sleep(5);
   } while (run);
 
-  freeSurface(sfc);
-  freeFont(font);
-  freeBitmap(dlIcon);
-  freeBitmap(dlErr);
-  freePiwxConfig(cfg);
-  freeStations(wx);
+  if (sfc)
+    freeSurface(sfc);
+  if (font16)
+    freeFont(font16);
+  if (font8)
+    freeFont(font8);
+  if (dlIcon)
+    freeBitmap(dlIcon);
+  if (dlErr)
+    freeBitmap(dlErr);
+  if (cfg)
+    freePiwxConfig(cfg);
+  if (wx)
+    freeStations(wx);
 
   return 0;
 }

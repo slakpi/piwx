@@ -316,6 +316,9 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
     case tagWindSpeed:
       _station->windSpeed = atoi((char*)c->children->content);
       break;
+    case tagWindGust:
+      _station->windGust = atoi((char*)c->children->content);
+      break;
     case tagVis:
       _station->visibility = strtod((char*)c->children->content, NULL);
       break;

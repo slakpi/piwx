@@ -63,7 +63,7 @@ typedef struct __WxStation
   DominantWeather wx;
   char *wxString;
   SkyCondition *layers;
-  int windDir, windSpeed;
+  int windDir, windSpeed, windGust;
   int visibility;
   double temp, dewPoint;
   double alt;
