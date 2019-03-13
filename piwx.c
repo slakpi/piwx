@@ -71,7 +71,9 @@ static int go(int _test)
 
     if (!wx)
     {
+      clearSurface(sfc);
       drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
+      writeToFramebuffer(sfc);
       sleep(60);
       continue;
     }
