@@ -204,7 +204,7 @@ cleanup:
   if (png)
     fclose(png);
   if (pngPtr)
-    png_destroy_read_struct(&pngPtr, &pngInfo, NULL);
+    png_destroy_write_struct(&pngPtr, &pngInfo);
   if (rows)
     free(rows);
 
