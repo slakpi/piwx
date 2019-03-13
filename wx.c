@@ -296,7 +296,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
       break;
     case tagObsTime:
       parseUTCDateTime(&obs, (char*)c->children->content);
-      _station->obsTime = mktime(&obs);
+      _station->obsTime = timegm(&obs);
       break;
     case tagLat:
       _station->lat = strtod((char*)c->children->content, NULL);
