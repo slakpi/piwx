@@ -417,7 +417,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 
         while (skyP)
         {
-          if (skyN->height > skyP->height)
+          if (skyN->height < skyP->height)
           {
             if (skyP == _station->layers)
               _station->layers = skyN;
@@ -428,6 +428,8 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
             skyN->next = skyP;
             break;
           }
+
+          skyP = skyP->next;
         }
       }
 
