@@ -264,7 +264,7 @@ static int go(int _test)
     }
 
     if (ptr->windDir > 0)
-      snprintf(buf, 33, "%d", ptr->windDir);
+      snprintf(buf, 33, "%d\x1", ptr->windDir);
     else
     {
       if (ptr->windSpeed == 0)
@@ -277,7 +277,7 @@ static int go(int _test)
     if (ptr->windSpeed == 0)
       strncpy(buf, "---", 33);
     else
-      snprintf(buf, 33, "%d", ptr->windSpeed);
+      snprintf(buf, 33, "%dkts.", ptr->windSpeed);
 
     drawText(sfc, font6, 84, 149, buf, strlen(buf));
 
@@ -290,7 +290,7 @@ static int go(int _test)
     if (ptr->windGust == 0)
       strncpy(buf, "---", 33);
     else
-      snprintf(buf, 33, "%d", ptr->windGust);
+      snprintf(buf, 33, "%dkts.", ptr->windGust);
 
     drawText(sfc, font6, 84, 172, buf, strlen(buf));
 
@@ -302,7 +302,7 @@ static int go(int _test)
 
     writeToFramebuffer(sfc);
     ptr = ptr->next;
-    sleep(5);
+    sleep(cfg->cycleTime);
   } while (run);
 
   if (sfc)
