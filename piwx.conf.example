@@ -1,1 +1,2 @@
-stations=KHIO,KMMV,KUAO;
+stations="KHIO,KMMV,KUAO,KVUO,KSLE,KSPB,KTPA,KCGC,KGNV,KDEN";
+cycletime=5;
