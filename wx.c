@@ -175,11 +175,13 @@ typedef enum __Tag
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
   tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
   tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
-  tagSkyCond,
+  tagSkyCond,     tagVertVis,
 
   tagSkyCover,    tagCloudBase,
 
-  tagSCT,         tagFEW,           tagBKN,           tagOVC,
+  tagSCT,         tagFEW,           tagBKN,           tagOVC,         tagOVX,
+  tagCLR,         tagSKC,           tagCAVOK,
+
   tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
 
   tagFirst = tagResponse,
@@ -194,11 +196,13 @@ static const Tag tags[] = {
   tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
   tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
   tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
-  tagSkyCond,
+  tagSkyCond,     tagVertVis,
 
   tagSkyCover,    tagCloudBase,
 
-  tagSCT,         tagFEW,           tagBKN,           tagOVC,
+  tagSCT,         tagFEW,           tagBKN,           tagOVC,         tagOVX,
+  tagCLR,         tagSKC,           tagCAVOK,
+
   tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
 };
 
@@ -210,11 +214,13 @@ static const char* tagNames[] = {
   "raw_text",       "station_id",     "observation_time",       "latitude",
   "longitude",      "temp_c",         "dewpoint_c",             "wind_dir_degrees",
   "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
-  "flight_category","wx_string",      "sky_condition",
+  "flight_category","wx_string",      "sky_condition",          "vert_vis_ft",
 
   "sky_cover",      "cloud_base_ft_agl",
 
   "SCT",            "FEW",            "BKN",                    "OVC",
+  "OVX",            "CLR",            "SKC",                    "CAVOK",
+
   "VFR",            "MVFR",           "IFR",                    "LIFR",
 
   NULL
@@ -272,7 +278,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 {
   Tag tag;
   struct tm obs;
-  SkyCondition *skyCur = NULL, *skyN;
+  SkyCondition *skyN, *skyP;
   xmlNodePtr c = _node->children;
   xmlAttr *a;
 
@@ -356,14 +362,6 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
       skyN = (SkyCondition*)malloc(sizeof(SkyCondition));
       memset(skyN, 0, sizeof(SkyCondition));
 
-      if (!_station->layers)
-        _station->layers = skyCur = skyN;
-      else
-      {
-        skyCur->next = skyN;
-        skyCur = skyN;
-      }
-
       while (a)
       {
         tag = getTag(_hash, a->name);
@@ -375,6 +373,11 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
 
           switch (tag)
           {
+          case tagSKC:
+          case tagCLR:
+          case tagCAVOK:
+            skyN->coverage = skyClear;
+            break;
           case tagSCT:
             skyN->coverage = skyScattered;
             break;
@@ -386,6 +389,9 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
             break;
           case tagOVC:
             skyN->coverage = skyOvercast;
+            break;
+          case tagOVX:
+            skyN->coverage = skyOvercastSurface;
             break;
           default:
             skyN->coverage = skyInvalid;
@@ -403,6 +409,31 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
         a = a->next;
       }
 
+      if (!_station->layers)
+        _station->layers = skyN;
+      else
+      {
+        skyP = _station->layers;
+
+        while (skyP)
+        {
+          if (skyN->height > skyP->height)
+          {
+            if (skyP == _station->layers)
+              _station->layers = skyN;
+            else
+              skyP->prev->next = skyN;
+
+            skyP->prev = skyN;
+            skyN->next = skyP;
+            break;
+          }
+        }
+      }
+
+      break;
+    case tagVertVis:
+      _station->vertVis = strtod((char*)c->children->content, NULL);
       break;
     default:
       break;
@@ -428,7 +459,9 @@ static void classifyDominantWeather(WxStation *_station)
 
   while (s)
   {
-    if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay)
+    if (s->coverage < skyScattered && _station->wx < wxClearDay)
+      _station->wx = (n ? wxClearNight : wxClearDay);
+    else if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay)
       _station->wx = (n ? wxScatteredOrFewNight : wxScatteredOrFewDay);
     else if (s->coverage < skyOvercast && s->height < h &&
              _station->wx < wxBrokenDay)

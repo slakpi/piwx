@@ -6,17 +6,19 @@
 typedef enum __CloudCover
 {
   skyInvalid,
+  skyClear,
   skyScattered,
   skyFew,
   skyBroken,
-  skyOvercast
+  skyOvercast,
+  skyOvercastSurface
 } CloudCover;
 
 typedef struct __SkyCondition
 {
   CloudCover coverage;
   int height;
-  struct __SkyCondition *next;
+  struct __SkyCondition *prev, *next;
 } SkyCondition;
 
 typedef enum __FlightCategory
@@ -64,7 +66,7 @@ typedef struct __WxStation
   char *wxString;
   SkyCondition *layers;
   int windDir, windSpeed, windGust;
-  int visibility;
+  int visibility, vertVis;
   double temp, dewPoint;
   double alt;
   FlightCategory cat;

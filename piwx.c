@@ -31,6 +31,34 @@ static void signalHandler(int _signo)
   }
 }
 
+static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len)
+{
+  const char *cover = NULL;
+
+  switch (_sky->coverage)
+  {
+  case skyScattered:
+    cover = "SCT";
+    break;
+  case skyFew:
+    cover = "FEW";
+    break;
+  case skyBroken:
+    cover = "BKN";
+    break;
+  case skyOvercast:
+    cover = "OVC";
+    break;
+  default:
+    break;
+  }
+
+  if (cover)
+    snprintf(_buf, _len, "%s %d", cover, _sky->height);
+  else
+    snprintf(_buf, _len, "--- %d", _sky->height);
+}
+
 static int go(int _test)
 {
   PiwxConfig *cfg = getPiwxConfig();
@@ -43,6 +71,7 @@ static int go(int _test)
   Bitmap icon = NULL;
   RGB c;
   WxStation *wx = NULL, *ptr = NULL;
+  SkyCondition *sky;
   time_t last = 0, now;
   int first = 1;
   char buf[33];
@@ -58,6 +87,7 @@ static int go(int _test)
     }
 
     now = time(0);
+
     if (!wx || first || (now - last > 1200))
     {
       if (wx)
@@ -203,9 +233,9 @@ static int go(int _test)
     }
 
     if (ptr->wxString)
-      drawText(sfc, font8, 5, 81, ptr->wxString, strlen(ptr->wxString));
+      drawText(sfc, font8, 0, 81, ptr->wxString, strlen(ptr->wxString));
     else
-      drawText(sfc, font8, 5, 81, "No Present Wx", 13);
+      drawText(sfc, font8, 0, 81, "No Present Wx", 13);
 
     switch ((ptr->windDir + 15) / 30 * 30)
     {
@@ -264,20 +294,20 @@ static int go(int _test)
     }
 
     if (ptr->windDir > 0)
-      snprintf(buf, 33, "%d\x1", ptr->windDir);
+      snprintf(buf, 33, "%d\x01", ptr->windDir);
     else
     {
       if (ptr->windSpeed == 0)
         strncpy(buf, "Calm", 33);
       else
-        strncpy(buf, "Var.", 33);
+        strncpy(buf, "Var", 33);
     }
     drawText(sfc, font6, 84, 126, buf, strlen(buf));
 
     if (ptr->windSpeed == 0)
       strncpy(buf, "---", 33);
     else
-      snprintf(buf, 33, "%dkts.", ptr->windSpeed);
+      snprintf(buf, 33, "%dkt", ptr->windSpeed);
 
     drawText(sfc, font6, 84, 149, buf, strlen(buf));
 
@@ -290,9 +320,68 @@ static int go(int _test)
     if (ptr->windGust == 0)
       strncpy(buf, "---", 33);
     else
-      snprintf(buf, 33, "%dkts.", ptr->windGust);
+      snprintf(buf, 33, "%dkt", ptr->windGust);
 
     drawText(sfc, font6, 84, 172, buf, strlen(buf));
+
+    c.r = 1.0;
+    c.g = 1.0;
+    c.b = 1.0;
+    c.a = 1.0;
+    setTextColor(font6, &c);
+
+    sky = ptr->layers;
+
+    if (sky)
+    {
+      switch (sky->coverage)
+      {
+      case skyClear:
+        strncpy(buf, "Clear", 33);
+        drawText(sfc, font6, 172, 126, buf, strlen(buf));
+        break;
+      case skyOvercastSurface:
+        snprintf(buf, 33, "VV %d", ptr->vertVis);
+        drawText(sfc, font6, 172, 126, buf, strlen(buf));
+        break;
+      default:
+        while (sky)
+        {
+          if (sky->coverage >= skyBroken)
+          {
+            if (sky->prev)
+              sky = sky->prev;
+
+            break;
+          }
+
+          sky = sky->next;
+        }
+
+        if (!sky)
+          sky = ptr->layers;
+
+        layerToString(sky, buf, 33);
+        drawText(sfc, font6, 172, sky->next ? 149 : 126, buf, strlen(buf));
+
+        if (sky->next)
+        {
+          layerToString(sky->next, buf, 33);
+          drawText(sfc, font6, 172, 126, buf, strlen(buf));
+        }
+
+        break;
+      }
+    }
+
+    snprintf(buf, 33, "%dsm vis", ptr->visibility);
+    drawText(sfc, font6, 172, 172, buf, strlen(buf));
+
+    snprintf(buf, 33, "%.0f\x01/%.0f\x01\x43", ptr->temp, ptr->dewPoint);
+    drawText(sfc, font6, 0, 206, buf, strlen(buf));
+
+    snprintf(buf, 33, "%.2f\"", ptr->alt);
+    drawText(sfc, font6, 172, 206, buf, strlen(buf));
 
     if (_test)
     {
