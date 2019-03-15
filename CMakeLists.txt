@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.6)
 
 project("piwx")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Wno-unused-function")
 set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 if (NOT DEFINED SHARE_PREFIX)
@@ -18,6 +19,7 @@ configure_file(config.h.in config.h)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(WiringPi REQUIRED)
 
 BISON_TARGET(ConfParser
   conf_file.y
@@ -43,7 +45,7 @@ add_executable(piwx
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
   ${FLEX_WxTypeLexer_OUTPUTS})
-target_link_libraries(piwx curl xml2 png jansson)
+target_link_libraries(piwx curl xml2 png jansson wiringPi)
 
 install(TARGETS piwx DESTINATION bin)
 install(DIRECTORY wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
