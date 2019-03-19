@@ -6,6 +6,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <wiringPi.h>
 #include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
@@ -72,7 +73,7 @@ static int go(int _test)
   RGB c;
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
-  time_t last = 0, now;
+  time_t nextUpdate = 0, nextWx = 0, now;
   int first = 1;
   char buf[33];
 
@@ -88,7 +89,7 @@ static int go(int _test)
 
     now = time(0);
 
-    if (!wx || first || (now - last > 1200))
+    if (!wx || first || now >= nextUpdate)
     {
       if (wx)
         freeStations(wx);
@@ -100,7 +101,7 @@ static int go(int _test)
       wx = queryWx(cfg->stationQuery);
       ptr = wx;
       first = 0;
-      last = now;
+      nextUpdate = ((now / 1200) + (now % 1200 != 0)) * 1200;
     }
 
     if (!wx)
@@ -108,7 +109,7 @@ static int go(int _test)
       clearSurface(sfc);
       drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
       writeToFramebuffer(sfc);
-      sleep(60);
+      nextUpdate = now + 60;
       continue;
     }
 
@@ -390,12 +391,22 @@ static int go(int _test)
     }
 
     writeToFramebuffer(sfc);
-    ptr = ptr->next;
-    sleep(cfg->cycleTime);
+
+    if (now >= nextWx)
+    {
+      ptr = ptr->next;
+      nextWx = now + cfg->cycleTime;
+    }
+
+    usleep(50000);
   } while (run);
 
   if (sfc)
+  {
+    clearSurface(sfc);
+    writeToFramebuffer(sfc);
     freeSurface(sfc);
+  }
   if (font16)
     freeFont(font16);
   if (font8)
