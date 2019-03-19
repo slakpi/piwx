@@ -456,8 +456,8 @@ static void classifyDominantWeather(WxStation *_station)
 
   s = _station->layers;
   h = 99999;
-  n = _station->obsTime < _station->sunrise ||
-      _station->obsTime >= _station->sunset;
+  n = (_station->obsTime < _station->sunrise - 1800) ||
+      (_station->obsTime >= _station->sunset + 1800);
 
   while (s)
   {
