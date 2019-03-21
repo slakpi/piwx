@@ -92,8 +92,8 @@ static size_t sunriseSunsetCallback(char *_ptr, size_t _size, size_t _nmemb,
   return _nmemb;
 }
 
-static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
-  time_t *_sunset)
+static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
+  time_t *_sunrise, time_t *_sunset)
 {
   CURL *curlLib;
   CURLcode res;
@@ -109,8 +109,9 @@ static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
     return -1;
 
   snprintf(url, 257, "https://api.sunrise-sunset.org/json?"
-    "lat=%f&lng=%f&formatted=0",
-    _lat, _lon);
+    "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
+    _lat, _lon, _date->tm_year + 1900, _date->tm_mon + 1,
+    _date->tm_mday);
 
   initResponse(&json);
 
@@ -133,11 +134,11 @@ static int getSunriseSunset(double _lat, double _lon, time_t *_sunrise,
   if (!json_is_object(times))
     goto cleanup;
 
-  sunrise = json_object_get(times, "sunrise");
+  sunrise = json_object_get(times, "civil_twilight_begin");
   if (!json_is_string(sunrise))
     goto cleanup;
 
-  sunset = json_object_get(times, "sunset");
+  sunset = json_object_get(times, "civil_twilight_end");
   if (!json_is_string(sunset))
     goto cleanup;
 
@@ -162,6 +163,28 @@ cleanup:
   }
 
   return ok;
+}
+
+static int isNight(double _lat, double _lon, time_t _obsTime)
+{
+  time_t yesterday = _obsTime - 86400;
+  time_t sry, ssy, sr, ss;
+  struct tm date;
+
+  date = *gmtime(&_obsTime);
+  if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
+    return 0;
+
+  if (_obsTime < sr)
+  {
+    date = *gmtime(&yesterday);
+    if (getSunriseSunsetForDay(_lat, _lon, &date, &sry, &ssy) != 0)
+      return 0;
+
+    return _obsTime >= ssy;
+  }
+
+  return _obsTime >= ss;
 }
 
 typedef enum __Tag
@@ -449,26 +472,24 @@ static void classifyDominantWeather(WxStation *_station)
 {
   yyscan_t scanner;
   YY_BUFFER_STATE buf;
-  int c, h, n, intensity, descriptor;
+  int c, h, intensity, descriptor;
   SkyCondition *s;
 
   _station->wx = wxInvalid;
 
   s = _station->layers;
   h = 99999;
-  n = (_station->obsTime < _station->sunrise - 1800) ||
-      (_station->obsTime >= _station->sunset + 1800);
 
   while (s)
   {
     if (s->coverage < skyScattered && _station->wx < wxClearDay)
-      _station->wx = (n ? wxClearNight : wxClearDay);
+      _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
     else if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay)
-      _station->wx = (n ? wxScatteredOrFewNight : wxScatteredOrFewDay);
+      _station->wx = (_station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay);
     else if (s->coverage < skyOvercast && s->height < h &&
              _station->wx < wxBrokenDay)
     {
-      _station->wx = (n ? wxBrokenNight : wxBrokenDay);
+      _station->wx = (_station->isNight ? wxBrokenNight : wxBrokenDay);
       h = s->height;
     }
     else if (_station->wx < wxOvercast && s->height < h)
@@ -481,7 +502,7 @@ static void classifyDominantWeather(WxStation *_station)
   }
 
   if (_station->wx == wxInvalid)
-    _station->wx = (n ? wxClearNight : wxClearDay);
+    _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
 
   if (!_station->wxString)
     return;
@@ -692,7 +713,7 @@ WxStation* queryWx(const char *_stations)
     }
 
     readStation(p, hash, n);
-    getSunriseSunset(n->lat, n->lon, &n->sunrise, &n->sunset);
+    n->isNight = isNight(n->lat, n->lon, n->obsTime);
     classifyDominantWeather(n);
 
     p = p->next;

@@ -61,7 +61,7 @@ typedef struct __WxStation
   char *raw;
   time_t obsTime;
   double lat, lon;
-  time_t sunrise, sunset;
+  int isNight;
   DominantWeather wx;
   char *wxString;
   SkyCondition *layers;
