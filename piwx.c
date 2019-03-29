@@ -445,6 +445,8 @@ int main(int _argc, char* _argv[])
   if (standAlone)
   {
     signal(SIGINT, signalHandler);
+    signal(SIGTERM, signalHandler);
+    signal(SIGHUP, signalHandler);
     return go(t);
   }
 
