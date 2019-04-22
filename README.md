@@ -8,6 +8,9 @@ framebuffer device.
 
 For more information about the PiTFT: https://www.adafruit.com/product/2298.
 
+The amazing weather icons are from the Weather Underground Icons project:
+https://github.com/manifestinteractive/weather-underground-icons
+
 Building
 --------
 
