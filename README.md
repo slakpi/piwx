@@ -1,6 +1,8 @@
 PiWx: Raspberry Pi Aviation Weather
 ===================================
 
+![Weather Display](imgs/sample.png)
+
 PiWx is a configurable aviation METAR display designed to work with the Adafruit
 320x240 PiTFT framebuffer display. While PiWx is hard-coded to work with the
 PiTFT, it should not be difficult to modify it for any display that uses a
