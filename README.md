@@ -11,6 +11,8 @@ For more information about the PiTFT: https://www.adafruit.com/product/2298.
 The amazing weather icons are from the Weather Underground Icons project:
 https://github.com/manifestinteractive/weather-underground-icons
 
+The font used is San Francisco Monospace (SF Mono) from Xcode.
+
 Building
 --------
 
