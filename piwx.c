@@ -11,6 +11,13 @@
 #include "gfx.h"
 #include "wx.h"
 
+#define BUTTONS  4
+#define BUTTON_1 0x1
+#define BUTTON_2 0x2
+#define BUTTON_3 0x4
+#define BUTTON_4 0x8
+
+static const int buttonPins[] = {17, 22, 23, 27};
 static const char *shortArgs = "st";
 static const struct option longArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
@@ -30,6 +37,20 @@ static void signalHandler(int _signo)
     run = 0;
     break;
   }
+}
+
+static unsigned int scanButtons()
+{
+  int i;
+  unsigned int buttons = 0;
+
+  for (i = 0; i < BUTTONS; ++i)
+  {
+    if(digitalRead(buttonPins[i]) == LOW)
+      buttons |= (1 << i);
+  }
+
+  return buttons;
 }
 
 static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len)
@@ -74,11 +95,28 @@ static int go(int _test)
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
   time_t nextUpdate = 0, nextWx = 0, now;
-  int first = 1;
+  int first = 1, i;
+  unsigned int b, bl = 0, bc;
   char buf[33];
+
+  wiringPiSetupGpio();
+
+  for (i = 0; i < BUTTONS; ++i)
+  {
+    pinMode(buttonPins[i], INPUT);
+    pullUpDnControl(buttonPins[i], PUD_UP);
+  }
 
   do
   {
+    /**
+     * Scan the buttons. Mask off any buttons that were pressed on the last
+     * scan and are either still pressed or were released.
+     */
+    b = scanButtons();
+    bc = (~bl) & b;
+    bl = b;
+
     if (!cfg->stationQuery)
     {
       clearSurface(sfc);
@@ -89,7 +127,7 @@ static int go(int _test)
 
     now = time(0);
 
-    if (!wx || first || now >= nextUpdate)
+    if (!wx || first || now >= nextUpdate || (bc & BUTTON_1))
     {
       if (wx)
         freeStations(wx);
@@ -112,9 +150,6 @@ static int go(int _test)
       nextUpdate = now + 60;
       continue;
     }
-
-    if (!ptr)
-      ptr = wx;
 
     clearSurface(sfc);
 
@@ -392,9 +427,14 @@ static int go(int _test)
 
     writeToFramebuffer(sfc);
 
-    if (now >= nextWx)
+    if (now >= nextWx || (bc & BUTTON_2))
     {
       ptr = ptr->next;
+      nextWx = now + cfg->cycleTime;
+    }
+    else if (bc & BUTTON_3)
+    {
+      ptr = ptr->prev;
       nextWx = now + cfg->cycleTime;
     }
 
