@@ -705,10 +705,17 @@ WxStation* queryWx(const char *_stations)
     memset(n, 0, sizeof(WxStation));
 
     if (!start)
+    {
       start = cur = n;
+      cur->next = cur;
+      cur->prev = cur;
+    }
     else
     {
+      start->prev = n;
       cur->next = n;
+      n->next = start;
+      n->prev = cur;
       cur = n;
     }
 
@@ -739,6 +746,8 @@ void freeStations(WxStation *_stations)
 {
   WxStation *p;
   SkyCondition *s;
+
+  _stations->prev->next = 0;
 
   while (_stations)
   {

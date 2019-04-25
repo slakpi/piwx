@@ -71,6 +71,7 @@ typedef struct __WxStation
   double alt;
   FlightCategory cat;
   struct __WxStation *next;
+  struct __WxStation *prev;
 } WxStation;
 
 WxStation* queryWx(const char *_stations);
