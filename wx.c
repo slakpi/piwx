@@ -36,7 +36,7 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len)
 
   while (1)
   {
-    if (_res->len + _len < newBuf - 1)
+    if (_res->len + _len < newBuf)
     {
       if (_res->bufLen < newBuf)
       {
@@ -51,7 +51,7 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len)
       return;
     }
 
-    newBuf = _res->bufLen << 1;
+    newBuf <<= 1;
     if (newBuf < _res->bufLen)
       return;
   }
