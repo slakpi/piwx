@@ -136,7 +136,7 @@ static int go(int _test)
       wx = queryWx(cfg->stationQuery);
       ptr = wx;
       first = 0;
-      draw = 1;
+      draw = (wx != NULL);
       nextUpdate = ((now / 1200) + (now % 1200 != 0)) * 1200;
       nextWx = now + cfg->cycleTime;
     }
