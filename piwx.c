@@ -95,9 +95,12 @@ static int go(int _test)
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
   time_t nextUpdate = 0, nextWx = 0, now;
-  int first = 1, i;
+  int first = 1, draw, i;
   unsigned int b, bl = 0, bc;
   char buf[33];
+
+  if (!cfg->stationQuery)
+    return 0;
 
   wiringPiSetupGpio();
 
@@ -109,6 +112,8 @@ static int go(int _test)
 
   do
   {
+    draw = 0;
+
     /**
      * Scan the buttons. Mask off any buttons that were pressed on the last
      * scan and are either still pressed or were released.
@@ -117,17 +122,9 @@ static int go(int _test)
     bc = (~bl) & b;
     bl = b;
 
-    if (!cfg->stationQuery)
-    {
-      clearSurface(sfc);
-      drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
-      writeToFramebuffer(sfc);
-      break;
-    }
-
     now = time(0);
 
-    if (!wx || first || now >= nextUpdate || (bc & BUTTON_1))
+    if (first || now >= nextUpdate || (bc & BUTTON_1))
     {
       if (wx)
         freeStations(wx);
@@ -139,7 +136,9 @@ static int go(int _test)
       wx = queryWx(cfg->stationQuery);
       ptr = wx;
       first = 0;
+      draw = 1;
       nextUpdate = ((now / 1200) + (now % 1200 != 0)) * 1200;
+      nextWx = now + cfg->cycleTime;
     }
 
     if (!wx)
@@ -148,6 +147,26 @@ static int go(int _test)
       drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
       writeToFramebuffer(sfc);
       nextUpdate = now + 60;
+    }
+    else
+    {
+      if (now >= nextWx || (bc & BUTTON_2))
+      {
+        ptr = ptr->next;
+        draw = 1;
+        nextWx = now + cfg->cycleTime;
+      }
+      else if (bc & BUTTON_3)
+      {
+        ptr = ptr->prev;
+        draw = 1;
+        nextWx = now + cfg->cycleTime;
+      }
+    }
+
+    if (!draw)
+    {
+      usleep(50000);
       continue;
     }
 
@@ -426,19 +445,6 @@ static int go(int _test)
     }
 
     writeToFramebuffer(sfc);
-
-    if (now >= nextWx || (bc & BUTTON_2))
-    {
-      ptr = ptr->next;
-      nextWx = now + cfg->cycleTime;
-    }
-    else if (bc & BUTTON_3)
-    {
-      ptr = ptr->prev;
-      nextWx = now + cfg->cycleTime;
-    }
-
-    usleep(50000);
   } while (run);
 
   if (sfc)
