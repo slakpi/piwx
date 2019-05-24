@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/usr/local/piwx/bin/piwx
+ExecStart=/usr/local/piwx/bin/piwx -s
 Restart=on-abort
 
 [Install]
