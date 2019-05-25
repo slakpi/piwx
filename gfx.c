@@ -243,6 +243,7 @@ int writeToFramebuffer(const Surface _surface)
 
   write(fb, buf, sizeof(u_int16_t) * px);
   close(fb);
+  free(buf);
 
   return 0;
 }

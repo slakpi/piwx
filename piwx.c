@@ -457,6 +457,8 @@ static int go(int _test)
     freeFont(font16);
   if (font8)
     freeFont(font8);
+  if (font6)
+    freeFont(font6);
   if (dlIcon)
     freeBitmap(dlIcon);
   if (dlErr)
