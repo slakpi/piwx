@@ -46,6 +46,12 @@ Configuration is relatively simple. Refer to the sample configuration file that
 installs to the `etc` directory under the install prefix. Simply copy the sample
 to a new file called `piwx.conf`.
 
+    # Comma-separated list of aiports; used directly in the URL query.
+    stations="KHIO,KMMV,KUAO,KVUO,KSLE,KSPB,KTPA,KCGC,KGNV,KDEN";
+
+    # Airport METAR display cycle time in seconds.
+    cycletime=5;
+
 Running Automatically
 ---------------------
 
