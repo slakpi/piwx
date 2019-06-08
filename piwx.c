@@ -147,7 +147,7 @@ static int go(int _test)
 
         setTextColor(font6, &rgbWhite);
         i = snprintf(buf, 33, "Error %d, Retry %d", i, r++);
-        drawText(sfc, font6, 0, getCharHeight(font6), buf, i);
+        drawText(sfc, font6, 0, 0, buf, i);
 
         drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
         writeToFramebuffer(sfc);
