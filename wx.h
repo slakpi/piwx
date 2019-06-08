@@ -74,7 +74,7 @@ typedef struct __WxStation
   struct __WxStation *prev;
 } WxStation;
 
-WxStation* queryWx(const char *_stations);
+WxStation* queryWx(const char *_stations, int *err);
 void freeStations(WxStation *_stations);
 
 #endif

@@ -612,7 +612,7 @@ static void classifyDominantWeather(WxStation *_station)
   wxtype_lex_destroy(scanner);
 }
 
-WxStation* queryWx(const char *_stations)
+WxStation* queryWx(const char *_stations, int *err)
 {
   CURL *curlLib;
   CURLcode res;
@@ -624,6 +624,8 @@ WxStation* queryWx(const char *_stations)
   Tag tag;
   WxStation *start = NULL, *cur, *n;
   int ok = 0, count, len;
+
+  *err = 0;
 
   strncpy(url,
     "https://aviationweather.gov/adds/dataserver_current/httpparam?"
@@ -661,7 +663,10 @@ WxStation* queryWx(const char *_stations)
   }
 
   if (res != CURLE_OK)
+  {
+    *err = res;
     goto cleanup;
+  }
 
   hash = xmlHashCreate(tagLast);
   initHash(hash);

@@ -91,12 +91,11 @@ static int go(int _test)
   Bitmap dlIcon = allocateBitmap("downloading.png");
   Bitmap dlErr = allocateBitmap("download_err.png");
   Bitmap icon = NULL;
-  RGB c;
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
   time_t nextUpdate = 0, nextWx = 0, now;
   int first = 1, draw, i;
-  unsigned int b, bl = 0, bc;
+  unsigned int b, bl = 0, bc, r = 0;
   char buf[33];
 
   if (!cfg->stationQuery)
@@ -133,22 +132,30 @@ static int go(int _test)
       drawBitmapInBox(sfc, dlIcon, 0, 0, 320, 240);
       writeToFramebuffer(sfc);
 
-      wx = queryWx(cfg->stationQuery);
+      wx = queryWx(cfg->stationQuery, &i);
       ptr = wx;
       first = 0;
       draw = (wx != NULL);
       nextUpdate = ((now / 1200) + (now % 1200 != 0)) * 1200;
       nextWx = now + cfg->cycleTime;
+
+      if (wx)
+        r = 0;
+      else
+      {
+        clearSurface(sfc);
+
+        setTextColor(font6, &rgbWhite);
+        i = snprintf(buf, 33, "Error %d, Retry %d", i, r++);
+        drawText(sfc, font6, 0, getCharHeight(font6), buf, i);
+
+        drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
+        writeToFramebuffer(sfc);
+        nextUpdate = now + 60;
+      }
     }
 
-    if (!wx)
-    {
-      clearSurface(sfc);
-      drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
-      writeToFramebuffer(sfc);
-      nextUpdate = now + 60;
-    }
-    else
+    if (wx)
     {
       if (now >= nextWx || (bc & BUTTON_2))
       {
@@ -171,14 +178,9 @@ static int go(int _test)
     }
 
     clearSurface(sfc);
-
-    c.r = 1.0;
-    c.g = 1.0;
-    c.b = 1.0;
-    c.a = 1.0;
-    setTextColor(font16, &c);
-    setTextColor(font8, &c);
-    setTextColor(font6, &c);
+    setTextColor(font16, &rgbWhite);
+    setTextColor(font8, &rgbWhite);
+    setTextColor(font6, &rgbWhite);
 
     icon = allocateBitmap("separators.png");
 
@@ -366,11 +368,7 @@ static int go(int _test)
 
     drawText(sfc, font6, 84, 149, buf, strlen(buf));
 
-    c.r = 1.0;
-    c.g = 0.0;
-    c.b = 0.0;
-    c.a = 1.0;
-    setTextColor(font6, &c);
+    setTextColor(font6, &rgbRed);
 
     if (ptr->windGust == 0)
       strncpy(buf, "---", 33);
@@ -379,11 +377,7 @@ static int go(int _test)
 
     drawText(sfc, font6, 84, 172, buf, strlen(buf));
 
-    c.r = 1.0;
-    c.g = 1.0;
-    c.b = 1.0;
-    c.a = 1.0;
-    setTextColor(font6, &c);
+    setTextColor(font6, &rgbWhite);
 
     sky = ptr->layers;
 
