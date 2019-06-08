@@ -6,6 +6,10 @@ typedef struct __RGB
   double r, g, b, a;
 } RGB;
 
+extern const RGB rgbRed;
+extern const RGB rgbWhite;
+extern const RGB rgbBlack;
+
 typedef void* Surface;
 
 Surface allocateSurface(int _w, int _h);
@@ -34,8 +38,8 @@ typedef enum __FontSize
 
 Font allocateFont(FontSize _size);
 void freeFont(Font _font);
-void setTextColor(Font, RGB *_color);
-void setBackgroundColor(Font, RGB *_bkgnd);
+void setTextColor(Font, const RGB *_color);
+void setBackgroundColor(Font, const RGB *_bkgnd);
 void drawText(Surface _surface, const Font _font, int _x, int _y,
   const char *_str, size_t _len);
 

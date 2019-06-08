@@ -10,6 +10,10 @@
 #include "gfx.h"
 #include "config_helpers.h"
 
+const RGB rgbRed = {1.0, 0.0, 0.0, 1.0};
+const RGB rgbWhite = {1.0, 1.0, 1.0, 1.0};
+const RGB rgbBlack = {0.0, 0.0, 0.0, 1.0};
+
 static inline int min(int _a, int _b)
 {
   return (_a < _b ? _a : _b);
@@ -429,13 +433,13 @@ void freeFont(Font _font)
   free(font);
 }
 
-void setTextColor(Font _font, RGB *_color)
+void setTextColor(Font _font, const RGB *_color)
 {
   _Font *font = (_Font*)_font;
   font->color = *_color;
 }
 
-void setBackgroundColor(Font _font, RGB *_bkgnd)
+void setBackgroundColor(Font _font, const RGB *_bkgnd)
 {
   _Font *font = (_Font*)_font;
   font->bkgnd = *_bkgnd;
