@@ -38,6 +38,8 @@ typedef enum __FontSize
 
 Font allocateFont(FontSize _size);
 void freeFont(Font _font);
+int getFontCharWidth(Font _font);
+int getFontCharHeight(Font _font);
 void setTextColor(Font, const RGB *_color);
 void setBackgroundColor(Font, const RGB *_bkgnd);
 void drawText(Surface _surface, const Font _font, int _x, int _y,

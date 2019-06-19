@@ -433,6 +433,18 @@ void freeFont(Font _font)
   free(font);
 }
 
+int getFontCharWidth(Font _font)
+{
+  _Font *font = (_Font*)_font;
+  return font->cw;
+}
+
+int getFontCharHeight(Font _font)
+{
+  _Font *font = (_Font*)_font;
+  return font->ch;
+}
+
 void setTextColor(Font _font, const RGB *_color)
 {
   _Font *font = (_Font*)_font;
