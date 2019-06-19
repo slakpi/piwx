@@ -157,13 +157,13 @@ static int go(int _test)
 
     if (wx)
     {
-      if (now >= nextWx || (bc & BUTTON_2))
+      if (now >= nextWx || (bc & BUTTON_3))
       {
         ptr = ptr->next;
         draw = 1;
         nextWx = now + cfg->cycleTime;
       }
-      else if (bc & BUTTON_3)
+      else if (bc & BUTTON_2)
       {
         ptr = ptr->prev;
         draw = 1;
