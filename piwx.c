@@ -94,7 +94,7 @@ static int go(int _test)
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
   time_t nextUpdate = 0, nextWx = 0, now;
-  int first = 1, draw, i;
+  int first = 1, draw, i, x, w;
   unsigned int b, bl = 0, bc, r = 0;
   char buf[33];
 
@@ -290,9 +290,13 @@ static int go(int _test)
     }
 
     if (ptr->wxString)
-      drawText(sfc, font8, 0, 81, ptr->wxString, strlen(ptr->wxString));
-    else
-      drawText(sfc, font8, 0, 81, "No Present Wx", 13);
+    {
+      w = getFontCharWidth(font8);
+      x = strlen(ptr->wxString) * w;
+      x = (320 - x) / 2;
+      drawText(sfc, font8, x < 0 ? 0 : x, 81, ptr->wxString,
+        strlen(ptr->wxString));
+    }
 
     switch ((ptr->windDir + 15) / 30 * 30)
     {
