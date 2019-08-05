@@ -19,7 +19,7 @@ NOTICE
 ------
 
 Use of this program in no way satisfies any regulatory requirement for pre-
-flight planning in any country.
+flight planning action in any country.
 
 Building
 --------
