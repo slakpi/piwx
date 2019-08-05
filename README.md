@@ -15,6 +15,12 @@ https://github.com/manifestinteractive/weather-underground-icons
 
 The font used is San Francisco Monospace (SF Mono) from Xcode.
 
+NOTICE
+------
+
+Use of this program in no way satisfies any regulatory requirement for pre-
+flight planning in any country.
+
 Building
 --------
 
