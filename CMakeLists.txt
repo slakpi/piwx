@@ -19,6 +19,9 @@ configure_file(config.h.in config.h)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(LibXml2 REQUIRED)
+find_package(CURL REQUIRED)
+find_package(PNG REQUIRED)
+find_package(Jansson REQUIRED)
 find_package(WiringPi REQUIRED)
 
 BISON_TARGET(ConfParser
