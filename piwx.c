@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <wiringPi.h>
+#include <config.h>
 #include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
@@ -18,10 +19,11 @@
 #define BUTTON_4 0x8
 
 static const int buttonPins[] = {17, 22, 23, 27};
-static const char *shortArgs = "st";
+static const char *shortArgs = "stv";
 static const struct option longArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
   { "test",        no_argument,       0, 't' },
+  { "version",     no_argument,       0, 'v' },
   { 0,             0,                 0,  0  }
 };
 
@@ -485,6 +487,9 @@ int main(int _argc, char* _argv[])
       standAlone = 1;
       t = 1;
       break;
+    case 'v':
+      printf("piwx (%s)\n", GIT_COMMIT_HASH);
+      return 0;
     }
   }
 
