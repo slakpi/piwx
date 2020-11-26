@@ -52,10 +52,11 @@ FLEX_TARGET(WxTypeLexer
 
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 add_executable(piwx
-  gfx.c
-  wx.c
   config.c
+  gfx.c
+  led_driver.c
   piwx.c
+  wx.c
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
   ${FLEX_WxTypeLexer_OUTPUTS})
