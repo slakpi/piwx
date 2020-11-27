@@ -33,6 +33,7 @@ PiWx uses CMake 3.6 to build. The following dependencies must be installed:
   * libcURL (https://curl.haxx.se/libcurl/)
   * libpng (http://www.libpng.org/pub/png/libpng.html)
   * jansson (http://www.digip.org/jansson/)
+  * ws2811 [optional] (https://github.com/jgarff/rpi_ws281x.git)
 
 After cloning the repository, use the following commands to perform a simple
 build:
@@ -44,6 +45,13 @@ build:
     % cmake -DCMAKE_INSTALL_PREFIX="/usr/local/piwx" -DCMAKE_BUILD_TYPE=Release ..
     % make
     % sudo make install
+
+To build with support for WS2811 LED strips, add the LED option to the CMake
+command:
+
+    -DWITH_LED_SUPPORT=ON
+
+LED support requires the `ws2811` library listed above.
 
 Configuration
 -------------
@@ -57,6 +65,31 @@ to a new file called `piwx.conf`.
 
     # Airport METAR display cycle time in seconds.
     cycletime=5;
+
+With LED support enabled, `piwx` will drive a 50-LED WS281x strip to display
+flight categories at select airports. The `led<num>` option assigns an airport
+to a LED where `<num>` is a number between 1 and 50 inclusive.
+
+    # Assign LEDs
+    led1="KHIO";
+    led5="KMMV";
+    led6="KUAO";
+    ...
+
+It is not necessary to assign LEDs sequentially. Unassigned LEDs will just
+remain off. `piwx` supports a brightness option with 256 levels of brightness
+where 0 is off and 255 is full intensity.
+
+    # Set LED brightness
+    brightness=64;
+
+Flight category colors are currently fixed to the US National Weather Service
+colors:
+
+    Green = VFR
+    Blue = Marginal VFR
+    Red = IFR
+    Purple = Low IFR
 
 Running Automatically
 ---------------------
