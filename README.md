@@ -83,13 +83,9 @@ where 0 is off and 255 is full intensity.
     # Set LED brightness
     brightness=64;
 
-Flight category colors are currently fixed to the US National Weather Service
-colors:
-
-    Green = VFR
-    Blue = Marginal VFR
-    Red = IFR
-    Purple = Low IFR
+Flight category colors, both LED and weather display, are currently fixed to
+the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
+Red (IFR), and Purple (Low IFR).
 
 Running Automatically
 ---------------------
