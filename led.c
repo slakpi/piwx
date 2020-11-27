@@ -69,6 +69,19 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   ws2811_return_t ret;
   int i;
 
+  switch (_cfg->ledDataPin)
+  {
+  case 12:
+  case 18:
+    ledstring.channel[0].gpionum = _cfg->ledDataPin;
+    break;
+  default:
+    return -1;
+  }
+
+  if (_cfg->ledDMAChannel >= 0 || _cfg->ledDMAChannel < 16)
+    ledstring.dmanum = _cfg->ledDMAChannel;
+
   ret = ws2811_init(&ledstring);
 
   if (ret != WS2811_SUCCESS)

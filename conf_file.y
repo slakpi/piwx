@@ -74,6 +74,12 @@ assignment
       _cfg->ledBrightness = (_cfg->ledBrightness > 255 ? 255 : _cfg->ledBrightness);
       _cfg->ledBrightness /= 255.0f;
       break;
+    case confLEDDataPin:
+      _cfg->ledDataPin = $3;
+      break;
+    case confLEDDMAChannel:
+      _cfg->ledDMAChannel = $3;
+      break;
     default:
       YYERROR;
     }

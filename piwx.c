@@ -110,7 +110,9 @@ static int go(int _test, int _verbose)
     printf("Font Resources: %s\n", cfg->fontResources);
     printf("Station Query: %s\n", cfg->stationQuery);
     printf("Cycle Time: %d\n", cfg->cycleTime);
-    printf("Led Brightness: %.3f\n", cfg->ledBrightness);
+    printf("LED Brightness: %.3f\n", cfg->ledBrightness);
+    printf("LED Data Pin: %d\n", cfg->ledDataPin);
+    printf("LED DMA Channel: %d\n", cfg->ledDMAChannel);
 
     for (i = 0; i < MAX_LEDS; ++i)
     {

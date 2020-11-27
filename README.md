@@ -87,6 +87,17 @@ Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
 Red (IFR), and Purple (Low IFR).
 
+By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
+These may be configured using the following options:
+
+    # Set LED data pin
+    ledpin=12;
+    # Set LED DMA channel (BE CAREFUL)
+    leddma=10;
+
+BE EXTREMEMLY CAREFUL when choosing the DMA channel. Read up on the available
+DMA channels. `piwx` currently only supports GPIO12 and GPIO18 (PWM0).
+
 Running Automatically
 ---------------------
 

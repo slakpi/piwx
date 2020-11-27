@@ -13,6 +13,8 @@ typedef struct __PiwxConfig
   int cycleTime;
   char* ledAssignments[MAX_LEDS];
   float ledBrightness;
+  int ledDataPin;
+  int ledDMAChannel;
 } PiwxConfig;
 
 PiwxConfig* getPiwxConfig();

@@ -1,2 +1,5 @@
 stations="KHIO,KMMV,KUAO,KVUO,KSLE,KSPB,KTPA,KCGC,KGNV,KDEN";
 cycletime=5;
+# ledpin = 18;
+# leddma = 10;
+

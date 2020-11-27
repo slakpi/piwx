@@ -24,6 +24,8 @@ PiwxConfig* getPiwxConfig()
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->cycleTime = 60;
   cfg->ledBrightness = 0.125f;
+  cfg->ledDataPin = 18;
+  cfg->ledDMAChannel = 10;
 
   cfgFile = fopen(CONFIG_FILE, "r");
   if (!cfgFile)

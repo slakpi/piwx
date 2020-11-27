@@ -7,6 +7,8 @@ typedef enum __ConfParam
   confCycleTime,
   confLED,
   confLEDBrightness,
+  confLEDDataPin,
+  confLEDDMAChannel,
 } ConfParam;
 
 #endif

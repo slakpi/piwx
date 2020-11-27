@@ -59,6 +59,16 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"ledpin" {
+  yylval->p.param = confLEDDataPin;
+  return TOKEN_PARAM;
+}
+
+"leddma" {
+  yylval->p.param = confLEDDMAChannel;
+  return TOKEN_PARAM;
+}
+
 "=" { return '='; }
 
 ";" { return ';'; }
