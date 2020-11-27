@@ -54,13 +54,16 @@ include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 add_executable(piwx
   config.c
   gfx.c
-  led_driver.c
   piwx.c
   wx.c
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
   ${FLEX_WxTypeLexer_OUTPUTS})
-target_link_libraries(piwx curl xml2 png jansson wiringPi)
+target_link_libraries(piwx curl xml2 png jansson wiringPi ws2811)
+
+add_executable(led_test
+  test/led_test.c)
+target_link_libraries(led_test ws2811)
 
 install(TARGETS piwx DESTINATION bin)
 install(DIRECTORY wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
