@@ -3,6 +3,7 @@
 %option never-interactive
 %option reentrant
 %option bison-bridge
+%option case-insensitive
 
 %{
 
@@ -47,10 +48,15 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
-"LED"{INT} {
+"led"{INT} {
   yylval->p.param = confLED;
   yylval->p.n = atoi(yytext + 3);
   return TOKEN_PARAM;  
+}
+
+"brightness" {
+  yylval->p.param = confLEDBrightness;
+  return TOKEN_PARAM;
 }
 
 "=" { return '='; }

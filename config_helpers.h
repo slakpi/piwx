@@ -12,6 +12,7 @@ typedef struct __PiwxConfig
   char *stationQuery;
   int cycleTime;
   char* ledAssignments[MAX_LEDS];
+  float ledBrightness;
 } PiwxConfig;
 
 PiwxConfig* getPiwxConfig();

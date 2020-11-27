@@ -54,7 +54,8 @@ FLEX_TARGET(WxTypeLexer
   DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/wxtype.lexer.h)
 
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
-add_executable(piwx
+
+set(PIWX_SOURCES
   config.c
   gfx.c
   piwx.c
@@ -62,6 +63,12 @@ add_executable(piwx
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
   ${FLEX_WxTypeLexer_OUTPUTS})
+
+if (WITH_LED_SUPPORT)
+  set(PIWX_SOURCES ${PIWX_SOURCES} led.c)
+endif (WITH_LED_SUPPORT)
+
+add_executable(piwx ${PIWX_SOURCES})
 
 set(PIWX_LIBS curl xml2 png jansson wiringPi)
 

@@ -23,6 +23,7 @@ PiwxConfig* getPiwxConfig()
   cfg->fontResources = strdup(FONT_RESOURCES);
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->cycleTime = 60;
+  cfg->ledBrightness = 0.125f;
 
   cfgFile = fopen(CONFIG_FILE, "r");
   if (!cfgFile)
@@ -53,7 +54,7 @@ void freePiwxConfig(PiwxConfig *_cfg)
   if (_cfg->stationQuery)
     free(_cfg->stationQuery);
 
-  for (i = 0; i < 51; ++i)
+  for (i = 0; i < MAX_LEDS; ++i)
   {
     if (_cfg->ledAssignments[i])
       free(_cfg->ledAssignments[i]);

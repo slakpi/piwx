@@ -6,6 +6,7 @@ typedef enum __ConfParam
   confStations,
   confCycleTime,
   confLED,
+  confLEDBrightness,
 } ConfParam;
 
 #endif

@@ -11,6 +11,9 @@
 #include "config_helpers.h"
 #include "gfx.h"
 #include "wx.h"
+#ifdef WITH_LED_SUPPORT
+#include "led.h"
+#endif
 
 #define BUTTONS  4
 #define BUTTON_1 0x1
@@ -103,10 +106,11 @@ static int go(int _test, int _verbose)
 
   if (_verbose)
   {
-    printf("image resources = %s\n", cfg->imageResources);
-    printf("font resources = %s\n", cfg->fontResources);
-    printf("stationquery = %s\n", cfg->stationQuery);
-    printf("cycletime = %d\n", cfg->cycleTime);
+    printf("Image Resources: %s\n", cfg->imageResources);
+    printf("Font Resources: %s\n", cfg->fontResources);
+    printf("Station Query: %s\n", cfg->stationQuery);
+    printf("Cycle Time: %d\n", cfg->cycleTime);
+    printf("Led Brightness: %.3f\n", cfg->ledBrightness);
 
     for (i = 0; i < MAX_LEDS; ++i)
     {
@@ -157,7 +161,12 @@ static int go(int _test, int _verbose)
       nextWx = now + cfg->cycleTime;
 
       if (wx)
+      {
         r = 0;
+#ifdef WITH_LED_SUPPORT
+        updateLEDs(cfg, wx);
+#endif
+      }
       else
       {
         clearSurface(sfc);

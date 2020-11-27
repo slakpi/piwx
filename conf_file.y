@@ -69,6 +69,11 @@ assignment
     case confCycleTime:
       _cfg->cycleTime = $3;
       break;
+    case confLEDBrightness:
+      _cfg->ledBrightness = ($3 < 0 ? 0 : $3);
+      _cfg->ledBrightness = (_cfg->ledBrightness > 255 ? 255 : _cfg->ledBrightness);
+      _cfg->ledBrightness /= 255.0f;
+      break;
     default:
       YYERROR;
     }
