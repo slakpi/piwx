@@ -17,11 +17,11 @@ PiwxConfig* getPiwxConfig()
   yyscan_t scanner;
   PiwxConfig *cfg = (PiwxConfig*)malloc(sizeof(PiwxConfig));
 
+  memset(cfg, 0, sizeof(PiwxConfig));
   cfg->installPrefix = strdup(INSTALL_PREFIX);
   cfg->imageResources = strdup(IMAGE_RESOURCES);
   cfg->fontResources = strdup(FONT_RESOURCES);
   cfg->configFile = strdup(CONFIG_FILE);
-  cfg->stationQuery = NULL;
   cfg->cycleTime = 60;
 
   cfgFile = fopen(CONFIG_FILE, "r");
@@ -40,6 +40,8 @@ PiwxConfig* getPiwxConfig()
 
 void freePiwxConfig(PiwxConfig *_cfg)
 {
+  int i;
+
   if (_cfg->installPrefix)
     free(_cfg->installPrefix);
   if (_cfg->imageResources)
@@ -50,6 +52,12 @@ void freePiwxConfig(PiwxConfig *_cfg)
     free(_cfg->configFile);
   if (_cfg->stationQuery)
     free(_cfg->stationQuery);
+
+  for (i = 0; i < 51; ++i)
+  {
+    if (_cfg->ledAssignments[i])
+      free(_cfg->ledAssignments[i]);
+  }
 
   free(_cfg);
 }

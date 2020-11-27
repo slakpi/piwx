@@ -1,6 +1,8 @@
 #ifndef CONFIG_HELPERS_H
 #define CONFIG_HELPERS_H
 
+#define MAX_LEDS 50
+
 typedef struct __PiwxConfig
 {
   char *installPrefix;
@@ -9,6 +11,7 @@ typedef struct __PiwxConfig
   char *configFile;
   char *stationQuery;
   int cycleTime;
+  char* ledAssignments[MAX_LEDS];
 } PiwxConfig;
 
 PiwxConfig* getPiwxConfig();

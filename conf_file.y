@@ -17,7 +17,10 @@ static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
 %}
 
 %union{
-  ConfParam param;
+  struct {
+    ConfParam param;
+    int n;
+  } p;
   char *str;
   int val;
 }
@@ -28,7 +31,7 @@ static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
 %lex-param {yyscan_t _scanner}
 %parse-param {PiwxConfig *_cfg}
 
-%token<param> TOKEN_PARAM
+%token<p> TOKEN_PARAM
 %token<str> TOKEN_STRING
 %token<val> TOKEN_VALUE
 %start confFile
@@ -42,17 +45,26 @@ confFile
 
 assignment
 : TOKEN_PARAM '=' TOKEN_STRING ';' {
-    switch($1)
+    switch($1.param)
     {
     case confStations:
       _cfg->stationQuery = $3;
+      break;
+    case confLED:
+      if ($1.n < 1 || $1.n > MAX_LEDS)
+        break;
+      if (_cfg->ledAssignments[$1.n - 1])
+        free(_cfg->ledAssignments[$1.n - 1]);
+
+      _cfg->ledAssignments[$1.n - 1] = $3;
+
       break;
     default:
       YYERROR;
     }
   }
 | TOKEN_PARAM '=' TOKEN_VALUE ';' {
-    switch($1)
+    switch($1.param)
     {
     case confCycleTime:
       _cfg->cycleTime = $3;

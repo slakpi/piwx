@@ -19,10 +19,11 @@
 #define BUTTON_4 0x8
 
 static const int buttonPins[] = {17, 22, 23, 27};
-static const char *shortArgs = "stv";
+static const char *shortArgs = "stVv";
 static const struct option longArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
   { "test",        no_argument,       0, 't' },
+  { "verbose",     no_argument,       0, 'V' },
   { "version",     no_argument,       0, 'v' },
   { 0,             0,                 0,  0  }
 };
@@ -83,7 +84,7 @@ static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len)
     snprintf(_buf, _len, "--- %d", _sky->height);
 }
 
-static int go(int _test)
+static int go(int _test, int _verbose)
 {
   PiwxConfig *cfg = getPiwxConfig();
   Surface sfc = allocateSurface(320, 240);
@@ -99,6 +100,20 @@ static int go(int _test)
   int first = 1, draw, i, x, w;
   unsigned int b, bl = 0, bc, r = 0;
   char buf[33];
+
+  if (_verbose)
+  {
+    printf("image resources = %s\n", cfg->imageResources);
+    printf("font resources = %s\n", cfg->fontResources);
+    printf("stationquery = %s\n", cfg->stationQuery);
+    printf("cycletime = %d\n", cfg->cycleTime);
+
+    for (i = 0; i < MAX_LEDS; ++i)
+    {
+      if (cfg->ledAssignments[i])
+        printf("LED %d = %s\n", i + 1, cfg->ledAssignments[i]);
+    }
+  }
 
   if (!cfg->stationQuery)
     return 0;
@@ -474,7 +489,7 @@ static int go(int _test)
 int main(int _argc, char* _argv[])
 {
   pid_t pid, sid;
-  int c, t = 0, standAlone = 0;
+  int c, t = 0, standAlone = 0, verbose = 0;
 
   while ((c = getopt_long(_argc, _argv, shortArgs, longArgs, 0)) != -1)
   {
@@ -487,6 +502,9 @@ int main(int _argc, char* _argv[])
       standAlone = 1;
       t = 1;
       break;
+    case 'V':
+      verbose = 1;
+      break;
     case 'v':
       printf("piwx (%s)\n", GIT_COMMIT_HASH);
       return 0;
@@ -498,7 +516,7 @@ int main(int _argc, char* _argv[])
     signal(SIGINT, signalHandler);
     signal(SIGTERM, signalHandler);
     signal(SIGHUP, signalHandler);
-    return go(t);
+    return go(t, verbose);
   }
 
   pid = fork();
@@ -523,5 +541,5 @@ int main(int _argc, char* _argv[])
   signal(SIGTERM, signalHandler);
   signal(SIGHUP, signalHandler);
 
-  return go(0);
+  return go(0, 0);
 }

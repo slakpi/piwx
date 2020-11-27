@@ -38,13 +38,19 @@ WS          [\v\r\n\t ]+
 }
 
 "stations" {
-  yylval->param = confStations;
+  yylval->p.param = confStations;
   return TOKEN_PARAM;
 }
 
 "cycletime" {
-  yylval->param = confCycleTime;
+  yylval->p.param = confCycleTime;
   return TOKEN_PARAM;
+}
+
+"LED"{INT} {
+  yylval->p.param = confLED;
+  yylval->p.n = atoi(yytext + 3);
+  return TOKEN_PARAM;  
 }
 
 "=" { return '='; }

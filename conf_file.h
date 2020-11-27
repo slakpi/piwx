@@ -4,7 +4,8 @@
 typedef enum __ConfParam
 {
   confStations,
-  confCycleTime
+  confCycleTime,
+  confLED,
 } ConfParam;
 
 #endif
