@@ -10,9 +10,12 @@ set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 if (NOT DEFINED SHARE_PREFIX)
   set(SHARE_PREFIX share/piwx/)
 endif (NOT DEFINED SHARE_PREFIX)
+
 if (NOT DEFINED ETC_PREFIX)
   set(ETC_PREFIX etc/)
 endif (NOT DEFINED ETC_PREFIX)
+
+option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
 
 execute_process(
   COMMAND git rev-parse HEAD
@@ -59,11 +62,20 @@ add_executable(piwx
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
   ${FLEX_WxTypeLexer_OUTPUTS})
-target_link_libraries(piwx curl xml2 png jansson wiringPi ws2811)
 
-add_executable(led_test
-  test/led_test.c)
-target_link_libraries(led_test ws2811)
+set(PIWX_LIBS curl xml2 png jansson wiringPi)
+
+if (WITH_LED_SUPPORT)
+  set(PIWX_LIBS ${PIWX_LIBS} ws2811)
+endif (WITH_LED_SUPPORT)
+
+target_link_libraries(piwx ${PIWX_LIBS})
+
+if (WITH_LED_SUPPORT)
+  add_executable(led_test
+    test/led_test.c)
+  target_link_libraries(led_test ws2811)
+endif (WITH_LED_SUPPORT)
 
 install(TARGETS piwx DESTINATION bin)
 install(DIRECTORY wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
