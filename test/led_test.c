@@ -46,9 +46,11 @@ int main()
     return ret;
   }
 
-  ledstring.channel[0].leds[0] = 0x200000;
-  ledstring.channel[0].leds[1] = 0x002000;
-  ledstring.channel[0].leds[2] = 0x000020;
+  // BRG
+  ledstring.channel[0].leds[0] = 0x000020; // VFR
+  ledstring.channel[0].leds[1] = 0x200000; // MVFR
+  ledstring.channel[0].leds[2] = 0x002000; // IFR
+  ledstring.channel[0].leds[3] = 0x202000; // LIFR
 
   ret = ws2811_render(&ledstring);
 
