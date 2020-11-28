@@ -473,6 +473,8 @@ static int go(int _test, int _verbose)
     writeToFramebuffer(sfc);
   } while (run);
 
+  updateLEDs(cfg, NULL);
+
   if (sfc)
   {
     clearSurface(sfc);

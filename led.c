@@ -87,7 +87,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   if (ret != WS2811_SUCCESS)
     return -1;
 
-  while (1)
+  while (p)
   {
     for (i = 0; i < MAX_LEDS; ++i)
     {
