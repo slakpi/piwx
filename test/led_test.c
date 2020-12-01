@@ -9,7 +9,7 @@
 #define STRIP_TYPE              WS2811_STRIP_GBR    // WS2812/SK6812RGB integrated chip+leds
 //#define STRIP_TYPE            SK6812_STRIP_RGBW   // SK6812RGBW (NOT SK6812RGB)
 
-#define LED_COUNT               10
+#define LED_COUNT               50
 
 ws2811_t ledstring =
 {
@@ -38,6 +38,7 @@ ws2811_t ledstring =
 int main()
 {
   ws2811_return_t ret;
+  int i;
 
   ret = ws2811_init(&ledstring);
 
@@ -47,10 +48,22 @@ int main()
   }
 
   // BRG
-  ledstring.channel[0].leds[0] = 0x000020; // VFR
-  ledstring.channel[0].leds[1] = 0x200000; // MVFR
-  ledstring.channel[0].leds[2] = 0x002000; // IFR
-  ledstring.channel[0].leds[3] = 0x202000; // LIFR
+  for (i = 0; i < LED_COUNT; ++i) {
+    switch (i % 4) {
+    case 0:
+      ledstring.channel[0].leds[i] = 0x000020; // VFR
+      break;
+    case 1:
+      ledstring.channel[0].leds[i] = 0x200000; // MVFR
+      break;
+    case 2:
+      ledstring.channel[0].leds[i] = 0x002000; // IFR
+      break;
+    case 3:
+      ledstring.channel[0].leds[i] = 0x202000; // LIFR
+      break;
+    }
+  }
 
   ret = ws2811_render(&ledstring);
 
