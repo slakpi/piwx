@@ -58,6 +58,7 @@ typedef enum __DominantWeather
 typedef struct __WxStation
 {
   char *id;
+  char *localId;
   char *raw;
   time_t obsTime;
   double lat, lon;

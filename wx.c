@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
@@ -12,6 +13,26 @@
 typedef void* yyscan_t;
 
 #include "wxtype.lexer.h"
+
+static char* trimLocalId(const char *_id)
+{
+  size_t i, len = strlen(_id);
+  const char *p = _id;
+
+  if (len < 1)
+    return NULL;
+
+  for (i = 0; i < len; ++i)
+  {
+    if (isdigit(_id[i]))
+    {
+      p = _id + 1;
+      break;
+    }
+  }
+
+  return strdup(p);
+}
 
 typedef struct __Response
 {
@@ -322,6 +343,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
       break;
     case tagStationId:
       _station->id = strdup((char*)c->children->content);
+      _station->localId = trimLocalId(_station->id);
       break;
     case tagObsTime:
       parseUTCDateTime(&obs, (char*)c->children->content);
@@ -752,15 +774,20 @@ void freeStations(WxStation *_stations)
   WxStation *p;
   SkyCondition *s;
 
-  _stations->prev->next = 0;
+  _stations->prev->next = NULL;
 
   while (_stations)
   {
     p = _stations;
+
     _stations = _stations->next;
 
-    free(p->id);
-    free(p->raw);
+    if (p->id)
+      free(p->id);
+    if (p->localId)
+      free(p->localId);
+    if (p->raw)
+      free(p->raw);
 
     while (p->layers)
     {

@@ -102,7 +102,7 @@ static int go(int _test, int _verbose)
   time_t nextUpdate = 0, nextWx = 0, now;
   int first = 1, draw, i, x, w;
   unsigned int b, bl = 0, bc, r = 0;
-  char buf[33];
+  char buf[33], *str;
 
   if (_verbose)
   {
@@ -223,7 +223,12 @@ static int go(int _test, int _verbose)
       icon = NULL;
     }
 
-    drawText(sfc, font16, 0, 0, ptr->id, strlen(ptr->id));
+    str = ptr->localId;
+
+    if (!str)
+      str = ptr->id;
+
+    drawText(sfc, font16, 0, 0, str, strlen(str));
 
     switch (ptr->wx)
     {
