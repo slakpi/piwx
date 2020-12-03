@@ -155,6 +155,10 @@ static int go(int _test, int _verbose)
       drawBitmapInBox(sfc, dlIcon, 0, 0, 320, 240);
       writeToFramebuffer(sfc);
 
+#ifdef WITH_LED_SUPPORT
+      updateLEDs(cfg, NULL);
+#endif
+
       wx = queryWx(cfg->stationQuery, &i);
       ptr = wx;
       first = 0;
@@ -179,7 +183,7 @@ static int go(int _test, int _verbose)
 
         drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
         writeToFramebuffer(sfc);
-        nextUpdate = now + 60;
+        nextUpdate = now + 300;
       }
     }
 
@@ -473,7 +477,9 @@ static int go(int _test, int _verbose)
     writeToFramebuffer(sfc);
   } while (run);
 
+#ifdef WITH_LED_SUPPORT
   updateLEDs(cfg, NULL);
+#endif
 
   if (sfc)
   {
