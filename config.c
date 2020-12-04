@@ -24,6 +24,7 @@ PiwxConfig* getPiwxConfig()
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->cycleTime = 60;
   cfg->ledBrightness = 0.125f;
+  cfg->ledNightBrightness = 0.125f;
   cfg->ledDataPin = 18;
   cfg->ledDMAChannel = 10;
 
@@ -55,6 +56,8 @@ void freePiwxConfig(PiwxConfig *_cfg)
     free(_cfg->configFile);
   if (_cfg->stationQuery)
     free(_cfg->stationQuery);
+  if (_cfg->nearestAirport)
+    free(_cfg->nearestAirport);
 
   for (i = 0; i < MAX_LEDS; ++i)
   {

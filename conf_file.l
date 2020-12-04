@@ -43,6 +43,11 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"nearestairport" {
+  yylval->p.param = confNearestAirport;
+  return TOKEN_PARAM;
+}
+
 "cycletime" {
   yylval->p.param = confCycleTime;
   return TOKEN_PARAM;
@@ -56,6 +61,11 @@ WS          [\v\r\n\t ]+
 
 "brightness" {
   yylval->p.param = confLEDBrightness;
+  return TOKEN_PARAM;
+}
+
+"nightbrightness" {
+  yylval->p.param = confLEDNightBrightness;
   return TOKEN_PARAM;
 }
 

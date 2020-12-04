@@ -4,9 +4,11 @@
 typedef enum __ConfParam
 {
   confStations,
+  confNearestAirport,
   confCycleTime,
   confLED,
   confLEDBrightness,
+  confLEDNightBrightness,
   confLEDDataPin,
   confLEDDMAChannel,
 } ConfParam;

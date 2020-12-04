@@ -50,6 +50,9 @@ assignment
     case confStations:
       _cfg->stationQuery = $3;
       break;
+    case confNearestAirport:
+      _cfg->nearestAirport = $3;
+      break;
     case confLED:
       if ($1.n < 1 || $1.n > MAX_LEDS)
         break;
@@ -73,6 +76,11 @@ assignment
       _cfg->ledBrightness = ($3 < 0 ? 0 : $3);
       _cfg->ledBrightness = (_cfg->ledBrightness > 255 ? 255 : _cfg->ledBrightness);
       _cfg->ledBrightness /= 255.0f;
+      break;
+    case confLEDNightBrightness:
+      _cfg->ledNightBrightness = ($3 < 0 ? 0 : $3);
+      _cfg->ledNightBrightness = (_cfg->ledNightBrightness > 255 ? 255 : _cfg->ledNightBrightness);
+      _cfg->ledNightBrightness /= 255.0f;
       break;
     case confLEDDataPin:
       _cfg->ledDataPin = $3;

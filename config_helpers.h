@@ -10,9 +10,11 @@ typedef struct __PiwxConfig
   char *fontResources;
   char *configFile;
   char *stationQuery;
+  char *nearestAirport;
   int cycleTime;
   char* ledAssignments[MAX_LEDS];
   float ledBrightness;
+  float ledNightBrightness;
   int ledDataPin;
   int ledDMAChannel;
 } PiwxConfig;

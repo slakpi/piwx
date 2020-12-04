@@ -68,6 +68,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   const WxStation *p = _wx;
   ws2811_return_t ret;
   int i;
+  float brightness = _cfg->ledBrightness;
 
   switch (_cfg->ledDataPin)
   {
@@ -87,6 +88,34 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   if (ret != WS2811_SUCCESS)
     return -1;
 
+  if (_cfg->nearestAirport)
+  {
+    while (p)
+    {
+      i = 1;
+
+      if (strcmp(_cfg->nearestAirport, p->localId) != 0)
+      {
+        if (strcmp(_cfg->nearestAirport, p->id) != 0)
+          i = 0;
+      }
+
+      if (i == 1)
+      {
+        brightness = p->isNight ? _cfg->ledNightBrightness : _cfg->ledBrightness;
+        break;
+      }
+
+      p = p->next;
+
+      // Circular list.
+      if (p == _wx)
+        break;
+    }
+
+    p = _wx;
+  }
+
   while (p)
   {
     for (i = 0; i < MAX_LEDS; ++i)
@@ -97,7 +126,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
       if (strcmp(p->id, _cfg->ledAssignments[i]) != 0)
         continue;
 
-      ledstring.channel[0].leds[i] = getColor(p->cat, _cfg->ledBrightness);
+      ledstring.channel[0].leds[i] = getColor(p->cat, brightness);
       break;
     }
 
@@ -109,6 +138,8 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   }
 
   ret = ws2811_render(&ledstring);
+
   ws2811_fini(&ledstring);
+
   return (ret == WS2811_SUCCESS ? 0 : -1);
 }
