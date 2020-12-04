@@ -83,6 +83,17 @@ where 0 is off and 255 is full intensity.
     # Set LED brightness
     brightness=64;
 
+PiWx downloads sunrise / sunset information with weather data. This allows
+automatically dimming the LEDs at night using two options:
+
+    # Set nearest airport
+    nearestairport="KHIO";
+    # Set night brightness
+    nightbrightness=8;
+
+When PiWx determines that it is night at the specified nearest airport, it will
+switch to using the specified night brightness level.
+
 Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
 Red (IFR), and Purple (Low IFR).
