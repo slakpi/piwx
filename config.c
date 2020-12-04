@@ -23,8 +23,8 @@ PiwxConfig* getPiwxConfig()
   cfg->fontResources = strdup(FONT_RESOURCES);
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->cycleTime = 60;
-  cfg->ledBrightness = 0.125f;
-  cfg->ledNightBrightness = 0.125f;
+  cfg->ledBrightness = 32;
+  cfg->ledNightBrightness = 32;
   cfg->ledDataPin = 18;
   cfg->ledDMAChannel = 10;
 

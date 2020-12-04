@@ -8,21 +8,12 @@
 #include <float.h>
 #include <png.h>
 #include "gfx.h"
+#include "util.h"
 #include "config_helpers.h"
 
 const RGB rgbRed = {1.0, 0.0, 0.0, 1.0};
 const RGB rgbWhite = {1.0, 1.0, 1.0, 1.0};
 const RGB rgbBlack = {0.0, 0.0, 0.0, 1.0};
-
-static inline int min(int _a, int _b)
-{
-  return (_a < _b ? _a : _b);
-}
-
-static inline int max(int _a, int _b)
-{
-  return (_a > _b ? _a : _b);
-}
 
 typedef struct __Bitmap
 {

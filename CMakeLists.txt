@@ -57,6 +57,7 @@ include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 
 set(PIWX_SOURCES
   config.c
+  util.c
   gfx.c
   piwx.c
   wx.c

@@ -6,6 +6,7 @@ typedef void* yyscan_t;
 
 #include "../config_helpers.h"
 #include "../conf_file.h"
+#include "../util.h"
 #include "conf_file.parser.h"
 #include "conf_file.lexer.h"
 
@@ -73,14 +74,10 @@ assignment
       _cfg->cycleTime = $3;
       break;
     case confLEDBrightness:
-      _cfg->ledBrightness = ($3 < 0 ? 0 : $3);
-      _cfg->ledBrightness = (_cfg->ledBrightness > 255 ? 255 : _cfg->ledBrightness);
-      _cfg->ledBrightness /= 255.0f;
+      _cfg->ledBrightness = min(max($3, 0), 255);
       break;
     case confLEDNightBrightness:
-      _cfg->ledNightBrightness = ($3 < 0 ? 0 : $3);
-      _cfg->ledNightBrightness = (_cfg->ledNightBrightness > 255 ? 255 : _cfg->ledNightBrightness);
-      _cfg->ledNightBrightness /= 255.0f;
+      _cfg->ledNightBrightness = min(max($3, 0), 255);
       break;
     case confLEDDataPin:
       _cfg->ledDataPin = $3;

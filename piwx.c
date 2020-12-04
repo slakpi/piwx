@@ -109,8 +109,10 @@ static int go(int _test, int _verbose)
     printf("Image Resources: %s\n", cfg->imageResources);
     printf("Font Resources: %s\n", cfg->fontResources);
     printf("Station Query: %s\n", cfg->stationQuery);
+    printf("Nearest Airport: %s\n", cfg->nearestAirport);
     printf("Cycle Time: %d\n", cfg->cycleTime);
-    printf("LED Brightness: %.3f\n", cfg->ledBrightness);
+    printf("LED Brightness: %d\n", cfg->ledBrightness);
+    printf("LED Night Brightness: %d\n", cfg->ledNightBrightness);
     printf("LED Data Pin: %d\n", cfg->ledDataPin);
     printf("LED DMA Channel: %d\n", cfg->ledDMAChannel);
 

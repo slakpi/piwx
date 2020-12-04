@@ -36,24 +36,24 @@ static ws2811_t ledstring =
   },
 };
 
-static ws2811_led_t getColor(FlightCategory _cat, float _brightness)
+static ws2811_led_t getColor(FlightCategory _cat)
 {
   char r = 0, g = 0, b = 0;
 
   switch (_cat)
   {
   case catVFR:
-    g = (char)(255.0f * _brightness);
+    g = 255;
     break;
   case catMVFR:
-    b = (char)(255.0f * _brightness);
+    b = 255;
     break;
   case catIFR:
-    r = (char)(255.0f * _brightness);
+    r = 255;
     break;
   case catLIFR:
-    r = (char)(255.0f * _brightness);
-    b = r;
+    r = 255;
+    b = 255;
     break;
   case catInvalid:
     // Leave the LED off.
@@ -68,7 +68,6 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   const WxStation *p = _wx;
   ws2811_return_t ret;
   int i;
-  float brightness = _cfg->ledBrightness;
 
   switch (_cfg->ledDataPin)
   {
@@ -88,11 +87,13 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
   if (ret != WS2811_SUCCESS)
     return -1;
 
+  ledstring.channel[0].brightness = _cfg->ledBrightness;
+
   if (_cfg->nearestAirport)
   {
     while (p)
     {
-      i = 1;
+      i = p->isNight;
 
       if (strcmp(_cfg->nearestAirport, p->localId) != 0)
       {
@@ -102,7 +103,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
 
       if (i == 1)
       {
-        brightness = p->isNight ? _cfg->ledNightBrightness : _cfg->ledBrightness;
+        ledstring.channel[0].brightness = _cfg->ledNightBrightness;
         break;
       }
 
@@ -126,7 +127,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
       if (strcmp(p->id, _cfg->ledAssignments[i]) != 0)
         continue;
 
-      ledstring.channel[0].leds[i] = getColor(p->cat, brightness);
+      ledstring.channel[0].leds[i] = getColor(p->cat);
       break;
     }
 
