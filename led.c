@@ -36,11 +36,11 @@ static ws2811_t ledstring =
   },
 };
 
-static ws2811_led_t getColor(FlightCategory _cat)
+static ws2811_led_t getColor(const PiwxConfig *_cfg, const WxStation *_wx)
 {
   char r = 0, g = 0, b = 0;
 
-  switch (_cat)
+  switch (_wx->cat)
   {
   case catVFR:
     g = 255;
@@ -56,8 +56,15 @@ static ws2811_led_t getColor(FlightCategory _cat)
     b = 255;
     break;
   case catInvalid:
-    // Leave the LED off.
-    break;
+    break; // No color.
+  }
+
+  if (_wx->windSpeed >= _cfg->highWindSpeed ||
+      _wx->windGust >= _cfg->highWindSpeed)
+  {
+    r = 247;
+    g = 178;
+    b = 6;
   }
 
   return (b << 16) | (r << 8) | g;
@@ -127,7 +134,7 @@ int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
       if (strcmp(p->id, _cfg->ledAssignments[i]) != 0)
         continue;
 
-      ledstring.channel[0].leds[i] = getColor(p->cat);
+      ledstring.channel[0].leds[i] = getColor(_cfg, p);
       break;
     }
 

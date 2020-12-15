@@ -53,6 +53,11 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"highwindspeed" {
+  yylval->p.param = confHighWindSpeed;
+  return TOKEN_PARAM;
+}
+
 "led"{INT} {
   yylval->p.param = confLED;
   yylval->p.n = atoi(yytext + 3);

@@ -6,6 +6,7 @@ typedef enum __ConfParam
   confStations,
   confNearestAirport,
   confCycleTime,
+  confHighWindSpeed,
   confLED,
   confLEDBrightness,
   confLEDNightBrightness,
