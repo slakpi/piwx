@@ -59,12 +59,15 @@ static ws2811_led_t getColor(const PiwxConfig *_cfg, const WxStation *_wx)
     break; // No color.
   }
 
-  if (_wx->windSpeed >= _cfg->highWindSpeed ||
-      _wx->windGust >= _cfg->highWindSpeed)
+  if (_cfg->highWindSpeed > 0)
   {
-    r = 255;
-    g = 192;
-    b = 0;
+    if (_wx->windSpeed >= _cfg->highWindSpeed ||
+        _wx->windGust >= _cfg->highWindSpeed)
+    {
+      r = 255;
+      g = 192;
+      b = 0;
+    }
   }
 
   return (b << 16) | (r << 8) | g;

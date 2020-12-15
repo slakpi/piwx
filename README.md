@@ -3,10 +3,10 @@ PiWx: Raspberry Pi Aviation Weather
 
 ![Weather Display](imgs/sample.png)
 
-PiWx is a configurable aviation METAR display designed to work with the Adafruit
-320x240 PiTFT framebuffer display. While PiWx is hard-coded to work with the
-PiTFT, it should not be difficult to modify it for any display that uses a
-framebuffer device.
+PiWx is a configurable aviation METAR display designed to work with the
+Adafruit 320x240 PiTFT framebuffer display. While PiWx is hard-coded to work
+with the PiTFT, it should not be difficult to modify it for any display that
+uses a framebuffer device.
 
 For more information about the PiTFT: https://www.adafruit.com/product/2298.
 
@@ -57,8 +57,8 @@ Configuration
 -------------
 
 Configuration is relatively simple. Refer to the sample configuration file that
-installs to the `etc` directory under the install prefix. Simply copy the sample
-to a new file called `piwx.conf`.
+installs to the `etc` directory under the install prefix. Simply copy the
+sample to a new file called `piwx.conf`.
 
     # Comma-separated list of aiports; used directly in the URL query.
     stations="KHIO,KMMV,KUAO,KVUO,KSLE,KSPB,KTPA,KCGC,KGNV,KDEN";
@@ -96,7 +96,14 @@ switch to using the specified night brightness level.
 
 Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
-Red (IFR), and Purple (Low IFR).
+Red (IFR), and Purple (Low IFR). The `highwindspeed` option may be used to
+color airports using Yellow if the wind or gust speed meets or exceeds the
+setting. By default, this value is 25 knots.
+
+    # Set high-wind threshold
+    highwindspeed=30;
+
+Setting `highwindspeed` to 0 disables the high-wind warning.
 
 By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
 These may be configured using the following options:
