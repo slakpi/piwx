@@ -654,7 +654,7 @@ WxStation* queryWx(const char *_stations, int *err)
     "dataSource=metars&"
     "requestType=retrieve&"
     "format=xml&"
-    "hoursBeforeNow=1&"
+    "hoursBeforeNow=1.5&"
     "mostRecentForEachStation=true&"
     "stationString=",
     4096);
