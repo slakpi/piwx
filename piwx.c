@@ -99,7 +99,7 @@ static int go(int _test, int _verbose)
   Bitmap icon = NULL;
   WxStation *wx = NULL, *ptr = NULL;
   SkyCondition *sky;
-  time_t nextUpdate = 0, nextWx = 0, now;
+  time_t nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   int first = 1, draw, i, x, w;
   unsigned int b, bl = 0, bc, r = 0;
   char buf[33], *str;
@@ -164,6 +164,7 @@ static int go(int _test, int _verbose)
       draw = (wx != NULL);
       nextUpdate = ((now / 1200) + 1) * 1200;
       nextWx = now + cfg->cycleTime;
+      nextBlink = 10;
 
       if (wx)
       {
@@ -203,6 +204,12 @@ static int go(int _test, int _verbose)
         ptr = ptr->prev;
         draw = 1;
         nextWx = now + cfg->cycleTime;
+      }
+
+      if (cfg->highWindSpeed > 0 && --nextBlink == 0)
+      {
+        updateLEDs(cfg, wx);
+        nextBlink = 10;
       }
     }
 

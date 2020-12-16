@@ -1,5 +1,6 @@
 #include <string.h>
 #include <ws2811/ws2811.h>
+#include "util.h"
 #include "led.h"
 
 #define TARGET_FREQ             WS2811_TARGET_FREQ
@@ -36,9 +37,23 @@ static ws2811_t ledstring =
   },
 };
 
-static ws2811_led_t getColor(const PiwxConfig *_cfg, const WxStation *_wx)
+static ws2811_led_t getColor(const PiwxConfig *_cfg, WxStation *_wx)
 {
   char r = 0, g = 0, b = 0;
+
+  if (_cfg->highWindSpeed > 0)
+  {
+    if (max(_wx->windSpeed, _wx->windGust) >= _cfg->highWindSpeed)
+    {
+      if (_wx->blinkState == 0)
+      {
+        _wx->blinkState = 1;
+        return (255 << 8) | 192;
+      }
+      else
+        _wx->blinkState = 0;
+    }
+  }
 
   switch (_wx->cat)
   {
@@ -59,23 +74,12 @@ static ws2811_led_t getColor(const PiwxConfig *_cfg, const WxStation *_wx)
     break; // No color.
   }
 
-  if (_cfg->highWindSpeed > 0)
-  {
-    if (_wx->windSpeed >= _cfg->highWindSpeed ||
-        _wx->windGust >= _cfg->highWindSpeed)
-    {
-      r = 255;
-      g = 192;
-      b = 0;
-    }
-  }
-
   return (b << 16) | (r << 8) | g;
 }
 
-int updateLEDs(const PiwxConfig *_cfg, const WxStation *_wx)
+int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx)
 {
-  const WxStation *p = _wx;
+  WxStation *p = _wx;
   ws2811_return_t ret;
   int i;
 

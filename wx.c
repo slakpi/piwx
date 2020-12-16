@@ -748,6 +748,7 @@ WxStation* queryWx(const char *_stations, int *err)
 
     readStation(p, hash, n);
     n->isNight = isNight(n->lat, n->lon, n->obsTime);
+    n->blinkState = 1;
     classifyDominantWeather(n);
 
     p = p->next;

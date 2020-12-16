@@ -71,6 +71,7 @@ typedef struct __WxStation
   double temp, dewPoint;
   double alt;
   FlightCategory cat;
+  int blinkState;
   struct __WxStation *next;
   struct __WxStation *prev;
 } WxStation;
