@@ -111,6 +111,7 @@ static int go(int _test, int _verbose)
     printf("Station Query: %s\n", cfg->stationQuery);
     printf("Nearest Airport: %s\n", cfg->nearestAirport);
     printf("Cycle Time: %d\n", cfg->cycleTime);
+    printf("High-Wind Speed: %d\n", cfg->highWindSpeed);
     printf("LED Brightness: %d\n", cfg->ledBrightness);
     printf("LED Night Brightness: %d\n", cfg->ledNightBrightness);
     printf("LED Data Pin: %d\n", cfg->ledDataPin);
@@ -157,15 +158,11 @@ static int go(int _test, int _verbose)
       drawBitmapInBox(sfc, dlIcon, 0, 0, 320, 240);
       writeToFramebuffer(sfc);
 
-#ifdef WITH_LED_SUPPORT
-      updateLEDs(cfg, NULL);
-#endif
-
       wx = queryWx(cfg->stationQuery, &i);
       ptr = wx;
       first = 0;
       draw = (wx != NULL);
-      nextUpdate = ((now / 1200) + (now % 1200 != 0)) * 1200;
+      nextUpdate = ((now / 1200) + 1) * 1200;
       nextWx = now + cfg->cycleTime;
 
       if (wx)
@@ -178,6 +175,10 @@ static int go(int _test, int _verbose)
       else
       {
         clearSurface(sfc);
+
+#ifdef WITH_LED_SUPPORT
+        updateLEDs(cfg, NULL);
+#endif
 
         setTextColor(font6, &rgbWhite);
         i = snprintf(buf, 33, "Error %d, Retry %d", i, r++);
