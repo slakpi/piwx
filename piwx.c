@@ -163,7 +163,7 @@ static int go(int _test, int _verbose)
       first = 0;
       draw = (wx != NULL);
       nextUpdate = ((now / 1200) + 1) * 1200;
-      nextWx = now + cfg->cycleTime;
+      nextWx = now + 1;
       nextBlink = 10;
 
       if (wx)
@@ -206,10 +206,10 @@ static int go(int _test, int _verbose)
         nextWx = now + cfg->cycleTime;
       }
 
-      if (cfg->highWindSpeed > 0 && --nextBlink == 0)
+      if (cfg->highWindSpeed > 0 && now > nextBlink)
       {
         updateLEDs(cfg, wx);
-        nextBlink = 10;
+        nextBlink = now + 1;
       }
     }
 
