@@ -45,7 +45,7 @@ static ws2811_led_t getColor(const PiwxConfig *_cfg, WxStation *_wx)
   {
     if (max(_wx->windSpeed, _wx->windGust) >= _cfg->highWindSpeed)
     {
-      if (_wx->blinkState == 0)
+      if (_wx->blinkState == 0 || _cfg->highWindBlink == 0)
       {
         _wx->blinkState = 1;
         return (255 << 8) | 192;

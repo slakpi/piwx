@@ -24,6 +24,7 @@ PiwxConfig* getPiwxConfig()
   cfg->configFile = strdup(CONFIG_FILE);
   cfg->cycleTime = 60;
   cfg->highWindSpeed = 25;
+  cfg->highWindBlink = 0;
   cfg->ledBrightness = 32;
   cfg->ledNightBrightness = 32;
   cfg->ledDataPin = 18;

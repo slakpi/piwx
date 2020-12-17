@@ -58,6 +58,11 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"highwindblink" {
+  yylval->p.param = confHighWindBlink;
+  return TOKEN_PARAM;
+}
+
 "led"{INT} {
   yylval->p.param = confLED;
   yylval->p.n = atoi(yytext + 3);

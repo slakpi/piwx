@@ -206,7 +206,7 @@ static int go(int _test, int _verbose)
         nextWx = now + cfg->cycleTime;
       }
 
-      if (cfg->highWindSpeed > 0 && now > nextBlink)
+      if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 && now > nextBlink)
       {
         updateLEDs(cfg, wx);
         nextBlink = now + 1;

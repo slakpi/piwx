@@ -13,6 +13,7 @@ typedef struct __PiwxConfig
   char *nearestAirport;
   int cycleTime;
   int highWindSpeed;
+  int highWindBlink;
   char* ledAssignments[MAX_LEDS];
   int ledBrightness;
   int ledNightBrightness;

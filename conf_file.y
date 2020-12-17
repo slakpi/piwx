@@ -76,6 +76,9 @@ assignment
     case confHighWindSpeed:
       _cfg->highWindSpeed = $3;
       break;
+    case confHighWindBlink:
+      _cfg->highWindBlink = $3;
+      break;
     case confLEDBrightness:
       _cfg->ledBrightness = min(max($3, 0), 255);
       break;
