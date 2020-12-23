@@ -126,7 +126,7 @@ will just display Yellow:
 By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
 These may be configured using the following options:
 
-    # Set LED data pin
+    # Set LED GPIO pin to GPIO12 (BE CAREFUL)
     ledpin=12;
     # Set LED DMA channel (BE CAREFUL)
     leddma=10;
