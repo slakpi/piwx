@@ -105,6 +105,16 @@ setting. By default, this value is 25 knots.
 
 Setting `highwindspeed` to 0 disables the high-wind warning.
 
+The `highwindblink` option enables alternating airports between the high-wind
+warning and the flight category color. For example, with blinking enabled, a
+VFR airport with high winds will alternate between Green and Yellow.
+
+    # Enable high-wind blinking
+    highwindblink=1;
+
+Setting `highwindblink` to 0 disables blinking and airports with high winds
+will just display Yellow.
+
 By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
 These may be configured using the following options:
 
