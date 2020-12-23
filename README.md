@@ -15,6 +15,8 @@ https://github.com/manifestinteractive/weather-underground-icons
 
 The font used is San Francisco Monospace (SF Mono) from Xcode.
 
+Special thanks to https://sunrise-sunset.org for their sunrise/sunset data API.
+
 NOTICE
 ------
 
@@ -78,7 +80,7 @@ to a LED where `<num>` is a number between 1 and 50 inclusive.
 
 It is not necessary to assign LEDs sequentially. Unassigned LEDs will just
 remain off. `piwx` supports a brightness option with 256 levels of brightness
-where 0 is off and 255 is full intensity.
+where 0 or `off` is off and 255 is full intensity.
 
     # Set LED brightness
     brightness=64;
@@ -103,17 +105,23 @@ setting. By default, this value is 25 knots.
     # Set high-wind threshold
     highwindspeed=30;
 
-Setting `highwindspeed` to 0 disables the high-wind warning.
+Setting `highwindspeed` to `off` disables the high-wind warning:
+
+    # Disable high-wind warning
+    highwindspeed=off;
 
 The `highwindblink` option enables alternating airports between the high-wind
 warning and the flight category color. For example, with blinking enabled, a
 VFR airport with high winds will alternate between Green and Yellow.
 
     # Enable high-wind blinking
-    highwindblink=1;
+    highwindblink=on;
 
-Setting `highwindblink` to 0 disables blinking and airports with high winds
-will just display Yellow.
+Setting `highwindblink` to `off` disables blinking and airports with high winds
+will just display Yellow:
+
+    # Disable high-wind blinking
+    highwindblink=off;
 
 By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
 These may be configured using the following options:
@@ -124,7 +132,9 @@ These may be configured using the following options:
     leddma=10;
 
 BE EXTREMEMLY CAREFUL when choosing the DMA channel. Read up on the available
-DMA channels. `piwx` currently only supports GPIO12 and GPIO18 (PWM0).
+DMA channels. `piwx` currently only supports GPIO12 and GPIO18 (PWM0). The
+default options are the safest. Leave these options alone unless there is a
+compelling option to change them.
 
 Running Automatically
 ---------------------

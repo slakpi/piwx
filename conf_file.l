@@ -38,6 +38,16 @@ WS          [\v\r\n\t ]+
   return TOKEN_VALUE;
 }
 
+"off" {
+  yylval->val = 0;
+  return TOKEN_VALUE;
+}
+
+"on" {
+  yylval->val = 1;
+  return TOKEN_VALUE;
+}
+
 "stations" {
   yylval->p.param = confStations;
   return TOKEN_PARAM;
