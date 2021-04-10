@@ -73,7 +73,7 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len)
       return;
     }
 
-    newBuf = (int)ceil(newBuf * 1.5);
+    newBuf = (size_t)ceil(newBuf * 1.5);
     if (newBuf < _res->bufLen)
       return;
   }
