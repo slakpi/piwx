@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <math.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
@@ -72,7 +73,7 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len)
       return;
     }
 
-    newBuf <<= 1;
+    newBuf = (int)ceil(newBuf * 1.5);
     if (newBuf < _res->bufLen)
       return;
   }
