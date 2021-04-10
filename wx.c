@@ -189,24 +189,14 @@ cleanup:
 
 static int isNight(double _lat, double _lon, time_t _obsTime)
 {
-  time_t yesterday = _obsTime - 86400;
-  time_t sry, ssy, sr, ss;
+  time_t sr, ss;
   struct tm date;
 
   date = *gmtime(&_obsTime);
   if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
-    return 0;
+    return -1;
 
-  if (_obsTime < sr)
-  {
-    date = *gmtime(&yesterday);
-    if (getSunriseSunsetForDay(_lat, _lon, &date, &sry, &ssy) != 0)
-      return 0;
-
-    return _obsTime >= ssy;
-  }
-
-  return _obsTime >= ss;
+  return (_obsTime < sr || _obsTime > ss);
 }
 
 typedef enum __Tag
