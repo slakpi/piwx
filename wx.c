@@ -189,14 +189,40 @@ cleanup:
 
 static int isNight(double _lat, double _lon, time_t _obsTime)
 {
-  time_t sr, ss;
+  time_t n, sr, ss;
   struct tm date;
 
+  /**
+   * Without retrieving the local date for each station, isNight requires
+   * checking either the previous or the next day's range since the UTC date
+   * may be different from the local date. So, it is either two sunrise/sunset
+   * API calls, or one along with an API call to a time zone map.
+   */
   date = *gmtime(&_obsTime);
   if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
     return -1;
 
-  return (_obsTime < sr || _obsTime > ss);
+  if (_obsTime < sr)
+  { // Check if < current day's sunrise and > previous day's sunset
+    n = _obsTime - 86400;
+    date = *gmtime(&n);
+    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
+      return -1;
+
+    return _obsTime > ss;
+  }
+  else if (_obsTime >= ss)
+  { // Check if >= current day's sunset and < next day's sunrise
+    n = _obsTime + 86400;
+    date = *gmtime(&n);
+    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
+      return -1;
+
+    return _obsTime < sr;
+  }
+
+  // >= current day's sunrise and < current day's sunset.
+  return 0;
 }
 
 typedef enum __Tag
