@@ -1,8 +1,11 @@
 #ifndef CONF_FILE_H
 #define CONF_FILE_H
 
-typedef enum __ConfParam
-{
+/**
+ * @enum  ConfParam
+ * @brief Lexical parameter tokens.
+ */
+typedef enum {
   confStations,
   confNearestAirport,
   confCycleTime,

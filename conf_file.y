@@ -10,8 +10,7 @@ typedef void* yyscan_t;
 #include "conf_file.parser.h"
 #include "conf_file.lexer.h"
 
-static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error)
-{
+static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error) {
 
 }
 
@@ -46,8 +45,7 @@ confFile
 
 assignment
 : TOKEN_PARAM '=' TOKEN_STRING ';' {
-    switch($1.param)
-    {
+    switch($1.param) {
     case confStations:
       _cfg->stationQuery = $3;
       break;
@@ -55,10 +53,13 @@ assignment
       _cfg->nearestAirport = $3;
       break;
     case confLED:
-      if ($1.n < 1 || $1.n > MAX_LEDS)
+      if ($1.n < 1 || $1.n > MAX_LEDS) {
         break;
-      if (_cfg->ledAssignments[$1.n - 1])
+      }
+
+      if (_cfg->ledAssignments[$1.n - 1]) {
         free(_cfg->ledAssignments[$1.n - 1]);
+      }
 
       _cfg->ledAssignments[$1.n - 1] = $3;
 
@@ -68,8 +69,7 @@ assignment
     }
   }
 | TOKEN_PARAM '=' TOKEN_VALUE ';' {
-    switch($1.param)
-    {
+    switch($1.param) {
     case confCycleTime:
       _cfg->cycleTime = $3;
       break;
