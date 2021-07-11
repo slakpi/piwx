@@ -322,7 +322,7 @@ cleanup:
 int writeToFramebuffer(const Surface _surface) {
   const _Surface *sfc = (const _Surface *)_surface;
   int fb;
-  u_int16_t *buf, *q;
+  u_int16_t *buf = NULL, *q;
   u_int8_t *p;
   size_t i, px;
   double a;
@@ -341,12 +341,13 @@ int writeToFramebuffer(const Surface _surface) {
   // Allocate a new buffer for the RGB565 data.
   px = sfc->w * sfc->h;
   buf = (u_int16_t *)malloc(sizeof(u_int16_t) * px);
-  p = sfc->bmp;
-  q = buf;
 
   if (!buf) {
     goto cleanup;
   }
+
+  p = sfc->bmp;
+  q = buf;
 
   // Convert the 32-bit pixels to 16-bit RGB565. Scale the components to [0, 1],
   // multiply them with their alpha value, then scale R and B up to 5 bits and
@@ -376,7 +377,7 @@ cleanup:
     free(buf);
   }
 
-  return 0;
+  return ok;
 }
 
 /**
@@ -614,7 +615,7 @@ Font allocateFont(FontSize _size) {
   font = (_Font *)malloc(sizeof(_Font));
 
   if (!font) {
-    return;
+    return NULL;
   }
 
   font->bmp =
@@ -652,7 +653,7 @@ int getFontCharWidth(Font _font) {
   _Font *font = (_Font *)_font;
 
   if (!font) {
-    return;
+    return 0;
   }
 
   return font->cw;
@@ -662,7 +663,7 @@ int getFontCharHeight(Font _font) {
   _Font *font = (_Font *)_font;
 
   if (!font) {
-    return;
+    return 0;
   }
 
   return font->ch;

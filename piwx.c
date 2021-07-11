@@ -208,7 +208,9 @@ static int go(int _test, int _verbose)
 
       if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 && now > nextBlink)
       {
+#ifdef WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
+#endif
         nextBlink = now + 1;
       }
     }

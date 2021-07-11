@@ -1,6 +1,8 @@
 #ifndef GFX_H
 #define GFX_H
 
+#include <stddef.h>
+
 /**
  * @struct RGBA
  * @brief  An RGBA color struct.
