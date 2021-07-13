@@ -3,6 +3,7 @@
 #include "util.h"
 #include <fcntl.h>
 #include <float.h>
+#include <math.h>
 #include <png.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,42 +12,104 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-const RGBA rgbRed   = {1.0, 0.0, 0.0, 1.0};
-const RGBA rgbWhite = {1.0, 1.0, 1.0, 1.0};
-const RGBA rgbBlack = {0.0, 0.0, 0.0, 1.0};
+const RGBA rgbNull  = {0.0f, 0.0f, 0.0f, 0.0f};
+const RGBA rgbRed   = {1.0f, 0.0f, 0.0f, 1.0f};
+const RGBA rgbWhite = {1.0f, 1.0f, 1.0f, 1.0f};
+const RGBA rgbBlack = {0.0f, 0.0f, 0.0f, 1.0f};
+
+#ifdef __ARM_NEON
+#define RED(c)   ((c)[0])
+#define GREEN(c) ((c)[1])
+#define BLUE(c)  ((c)[2])
+#define ALPHA(c) ((c)[3])
+#endif
+
+void makeColor(float _r, float _g, float _b, float _a, RGBA *_color) {
+  if (!_color) {
+    return;
+  }
+
+  RED(*_color)   = fmax(0.0f, fmin(_r, 1.0f));
+  GREEN(*_color) = fmax(0.0f, fmin(_g, 1.0f));
+  BLUE(*_color)  = fmax(0.0f, fmin(_b, 1.0f));
+  ALPHA(*_color) = fmax(0.0f, fmin(_a, 1.0f));
+}
+
+void makeColorFromRGBA8888(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a,
+                           RGBA *_color) {
+  if (!_color) {
+    return;
+  }
+
+  RED(*_color)   = _r;
+  GREEN(*_color) = _g;
+  BLUE(*_color)  = _b;
+  ALPHA(*_color) = _a;
+
+  (*_color) /= 255.0f;
+}
+
+void makeColorFromA8(const RGBA *_fg, uint8_t _a, RGBA *_color) {
+  if (!_fg || !_color) {
+    return;
+  }
+
+  *_color = *_fg;
+  ALPHA(*_color) = _a / 255.0f;
+}
+
+/**
+ * @struct  Rectangle
+ * @brief   Rectangle primitive.
+ * @details The rectangle excludes the right and bottom such that valid
+ *          coordinates are: x ~ [0, r) and y ~ [0, b).
+ */
+typedef struct {
+  int l, t, r, b;
+} Rectangle;
 
 /**
  * @struct _Bitmap
  * @brief  Private implementation of Bitmap
  */
 typedef struct {
+  Rectangle dim;                       /* Dimensions of the PNG.              */
   png_bytep *rows;                     /* Indexed PNG row pointers.           */
   int color;                           /* PNG color type.                     */
   int bits;                            /* Bit-depth of the PNG.               */
-  int w, h;                            /* Dimensions of the PNG.              */
 } _Bitmap;
 
 /**
- * @struct Compose
- * @brief  Configuration of a compose operation.
+ * @typedef _Surface
+ * @brief   Private implementation of Surface.
+ */
+typedef struct {
+  Rectangle dim;                       /* Dimensions of the PNG.              */
+  RGBA *pixels;                        /* Pixel data.                         */
+  RGBA **rows;                         /* Row markers.                        */
+} _Surface;
+
+/**
+ * @struct  Compose
+ * @brief   Configuration of a compose operation.
  */
 typedef struct {
   _Bitmap *from;                       /* Source bitmap.                      */
-  int l, t, r, b;                      /* Rectange of interest. Excludes the
-                                          right and bottom.                   */
+  Rectangle source;                    /* Source rectangle.                   */
+
   RGBA color;                          /* Foreground color.                   */
   RGBA bkgnd;                          /* Background color.                   */
 
-  u_int8_t *to;                        /* Start of the first output row.      */
-  int stride;                          /* Stride for copy.                    */
+  _Surface *to;                        /* Target surface.                     */
+  int x, y;                            /* Top-left corner of output.          */
 } Compose;
 
 /**
  * @brief   Alpha blend two colors.
  * @details Blends the foreground color @a _fg with background color @a _bg.
  * 
- *          For RGB components: Cc = Cf * Af + Cb * Ab * (1 - Af)
- *          For Alpha:          Ac = Af + Ab * (1 - Af)
+ *          For Alpha:          Ao = Af + Ab * (1 - Af)
+ *          For RGB components: [ Co = Cf * Af + Cb * Ab * (1 - Af) ] / Ao
  * 
  *          If the alpha component of the background is sufficiently close to
  *          1.0, blend the foreground onto the background with the foreground's
@@ -61,7 +124,7 @@ typedef struct {
  */
 static void mix(const RGBA *_fg, const RGBA *_bg, RGBA *_out) {
   RGBA tmp;
-  double ba;
+  float ba, ao;
 
   if (!_fg || !_bg || !_out) {
     return;
@@ -69,11 +132,9 @@ static void mix(const RGBA *_fg, const RGBA *_bg, RGBA *_out) {
 
   // Shortcut the blend if the background color's alpha is sufficiently large.
   // There is no need to calculate a composite alpha.
-  if (_bg->a > 1.0 - DBL_EPSILON) {
-    tmp.r = _fg->r * _fg->a + _bg->r * (1.0 - _fg->a);
-    tmp.g = _fg->g * _fg->a + _bg->g * (1.0 - _fg->a);
-    tmp.b = _fg->b * _fg->a + _bg->b * (1.0 - _fg->a);
-    tmp.a = 1.0;
+  if (ALPHA(*_bg) > 1.0f - FLT_EPSILON) {
+    tmp = (*_fg) * ALPHA(*_fg) + (*_bg) * (1.0f - ALPHA(*_fg));
+    ALPHA(tmp) = 1.0f;
 
     *_out = tmp;
 
@@ -81,116 +142,129 @@ static void mix(const RGBA *_fg, const RGBA *_bg, RGBA *_out) {
   }
 
   // Precalculate Ab * (1.0 - Af) and the final output alpha.
-  ba = _bg->a * (1.0 - _fg->a);
-  tmp.a = _fg->a + ba;
+  ba = ALPHA(*_bg) * (1.0f - ALPHA(*_fg));
+  ao = ALPHA(*_fg) + ba;
 
   // Shortcut the blend if the composite alpha is sufficiently small. Just set
   // the final color to clear black.
-  if (tmp.a < 1.0e-6) {
-    _out->r = _out->g = _out->b = _out->a = 0.0;
+  if (ao < FLT_EPSILON) {
+    *_out = rgbNull;
     return;
   }
 
   // Blend the RGB components.
-  tmp.r = (_fg->r * _fg->a + _bg->r * ba) / tmp.a;
-  tmp.g = (_fg->g * _fg->a + _bg->g * ba) / tmp.a;
-  tmp.b = (_fg->b * _fg->a + _bg->b * ba) / tmp.a;
+  tmp = (*_fg) * ALPHA(*_fg) + (*_bg) * ba;
+  tmp /= ao;
+  ALPHA(tmp) = ao;
 
   *_out = tmp;
 }
 
 /**
+ * @brief   Finds the intersection of two rectangles.
+ * @param[in] _a      First rectangle.
+ * @param[in] _b      Second rectangle.
+ * @param[out] _isect Intersected rectangle. It is safe for this to be a pointer
+ *                    to @a _a or @a _b.
+ * @returns 0 if the intersection is non-empty.
+ */
+static int rectangleIntersection(const Rectangle *_a, const Rectangle *_b,
+                                 Rectangle *_isect) {
+  Rectangle tmp;
+
+  tmp.l = max(_a->l, _b->l);
+  tmp.t = max(_a->t, _b->t);
+  tmp.r = min(_a->r, _b->r);
+  tmp.b = min(_a->b, _b->b);
+
+  *_isect = tmp;
+
+  if (tmp.l >= tmp.r || tmp.t >= tmp.b) {
+    return -1;
+  }
+
+  return 0;
+}
+
+/**
  * @brief   Perform a compose operation.
- * @details Blends the rectangle of interest from the source bitmap on to the
- *          target surface. The compose operation specifies the source bitmap
- *          and the rectangle of interest, a pointer to the output location on
- *          the target surface, and a stride to the start of the next output row
- *          location.
- * 
- *          Source:                       Target:
- *          +------------------+          +------------------+
- *          | [l,t]---+        |          |                  |
- *          |   |     |        |          |     to==>+-----+ |
- *          |   |     |        |          |          |     | |
- *          |   +---(r,b)      |          |    stride........|
- *          |                  |          |.......==>+-----+ |
- *          +------------------+          +------------------+
- * 
- *          For grayscale bitmaps, e.g. fonts, the foreground color specified in
- *          the Compose operation is used and blended with the background color
- *          specified.
+ * @details Blends the source rectangle from a bitmap into the target rectangle
+ *          of a surface.
  * @param[in] _cmp The compose operation details.
  */
 static void compose(const Compose *_cmp) {
-  int x, y;
-  u_int8_t *d, *s;
-  RGBA tmp, final;
+  int x, y, offset;
+  Rectangle source, target;
+  RGBA tmp, *t;
+  uint8_t *s;
 
   if (!_cmp || !_cmp->to || !_cmp->from) {
     return;
   }
 
-  d = _cmp->to;
+  // Initialize the rectangle to the same dimensions as the source, position it
+  // at the target location, and intersect it with the surface bounds.
+  target.l = _cmp->x;
+  target.t = _cmp->y;
+  target.r = target.l + (_cmp->source.r - _cmp->source.l);
+  target.b = target.t + (_cmp->source.b - _cmp->source.t);
 
-  for (y = _cmp->t; y < _cmp->b; ++y) {
-    s = _cmp->from->rows[y];
+  if (rectangleIntersection(&_cmp->to->dim, &target, &target) != 0) {
+    return;
+  }
 
-    for (x = _cmp->l; x < _cmp->r;) {
+  // Adjust the source rectangle. We know the rectangle above will be the same
+  // size or smaller than the source rectangle and can only move in the +x and
+  // +y directions.
+  source.l += (target.l - _cmp->x);
+  source.t += (target.t - _cmp->y);
+  source.r = source.l + target.r - target.l;
+  source.b = source.t + target.b - target.t;
+
+  // Intersect the new source rectangle with the bitmap bounds.
+  if (rectangleIntersection(&_cmp->from->dim, &_cmp->source, &source) != 0) {
+    return;
+  }
+
+  offset = source.l + (_cmp->from->color == PNG_COLOR_TYPE_GRAY ? 1 : 4);
+
+  for (y = target.t; y < target.b; ++y) {
+    t  = _cmp->to->rows[y] + target.l;
+    s  = _cmp->from->rows[source.t + y - target.t] + offset;
+
+    for (x = target.l; x < target.r; ++x) {
       if (_cmp->from->color == PNG_COLOR_TYPE_GRAY) {
         // For grayscale, set the foreground color and use the gray value as the
         // alpha, then blend with the background.
-        tmp = _cmp->color;
-        tmp.a = s[x] / 255.0;
+        makeColorFromA8(&_cmp->color, s[x], &tmp);
         mix(&tmp, &_cmp->bkgnd, &tmp);
-
-        ++x;
+        ++s;
       } else {
         // Directly translate the RGBA value in the PNG to a floating point
         // RGBA.
-        tmp.r = s[x    ] / 255.0;
-        tmp.g = s[x + 1] / 255.0;
-        tmp.b = s[x + 2] / 255.0;
-        tmp.a = s[x + 3] / 255.0;
-
-        x += 4;
+        makeColorFromRGBA8888(s[0], s[1], s[2], s[3], &tmp);
+        s += 4;
       }
 
-      if (tmp.a > 1.0 - DBL_EPSILON) {
+      if (ALPHA(tmp) > 1.0f - FLT_EPSILON) {
         // Shortcut the mix if the alpha is sufficiently large.
-        final = tmp;
+        *t = tmp;
       } else {
         // Mix with the surface color. The mix will shortcut if the alpha is
         // sufficiently small.
-        final.r = d[0] / 255.0;
-        final.g = d[1] / 255.0;
-        final.b = d[2] / 255.0;
-        final.a = d[3] / 255.0;
-        mix(&tmp, &final, &final);
+        mix(&tmp, t, t);
       }
 
-      // Write the color back to the surface.
-      *d++ = (u_int8_t)(final.r * 255.0);
-      *d++ = (u_int8_t)(final.g * 255.0);
-      *d++ = (u_int8_t)(final.b * 255.0);
-      *d++ = (u_int8_t)(final.a * 255.0);
+      ++t;
+      ++s;
     }
-
-    // Stride to the next output point.
-    d += _cmp->stride;
   }
 }
 
-/**
- * @struct _Surface
- * @brief  Private implementation of Surface.
- */
-typedef struct {
-  u_int8_t *bmp;                       /* Pixel data; 4 bytes per pixel.      */
-  int w, h;                            /* Dimensions of the bitmap.           */
-} _Surface;
-
 Surface allocateSurface(int _w, int _h) {
   _Surface *sfc;
+  RGBA *p;
+  int y;
 
   if (_w <= 0 || _h <= 0) {
     return NULL;
@@ -202,17 +276,39 @@ Surface allocateSurface(int _w, int _h) {
     return NULL;
   }
 
-  sfc->bmp = (u_int8_t *)malloc(sizeof(u_int8_t) * _w * 4 * _h);
+  sfc->dim.l = 0;
+  sfc->dim.t = 0;
+  sfc->dim.r = _w;
+  sfc->dim.b = _h;
 
-  if (!sfc->bmp) {
-    free(sfc);
-    return NULL;
+  sfc->pixels = (RGBA *)malloc(sizeof(RGBA) * _w * _h);
+
+  if (!sfc->pixels) {
+    goto cleanup;
   }
 
-  sfc->w = _w;
-  sfc->h = _h;
+  sfc->rows = (RGBA **)malloc(sizeof(RGBA*) * _h);
+
+  p = sfc->pixels;
+  for (y = 0; y < _h; ++y) {
+    sfc->rows[y] = p;
+    p += _w;
+  }
 
   return (Surface)sfc;
+
+cleanup:
+  if (sfc->rows) {
+    free(sfc->rows);
+  }
+
+  if (sfc->pixels) {
+    free(sfc->pixels);
+  }
+
+  free(sfc);
+
+  return NULL;
 }
 
 void freeSurface(Surface _surface) {
@@ -222,8 +318,12 @@ void freeSurface(Surface _surface) {
     return;
   }
 
-  if (sfc->bmp) {
-    free(sfc->bmp);
+  if (sfc->pixels) {
+    free(sfc->pixels);
+  }
+
+  if (sfc->rows) {
+    free(sfc->rows);
   }
 
   free(sfc);
@@ -232,11 +332,11 @@ void freeSurface(Surface _surface) {
 void clearSurface(Surface _surface) {
   _Surface *sfc = (_Surface *)_surface;
 
-  if (!sfc || !sfc->bmp) {
+  if (!sfc || !sfc->pixels) {
     return;
   }
 
-  memset(sfc->bmp, 0, sizeof(u_int8_t) * sfc->w * 4 * sfc->h);
+  memset(sfc->pixels, 0, sizeof(RGBA) * sfc->dim.r * sfc->dim.b);
 }
 
 int writeToFile(const Surface _surface, const char *_file) {
@@ -246,7 +346,9 @@ int writeToFile(const Surface _surface, const char *_file) {
   png_infop pngInfo = NULL;
   size_t rowBytes;
   png_bytep *rows = NULL;
-  int ok = -1, y;
+  png_byte *t;
+  RGBA *s;
+  int ok = -1, x, y;
 
   if (!sfc) {
     return -1;
@@ -279,7 +381,7 @@ int writeToFile(const Surface _surface, const char *_file) {
   }
 
   // Setup the PNG image header with the properties of the image.
-  png_set_IHDR(pngPtr, pngInfo, sfc->w, sfc->h, 8, PNG_COLOR_TYPE_RGBA,
+  png_set_IHDR(pngPtr, pngInfo, sfc->dim.r, sfc->dim.b, 8, PNG_COLOR_TYPE_RGBA,
                PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
                PNG_FILTER_TYPE_DEFAULT);
 
@@ -290,11 +392,26 @@ int writeToFile(const Surface _surface, const char *_file) {
   // to the beginning of the next row which is `rowBytes` ahead of the current
   // row.
   rowBytes = png_get_rowbytes(pngPtr, pngInfo);
-  rows = (png_bytep *)malloc(sizeof(png_bytep) * sfc->h);
-  rows[0] = (png_bytep)sfc->bmp;
+  rows = (png_bytep *)malloc(sizeof(png_bytep) * sfc->dim.b);
+  rows[0] = (png_byte *)malloc(rowBytes * sfc->dim.b);
 
-  for (y = 1; y < sfc->h; ++y) {
+  for (y = 1; y < sfc->dim.b; ++y) {
     rows[y] = rows[y - 1] + rowBytes;
+  }
+
+  s = sfc->pixels;
+  t = rows[0];
+
+  for (y = 0; y < sfc->dim.b; ++y) {
+    for (x = 0; x < sfc->dim.r; ++x) {
+      t[0] = (png_byte)(RED(*s)   * 255.0f);
+      t[1] = (png_byte)(GREEN(*s) * 255.0f);
+      t[2] = (png_byte)(BLUE(*s)  * 255.0f);
+      t[3] = (png_byte)(ALPHA(*s) * 255.0f);
+
+      ++s;
+      t += 4;
+    }
   }
 
   // Write the image data and finalize the PNG file.
@@ -312,6 +429,10 @@ cleanup:
     png_destroy_write_struct(&pngPtr, &pngInfo);
   }
 
+  if (rows[0]) {
+    free(rows[0]);
+  }
+
   if (rows) {
     free(rows);
   }
@@ -323,9 +444,8 @@ int writeToFramebuffer(const Surface _surface) {
   const _Surface *sfc = (const _Surface *)_surface;
   int fb;
   u_int16_t *buf = NULL, *q;
-  u_int8_t *p;
+  RGBA *p, tmp;
   size_t i, px;
-  double a;
   int ok = -1;
 
   if (!sfc) {
@@ -339,27 +459,26 @@ int writeToFramebuffer(const Surface _surface) {
   }
 
   // Allocate a new buffer for the RGB565 data.
-  px = sfc->w * sfc->h;
+  px = sfc->dim.r * sfc->dim.b;
   buf = (u_int16_t *)malloc(sizeof(u_int16_t) * px);
 
   if (!buf) {
     goto cleanup;
   }
 
-  p = sfc->bmp;
+  p = sfc->pixels;
   q = buf;
 
-  // Convert the 32-bit pixels to 16-bit RGB565. Scale the components to [0, 1],
-  // multiply them with their alpha value, then scale R and B up to 5 bits and
-  // G up to 6-bits.
+  // Convert the 32-bit pixels to 16-bit RGB565. Pre-multiply with the alpha
+  // value, then convert the components.
   for (i = 0; i < px; ++i) {
-    a = p[3] / 255.0;
+    tmp = *p / ALPHA(*p);
 
-    *q = ((u_int16_t)(p[0] / 255.0 * a * 0x1f) << 11) |
-         ((u_int16_t)(p[1] / 255.0 * a * 0x3f) << 5) |
-          (u_int16_t)(p[2] / 255.0 * a * 0x1f);
+    *q = ((u_int16_t)(RED(tmp)   * 0x1f) << 11) |
+         ((u_int16_t)(GREEN(tmp) * 0x3f) << 5) |
+          (u_int16_t)(BLUE(tmp)  * 0x1f);
 
-    p += 4;
+    ++p;
     ++q;
   }
 
@@ -461,8 +580,10 @@ static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
     goto cleanup;
   }
 
-  bmp->w = png_get_image_width(pngPtr, pngInfo);
-  bmp->h = png_get_image_height(pngPtr, pngInfo);
+  bmp->dim.l = 0;
+  bmp->dim.t = 0;
+  bmp->dim.r = png_get_image_width(pngPtr, pngInfo);
+  bmp->dim.b = png_get_image_height(pngPtr, pngInfo);
   bmp->color = png_get_color_type(pngPtr, pngInfo);
   bmp->bits = png_get_bit_depth(pngPtr, pngInfo);
 
@@ -477,20 +598,20 @@ static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
   // Attempt to allocate memory for the image.
   rowBytes = png_get_rowbytes(pngPtr, pngInfo);
 
-  bmp->rows = (png_bytep *)malloc(sizeof(png_bytep) * bmp->h);
+  bmp->rows = (png_bytep *)malloc(sizeof(png_bytep) * bmp->dim.b);
 
   if (!bmp->rows) {
     goto cleanup;
   }
 
-  bmp->rows[0] = (png_byte *)malloc(rowBytes * bmp->h);
+  bmp->rows[0] = (png_byte *)malloc(rowBytes * bmp->dim.b);
 
   if (!bmp->rows[0]) {
     goto cleanup;
   }
 
   // Setup the row index pointers.
-  for (y = 1; y < bmp->h; ++y) {
+  for (y = 1; y < bmp->dim.b; ++y) {
     bmp->rows[y] = bmp->rows[y - 1] + rowBytes;
   }
 
@@ -530,40 +651,20 @@ void drawBitmap(Surface _surface, const Bitmap _bitmap, int _x, int _y) {
   _Surface *sfc = (_Surface *)_surface;
   _Bitmap *bmp = (_Bitmap *)_bitmap;
   Compose cmp;
-  int tx, ty, sx, sy, bytes;
 
   if (!sfc || !bmp) {
     return;
   }
 
-  if (bmp->color == PNG_COLOR_TYPE_GRAY)
-    bytes = 1;
-  else
-    bytes = 4;
-
-  // Clamp the target location to the surface boundaries.
-  tx = max(0, min(_x, sfc->w - 1));
-  ty = max(0, min(_y, sfc->h - 1));
-
-  // Setup the compose by intersecting the bitmap's rectangle at the target
-  // location with the target surface's boundaries. (tx, ty) - (_x, _y) is the
-  // offset into the bitmap to account for the surface boundaries.
-  sx = tx - _x;
-  sy = ty - _y;
-
-  // Check for an empty intersection.
-  if (sx < 0 || sx >= bmp->w || sy < 0 || sy >= bmp->h) {
-    return;
-  }  
-
   cmp.from = bmp;
-  cmp.l = sx;
-  cmp.t = sy;
-  cmp.r = min(sfc->w - tx, bmp->w - sx) * bytes;
-  cmp.b = min(sfc->h - ty, bmp->h - sy);
+  cmp.source.l = 0;
+  cmp.source.t = 0;
+  cmp.source.r = bmp->dim.r;
+  cmp.source.b = bmp->dim.b;
 
-  cmp.to = sfc->bmp + (ty * sfc->w + tx) * 4;
-  cmp.stride = (sfc->w - min(sfc->w - tx, bmp->w)) * 4;
+  cmp.to = sfc;
+  cmp.x = _x;
+  cmp.y = _y;
 
   compose(&cmp);
 }
@@ -576,8 +677,8 @@ void drawBitmapInBox(Surface _surface, const Bitmap _bitmap, int _l, int _t,
     return;
   }
 
-  drawBitmap(_surface, _bitmap, _l + ((_r - _l) - bmp->w) / 2,
-             _t + ((_b - _t) - bmp->h) / 2);
+  drawBitmap(_surface, _bitmap, _l + ((_r - _l) - bmp->dim.r) / 2,
+             _t + ((_b - _t) - bmp->dim.b) / 2);
 }
 
 /**
@@ -622,15 +723,15 @@ Font allocateFont(FontSize _size) {
       _allocateBitmap(getPathForFont(f, path, 4096), PNG_COLOR_TYPE_GRAY, 8);
 
   // The font character map must be 16 characters by 8 characters.
-  if (!font->bmp || font->bmp->w % 16 != 0 || font->bmp->h % 8 != 0) {
+  if (!font->bmp || font->bmp->dim.r % 16 != 0 || font->bmp->dim.b % 8 != 0) {
     free(font);
     return NULL;
   }
 
-  font->cw = font->bmp->w / 16;
-  font->ch = font->bmp->h / 8;
-  font->color.a = 0.0;
-  font->bkgnd.a = 0.0;
+  font->cw = font->bmp->dim.r / 16;
+  font->ch = font->bmp->dim.b / 8;
+  font->color = rgbNull;
+  font->bkgnd = rgbNull;
 
   return (Font)font;
 }
@@ -695,23 +796,13 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
   const _Font *font = (const _Font *)_font;
   Compose cmp;
   char c;
-  int tx, ty, px;
   size_t i;
 
   if (!sfc || !font) {
     return;
   }
 
-  if (font->cw > sfc->w || font->ch > sfc->h) {
-    return;
-  }
-
-  // Clamp the target location to the surface boundaries.
-  tx = min(max(_x, 0), sfc->w - 1);
-  ty = min(max(_y, 0), sfc->h - 1);
-
-  // Check if it is even possible to draw characters from this position.
-  if (tx + font->cw > sfc->w || ty + font->ch > sfc->h) {
+  if (font->cw > sfc->dim.r || font->ch > sfc->dim.b) {
     return;
   }
 
@@ -720,10 +811,9 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
   cmp.color = font->color;
   cmp.bkgnd = font->bkgnd;
 
-  cmp.to = sfc->bmp + (ty * sfc->w + tx) * 4;
-  cmp.stride = (sfc->w - font->cw) * 4;
-
-  px = tx;
+  cmp.to = sfc;
+  cmp.x = _x;
+  cmp.y = _y;
 
   for (i = 0; i < _len; ++i) {
     c = _str[i];
@@ -734,25 +824,24 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
     }
 
     // Attempt to wrap the text string if exceeding the surface width.
-    if (px + font->cw >= sfc->w) {
-      px = tx;
-      ty += font->ch;
-      cmp.to = sfc->bmp + (ty * sfc->w + px) * 4;
+    if (cmp.x + font->cw >= sfc->dim.r) {
+      cmp.x = _x;
+      cmp.y += font->ch;
     }
 
     // If exceeding the surface height, there is nothing left to do.
-    if (ty + font->ch >= sfc->h) {
+    if (cmp.y >= sfc->dim.b) {
       return;
     }
 
     // Compose the character on to the surface.
-    cmp.l = (c % 16) * font->cw;
-    cmp.t = (c / 16) * font->ch;
-    cmp.r = cmp.l + font->cw;
-    cmp.b = cmp.t + font->ch;
+    cmp.source.l = (c % 16) * font->cw;
+    cmp.source.t = (c / 16) * font->ch;
+    cmp.source.r = cmp.source.l + font->cw;
+    cmp.source.b = cmp.source.t + font->ch;
+
     compose(&cmp);
 
-    px += font->cw;
-    cmp.to += font->cw * 4;
+    cmp.x += font->cw;
   }
 }

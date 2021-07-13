@@ -3,17 +3,55 @@
 
 #include <stddef.h>
 
-/**
- * @struct RGBA
- * @brief  An RGBA color struct.
- */
-typedef struct {
-  double r, g, b, a;
-} RGBA;
+#ifdef __ARM_NEON
+#include <arm_neon.h>
 
+/**
+ * @typedef RGBA
+ * @brief   Normalized RGBA color using ARM NEON vector intrinsic.
+ */
+typedef float32x4_t RGBA;
+#endif
+
+extern const RGBA rgbNull;
 extern const RGBA rgbRed;
 extern const RGBA rgbWhite;
 extern const RGBA rgbBlack;
+
+/**
+ * @brief   Make an RGBA object from color components.
+ * @details Clamps each component to the normalized range [0.0, 1.0] and
+ *          initializes the new color object.
+ * @param[in]  _r     Red component.
+ * @param[in]  _g     Green component.
+ * @param[in]  _b     Blue component.
+ * @param[in]  _a     Alpha component.
+ * @param[out] _color The output color.
+ */
+void makeColor(float _r, float _g, float _b, float _a, RGBA *_color);
+
+/**
+ * @brief   Make an RGBA object from RGBA8888 components.
+ * @details Initializes a new color object with the unsigned, 8-bit components
+            normalized to the range [0.0, 1.0].
+ * @param[in]  _r     8-bit Red component.
+ * @param[in]  _g     8-bit Green component.
+ * @param[in]  _b     8-bit Blue component.
+ * @param[in]  _a     8-bit Alpha component.
+ * @param[out] _color The output color.
+ */
+void makeColorFromRGBA8888(uint8_t _r, uint8_t _g, uint8_t _b, uint8_t _a,
+                           RGBA *_color);
+
+/**
+ * @brief   Make an RGBA object from a foreground color and 8-bit alpha.
+ * @details Initializes a new color object with the foreground color and an
+ *          8-bit alpha component normalized to the range [0.0, 1.0].
+ * @param[in]  _fg    The foreground color.
+ * @param[in]  _a     8-bit Alpha component.
+ * @param[out] _color The output color.
+ */
+void makeColorFromA8(const RGBA *_fg, uint8_t _a, RGBA *_color);
 
 /**
  * @typedef Surface
