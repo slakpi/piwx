@@ -83,24 +83,33 @@ void freeSurface(Surface _surface);
 void clearSurface(Surface _surface);
 
 /**
- * @brief   Write a drawing surface to a file.
+ * @brief   Write a drawing surface to a RGBA8888 PNG file.
  * @details Writes the contents of a drawing surface to a PNG file of the same
- *          dimensions. An existing file will be overwritten. Each pixel is
- *          blended with black according to its alpha value.
+ *          dimensions using RGBA8888. An existing file will be overwritten.
  * @param[in] _surface The drawing surface to output.
  * @param[in] _file    The name of the PNG file.
  * @returns Returns 0 if successful.
  */
-int writeToFile(const Surface _surface, const char *_file);
+int writeSurfaceToPNG(const Surface _surface, const char *_file);
 
 /**
- * @brief   Transfer the image to the framebuffer for display.
- * @details Converts the RGBA data to 16-bit RGB565 color and transfers the
- *          image to the framebuffer for display.
- * @param[in] _surface The drawing surface to present.
+ * @brief   Write a drawing surface to a RGB565 BMP file.
+ * @details Writes the contents of a drawing surface to a BMP file of the same
+ *          dimensions using RGB565. An existing file will be overwritten.
+ * @param[in] _surface The drawing surface to output.
+ * @param[in] _file    The name of the BMP file.
  * @returns Returns 0 if successful.
  */
-int writeToFramebuffer(const Surface _surface);
+int writeSurfaceToBMP(const Surface _surface, const char *_file);
+
+/**
+ * @brief   Transfer the drawing surface to the framebuffer for display.
+ * @details Converts the RGBA data to 16-bit RGB565 color and transfers the
+ *          contents of the drawing surface to the framebuffer for display.
+ * @param[in] _surface The drawing surface to display.
+ * @returns Returns 0 if successful.
+ */
+int commitSurface(const Surface _surface);
 
 /**
  * @typedef Bitmap

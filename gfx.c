@@ -226,7 +226,7 @@ static void compose(const Compose *_cmp) {
     return;
   }
 
-  offset = source.l + (_cmp->from->color == PNG_COLOR_TYPE_GRAY ? 1 : 4);
+  offset = source.l * (_cmp->from->color == PNG_COLOR_TYPE_GRAY ? 1 : 4);
 
   for (y = target.t; y < target.b; ++y) {
     t  = _cmp->to->rows[y] + target.l;
@@ -236,7 +236,7 @@ static void compose(const Compose *_cmp) {
       if (_cmp->from->color == PNG_COLOR_TYPE_GRAY) {
         // For grayscale, set the foreground color and use the gray value as the
         // alpha, then blend with the background.
-        makeColorFromA8(&_cmp->color, s[x], &tmp);
+        makeColorFromA8(&_cmp->color, *s, &tmp);
         mix(&tmp, &_cmp->bkgnd, &tmp);
         ++s;
       } else {
@@ -256,7 +256,6 @@ static void compose(const Compose *_cmp) {
       }
 
       ++t;
-      ++s;
     }
   }
 }
@@ -339,7 +338,39 @@ void clearSurface(Surface _surface) {
   memset(sfc->pixels, 0, sizeof(RGBA) * sfc->dim.r * sfc->dim.b);
 }
 
-int writeToFile(const Surface _surface, const char *_file) {
+/**
+ * @brief Convert a drawing surface to a RGB565 bitmap.
+ * @param[in]  _sfc    The drawing surface.
+ * @param[out] _bitmap The output buffer for the 16-bit RGB565 data.
+ */
+void ditherSurface(const _Surface *_sfc, u_int16_t *_bitmap) {
+  u_int16_t *q;
+  RGBA *p, tmp;
+  size_t i, px;
+
+  if (!_sfc) {
+    return;
+  }
+
+  px = _sfc->dim.r * _sfc->dim.b;
+  p = _sfc->pixels;
+  q = _bitmap;
+
+  // Convert the 32-bit pixels to 16-bit RGB565. Pre-multiply with the alpha
+  // value, then convert the components.
+  for (i = 0; i < px; ++i) {
+    tmp = *p * ALPHA(*p);
+
+    *q = ((u_int16_t)(RED(tmp)   * 0x1f) << 11) |
+         ((u_int16_t)(GREEN(tmp) * 0x3f) << 5)  |
+          (u_int16_t)(BLUE(tmp)  * 0x1f);
+
+    ++p;
+    ++q;
+  }
+}
+
+int writeSurfaceToPNG(const Surface _surface, const char *_file) {
   _Surface *sfc = (_Surface *)_surface;
   FILE *png = NULL;
   png_structp pngPtr = NULL;
@@ -440,12 +471,109 @@ cleanup:
   return ok;
 }
 
-int writeToFramebuffer(const Surface _surface) {
+/**
+ * @struct _BITMAPFILEHEADER
+ * @brief  Windows bitmap file header.
+ */
+typedef struct {
+  u_int8_t signature[2];               /* Bitmap file signature.              */
+  u_int32_t fileSize;                  /* Total bitmap file size.             */
+  u_int16_t reserved1;                 /* Ignored.                            */
+  u_int16_t reserved2;                 /* Ignored.                            */
+  u_int32_t pixelOffset;               /* Offset to pixel data.               */
+} _BITMAPFILEHEADER;
+
+/**
+ * @struct _BITMAPINFOHEADER
+ * @brief  Windows bitmap information header.
+ */
+typedef struct {
+  u_int32_t size;                      /* Header size.                        */
+  u_int32_t width;                     /* Bitmap width in pixels.             */
+  u_int32_t height;                    /* Bitmap height in pixels.            */
+  u_int16_t planes;                    /* Color planes, must be 1.            */
+  u_int16_t bpp;                       /* Bits-per-pixel                      */
+  u_int32_t compression;               /* Compression method.                 */
+  u_int32_t bmpSize;                   /* Raw bitmap size, 0 for BI_RGB.      */
+  u_int32_t hRes;                      /* Horizontal resolution px per meter. */
+  u_int32_t vRes;                      /* Vertical resolution px per meter.   */
+  u_int32_t paletteSize;               /* Colors in palette.                  */
+  u_int32_t importantColors;           /* Important colors in palette, 0.     */
+} _BITMAPINFOHEADER;
+
+int writeSurfaceToBMP(const Surface _surface, const char *_file) {
+  _Surface *sfc = (_Surface *)_surface;
+  FILE *bmp = NULL;
+  u_int16_t *buf = NULL;
+  _BITMAPFILEHEADER hdr;
+  _BITMAPINFOHEADER info;
+  size_t px;
+  int ok = -1;
+
+  if (!sfc) {
+    return -1;
+  }
+
+  hdr.signature[0] = 0x42;
+  hdr.signature[1] = 0x4d;
+  hdr.fileSize = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) +
+                 sizeof(u_int16_t) * sfc->dim.r * sfc->dim.b;
+  hdr.reserved1 = 0;
+  hdr.reserved2 = 0;
+  hdr.pixelOffset = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER);
+
+  info.size = sizeof(hdr);
+  info.width = sfc->dim.r;
+  info.height = sfc->dim.b;
+  info.planes = 1;
+  info.bpp = 16;
+  info.compression = 0;
+  info.bmpSize = 0;
+  info.hRes = 0;
+  info.vRes = 0;
+  info.paletteSize = 0;
+  info.importantColors = 0;
+
+  bmp = fopen(_file, "wb");
+
+  if (bmp < 0) {
+    goto cleanup;
+  }
+
+  // Allocate a new buffer for the RGB565 data.
+  px = sfc->dim.r * sfc->dim.b;
+  buf = (u_int16_t *)malloc(sizeof(u_int16_t) * px);
+
+  if (!buf) {
+    goto cleanup;
+  }
+
+  // Dither the surface for the TFT display.
+  ditherSurface(sfc, buf);
+
+  fwrite(&hdr, sizeof(hdr), 1, bmp);
+  fwrite(&info, sizeof(info), 1, bmp);
+  fwrite(buf, sizeof(u_int16_t), px, bmp);
+
+  ok = 0;
+
+cleanup:
+  if (bmp) {
+    fclose(bmp);
+  }
+
+  if (buf) {
+    free(buf);
+  }
+
+  return ok;
+}
+
+int commitSurface(const Surface _surface) {
   const _Surface *sfc = (const _Surface *)_surface;
   int fb;
-  u_int16_t *buf = NULL, *q;
-  RGBA *p, tmp;
-  size_t i, px;
+  u_int16_t *buf = NULL;
+  size_t px;
   int ok = -1;
 
   if (!sfc) {
@@ -466,21 +594,8 @@ int writeToFramebuffer(const Surface _surface) {
     goto cleanup;
   }
 
-  p = sfc->pixels;
-  q = buf;
-
-  // Convert the 32-bit pixels to 16-bit RGB565. Pre-multiply with the alpha
-  // value, then convert the components.
-  for (i = 0; i < px; ++i) {
-    tmp = *p / ALPHA(*p);
-
-    *q = ((u_int16_t)(RED(tmp)   * 0x1f) << 11) |
-         ((u_int16_t)(GREEN(tmp) * 0x3f) << 5) |
-          (u_int16_t)(BLUE(tmp)  * 0x1f);
-
-    ++p;
-    ++q;
-  }
+  // Dither the surface for the TFT display.
+  ditherSurface(sfc, buf);
 
   // Blt the 16-bit image to the framebuffer.
   write(fb, buf, sizeof(u_int16_t) * px);

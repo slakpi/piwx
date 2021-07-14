@@ -156,7 +156,7 @@ static int go(int _test, int _verbose)
 
       clearSurface(sfc);
       drawBitmapInBox(sfc, dlIcon, 0, 0, 320, 240);
-      writeToFramebuffer(sfc);
+      commitSurface(sfc);
 
       wx = queryWx(cfg->stationQuery, &i);
       ptr = wx;
@@ -186,7 +186,7 @@ static int go(int _test, int _verbose)
         drawText(sfc, font6, 0, 0, buf, i);
 
         drawBitmapInBox(sfc, dlErr, 0, 0, 320, 240);
-        writeToFramebuffer(sfc);
+        commitSurface(sfc);
         nextUpdate = now + 300;
       }
     }
@@ -487,11 +487,11 @@ static int go(int _test, int _verbose)
 
     if (_test)
     {
-      writeToFile(sfc, "test.png");
+      writeSurfaceToPNG(sfc, "test.png");
       break;
     }
 
-    writeToFramebuffer(sfc);
+    commitSurface(sfc);
   } while (run);
 
 #ifdef WITH_LED_SUPPORT
@@ -501,7 +501,7 @@ static int go(int _test, int _verbose)
   if (sfc)
   {
     clearSurface(sfc);
-    writeToFramebuffer(sfc);
+    commitSurface(sfc);
     freeSurface(sfc);
   }
   if (font16)
