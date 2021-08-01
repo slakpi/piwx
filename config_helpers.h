@@ -1,6 +1,8 @@
 #ifndef CONFIG_HELPERS_H
 #define CONFIG_HELPERS_H
 
+#include <stddef.h>
+
 #define MAX_LEDS 50
 
 /**
