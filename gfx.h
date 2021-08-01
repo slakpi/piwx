@@ -3,7 +3,7 @@
 
 #include <stddef.h>
 
-#ifdef __ARM_NEON
+#ifdef __ARM_NEON__
 #include <arm_neon.h>
 
 /**
@@ -11,6 +11,11 @@
  * @brief   Normalized RGBA color using ARM NEON vector intrinsic.
  */
 typedef float32x4_t RGBA;
+
+#define RED(c)   ((c)[0])
+#define GREEN(c) ((c)[1])
+#define BLUE(c)  ((c)[2])
+#define ALPHA(c) ((c)[3])
 #endif
 
 extern const RGBA rgbNull;

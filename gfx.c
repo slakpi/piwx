@@ -17,13 +17,6 @@ const RGBA rgbRed   = {1.0f, 0.0f, 0.0f, 1.0f};
 const RGBA rgbWhite = {1.0f, 1.0f, 1.0f, 1.0f};
 const RGBA rgbBlack = {0.0f, 0.0f, 0.0f, 1.0f};
 
-#ifdef __ARM_NEON
-#define RED(c)   ((c)[0])
-#define GREEN(c) ((c)[1])
-#define BLUE(c)  ((c)[2])
-#define ALPHA(c) ((c)[3])
-#endif
-
 void makeColor(float _r, float _g, float _b, float _a, RGBA *_color) {
   if (!_color) {
     return;
