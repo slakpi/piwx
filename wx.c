@@ -345,6 +345,9 @@ typedef enum {
   tagSKC,      tagCAVOK,
 
   tagVFR,      tagMVFR,      tagIFR,       tagLIFR,
+
+  tagFirst = tagResponse,
+  tagLast = tagLIFR
 } Tag;
 // clang-format on
 
