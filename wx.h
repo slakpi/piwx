@@ -7,7 +7,7 @@
  * @enum  CloudCover
  * @brief METAR cloud cover levels.
  */
-typedef enum __CloudCover {
+typedef enum {
   skyInvalid,
   skyClear,
   skyScattered,
@@ -31,41 +31,37 @@ typedef struct __SkyCondition {
  * @enum  FlightCategory
  * @brief METAR flight category.
  */
-typedef enum __FlightCategory {
-  catInvalid,
-  catVFR,
-  catMVFR,
-  catIFR,
-  catLIFR
-} FlightCategory;
+typedef enum { catInvalid, catVFR, catMVFR, catIFR, catLIFR } FlightCategory;
 
 /**
  * @enum  DominantWeather
  * @brief The dominant weather phenomenon a weather station. Only clear,
- *        scattered, and broken need night variants.
+ *        scattered, and broken need night variants. The items are ordered by
+ *        severity priority. E.g. Funnel clouds are a more severe phenomenon
+ *        than freezing rain.
  */
-typedef enum __DominantWeather {
+typedef enum {
   wxInvalid,
   wxClearDay,                          /* Clear; no other weather.            */
   wxClearNight,
   wxScatteredOrFewDay,                 /* Scattered or few; no other weather. */
   wxScatteredOrFewNight,
-  wxBrokenDay,                         /* Broken; no other weather.           */
+  wxBrokenDay, /* Broken; no other weather.           */
   wxBrokenNight,
-  wxOvercast,                          /* Overcast; no other weather.         */
-  wxLightMistHaze,                     /* BR, HZ                              */
-  wxLightDrizzleRain,                  /* VC/- DZ, RA                         */
-  wxRain,                              /* [+] DZ, RA                          */
-  wxFlurries,                          /* VC SN, SG                           */
-  wxLightSnow,                         /* - SN, SG                            */
-  wxSnow,                              /* [+] SN, SG                          */
-  wxLightFreezingRain,                 /* VC/- FZ + DZ or RA, IC, PL, GR, GS  */
-  wxFreezingRain,                      /* [+] FZ + DZ or RA, IC, PL, GR, GS   */
-  wxObscuration,                       /* FG, FU, DU, SS, DS                  */
-  wxVolcanicAsh,                       /* VA                                  */
-  wxLightTstormsSqualls,               /* VC/- TS, SQ                         */
-  wxTstormsSqualls,                    /* [+] TS, SQ                          */
-  wxFunnelCloud,                       /* FC                                  */
+  wxOvercast,            /* Overcast; no other weather.         */
+  wxLightMistHaze,       /* BR, HZ                              */
+  wxLightDrizzleRain,    /* VC/- DZ, RA                         */
+  wxRain,                /* [+] DZ, RA                          */
+  wxFlurries,            /* VC SN, SG                           */
+  wxLightSnow,           /* - SN, SG                            */
+  wxSnow,                /* [+] SN, SG                          */
+  wxLightFreezingRain,   /* VC/- FZ + DZ or RA, IC, PL, GR, GS  */
+  wxFreezingRain,        /* [+] FZ + DZ or RA, IC, PL, GR, GS   */
+  wxObscuration,         /* FG, FU, DU, SS, DS                  */
+  wxVolcanicAsh,         /* VA                                  */
+  wxLightTstormsSqualls, /* VC/- TS, SQ                         */
+  wxTstormsSqualls,      /* [+] TS, SQ                          */
+  wxFunnelCloud,         /* FC                                  */
 } DominantWeather;
 
 /**

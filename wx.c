@@ -1,32 +1,40 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include "wx.h"
+#include "wxtype.h"
 #include <ctype.h>
 #include <math.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include "wx.h"
-#include "wxtype.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
-typedef void* yyscan_t;
+typedef void *yyscan_t;
 
 #include "wxtype.lexer.h"
 
-static char* trimLocalId(const char *_id)
-{
+/**
+ * @brief   Trims a local airport ID for display.
+ * @details Non-ICAO airport IDs include numbers and are three characters long,
+ *          e.g. 7S3 or X01. However, AviationWeather.gov expects four-character
+ *          IDs. So, for the US, 7S3 should be "K7S3". If the specified ID has
+ *          a number in it, return a duplicate string that does not have the K.
+ *          If the ID is an ICAO ID, return a duplicate of the original string.
+ * @param[in] _id The airport ID of interest.
+ * @returns A duplicate of either the original ID or the shortened non-ICAO ID.
+ */
+static char *trimLocalId(const char *_id) {
   size_t i, len = strlen(_id);
   const char *p = _id;
 
-  if (len < 1)
+  if (len < 1) {
     return NULL;
+  }
 
-  for (i = 0; i < len; ++i)
-  {
-    if (isdigit(_id[i]))
-    {
+  for (i = 0; i < len; ++i) {
+    if (isdigit(_id[i])) {
       p = _id + 1;
       break;
     }
@@ -35,33 +43,43 @@ static char* trimLocalId(const char *_id)
   return strdup(p);
 }
 
-typedef struct __Response
-{
+/**
+ * @struct Response
+ * @brief  Buffer to hold response data from cURL.
+ */
+typedef struct __Response {
   char *str;
   size_t len, bufLen;
 } Response;
 
-static void initResponse(Response *_res)
-{
-  _res->str = (char*)malloc(sizeof(char) * 256);
+/**
+ * @brief Initialize a response buffer.
+ * @param[in] _res The response buffer.
+ */
+static void initResponse(Response *_res) {
+  _res->str = (char *)malloc(sizeof(char) * 256);
   _res->str[0] = 0;
   _res->len = 0;
   _res->bufLen = 256;
 }
 
-static void appendToResponse(Response *_res, const char *_str, size_t _len)
-{
+/**
+ * @brief   Appends new data from cURL to a response buffer.
+ * @details If there is not enough room left in the buffer, the function will
+ *          increase the buffer size by 1.5x.
+ * @param[in] _res Response buffer to receive the new data.
+ * @param[in] _str cURL data.
+ * @param[in] _len Length of the cURL data.
+ */
+static void appendToResponse(Response *_res, const char *_str, size_t _len) {
   size_t newBuf = _res->bufLen;
-
-  if (!_res->str)
+  if (!_res->str) {
     return;
+  }
 
-  while (1)
-  {
-    if (_res->len + _len < newBuf)
-    {
-      if (_res->bufLen < newBuf)
-      {
+  while (1) {
+    if (_res->len + _len < newBuf) {
+      if (_res->bufLen < newBuf) {
         _res->str = realloc(_res->str, newBuf);
         _res->bufLen = newBuf;
       }
@@ -73,31 +91,67 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len)
       return;
     }
 
-    newBuf = (size_t)ceil(newBuf * 1.5);
-    if (newBuf < _res->bufLen)
+    newBuf = (size_t)(newBuf * 1.5) + 1;
+
+    if (newBuf < _res->bufLen) {
       return;
+    }
   }
 }
 
-static void freeResponse(Response *_res)
-{
+/**
+ * @brief Free a response buffer.
+ * @param[in] _res The response buffer to free.
+ */
+static void freeResponse(Response *_res) {
   free(_res->str);
   _res->str = NULL;
   _res->len = 0;
   _res->bufLen = 0;
 }
 
-static int parseUTCDateTime(struct tm *_tm, const char *_str)
-{
-  int ret = sscanf(_str, "%d-%d-%dT%d:%d:%d", &_tm->tm_year, &_tm->tm_mon,
-    &_tm->tm_mday, &_tm->tm_hour, &_tm->tm_min, &_tm->tm_sec);
+/**
+ * @brief   Simple ISO-8601 parser.
+ * @details Assumes UTC and ignores timezone information. Assumes integer
+ *          seconds. Performs basic sanity checks, but does not check if the
+ *          day exceeds the number of days in the specified month.
+ * @param[in]: _str The string to parse.
+ * @param[in]: _tm  Receives the date time.
+ * @returns 0 if successful, non-zero otherwise.
+ */
+static int parseUTCDateTime(const char *_str, struct tm *_tm) {
+  char *end;
 
-  if (ret < 6)
+  _tm->tm_year = (int)strtol(_str, &end, 10);
+  _tm->tm_mon = (int)strtol(_str, &end, 10);
+  _tm->tm_mday = (int)strtol(_str, &end, 10);
+  _tm->tm_hour = (int)strtol(_str, &end, 10);
+  _tm->tm_min = (int)strtol(_str, &end, 10);
+  _tm->tm_sec = (int)strtol(_str, NULL, 10);
+
+  if (_tm->tm_year < 1900) {
     return -1;
-  if (_tm->tm_year < 1900)
+  }
+
+  if (_tm->tm_mon < 1 || _tm->tm_mon > 12) {
     return -1;
-  if (_tm->tm_mon < 1 || _tm->tm_mon > 12)
+  }
+
+  if (_tm->tm_mday < 1 || _tm->tm_mday > 31) {
     return -1;
+  }
+
+  if (_tm->tm_hour < 0 || _tm->tm_hour > 23) {
+    return -1;
+  }
+
+  if (_tm->tm_min < 0 || _tm->tm_min > 59) {
+    return -1;
+  }
+
+  if (_tm->tm_sec < 0 || _tm->tm_sec > 59) {
+    return -1;
+  }
 
   _tm->tm_year -= 1900;
   _tm->tm_mon -= 1;
@@ -106,17 +160,35 @@ static int parseUTCDateTime(struct tm *_tm, const char *_str)
   return 0;
 }
 
+/**
+ * @brief   cURL data callback for the sunrise/sunset API.
+ * @param[in] _ptr      Data received.
+ * @param[in] _size     Size of a data item.
+ * @param[in] _nmemb    Data items received.
+ * @param[in] _userdata User callback data, i.e. Response object.
+ * @returns Bytes processed.
+ */
 static size_t sunriseSunsetCallback(char *_ptr, size_t _size, size_t _nmemb,
-  void *_userdata)
-{
-  Response *res = (Response*)_userdata;
-  appendToResponse(res, _ptr, _nmemb);
-  return _nmemb;
+                                    void *_userdata) {
+  Response *res = (Response *)_userdata;
+  size_t bytes = _size * _nmemb;
+  appendToResponse(res, _ptr, bytes);
+  return bytes;
 }
 
+/**
+ * @brief   Queries the sunrise/sunset API.
+ * @details Note that the function returns the Civil Twilight range rather than
+ *          the Sunrise and Sunset range.
+ * @param[in]:  _lat     Latitude to query.
+ * @param[in]:  _lon     Longitude to query.
+ * @param[in]:  _date    Date to query.
+ * @param[out]: _sunrise Sunrise in UTC.
+ * @param[out]: _sunset  Sunset in UTC.
+ * @returns 0 if successful, non-zero otherwise.
+ */
 static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
-  time_t *_sunrise, time_t *_sunset)
-{
+                                  time_t *_sunrise, time_t *_sunset) {
   CURL *curlLib;
   CURLcode res;
   json_t *root, *times, *sunrise, *sunset;
@@ -126,11 +198,17 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   struct tm dtSunrise, dtSunset;
   int ok = -1;
 
-  curlLib = curl_easy_init();
-  if (!curlLib)
-    return -1;
+  *_sunrise = 0;
+  *_sunset = 0;
 
-  snprintf(url, 257, "https://api.sunrise-sunset.org/json?"
+  curlLib = curl_easy_init();
+
+  if (!curlLib) {
+    return -1;
+  }
+
+  snprintf(url, 257,
+    "https://api.sunrise-sunset.org/json?"
     "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
     _lat, _lon, _date->tm_year + 1900, _date->tm_mon + 1,
     _date->tm_mday);
@@ -143,32 +221,42 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   res = curl_easy_perform(curlLib);
   curl_easy_cleanup(curlLib);
 
-  if (res != CURLE_OK)
+  if (res != CURLE_OK) {
     return -1;
+  }
 
   root = json_loads(json.str, 0, &err);
   freeResponse(&json);
 
-  if (!root)
+  if (!root) {
     return -1;
+  }
 
   times = json_object_get(root, "results");
-  if (!json_is_object(times))
+
+  if (!json_is_object(times)) {
     goto cleanup;
+  }
 
   sunrise = json_object_get(times, "civil_twilight_begin");
-  if (!json_is_string(sunrise))
+
+  if (!json_is_string(sunrise)) {
     goto cleanup;
+  }
 
   sunset = json_object_get(times, "civil_twilight_end");
-  if (!json_is_string(sunset))
-    goto cleanup;
 
-  if (parseUTCDateTime(&dtSunrise, json_string_value(sunrise)) != 0)
+  if (!json_is_string(sunset)) {
     goto cleanup;
+  }
 
-  if (parseUTCDateTime(&dtSunset, json_string_value(sunset)) != 0)
+  if (parseUTCDateTime(json_string_value(sunrise), &dtSunrise) != 0) {
     goto cleanup;
+  }
+
+  if (parseUTCDateTime(json_string_value(sunset), &dtSunset) != 0) {
+    goto cleanup;
+  }
 
   *_sunrise = timegm(&dtSunrise);
   *_sunset = timegm(&dtSunset);
@@ -176,74 +264,111 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   ok = 0;
 
 cleanup:
-  if (root)
+  if (root) {
     json_decref(root);
-  if (ok != 0)
-  {
-    *_sunrise = 0;
-    *_sunset = 0;
   }
 
   return ok;
 }
 
-static int isNight(double _lat, double _lon, time_t _obsTime)
-{
-  time_t n, sr, ss;
+/**
+ * @brief   Checks if the given observation time is night at the given location.
+ * @details Consider a report issued at 1753L on July 31 in the US Pacific
+ *          Daylight time zone. The UTC date/time is 0053Z on Aug 1, so the
+ *          query will return the sunrise/sunset for Aug 1, not July 31. In this
+ *          situation, isNight() will return 1 even though it is still day at a
+ *          station in the PDT time zone.
+ *
+ *          Without converting the station observation date/times to local, we
+ *          have to check the current UTC day and prior UTC day (for the
+ *          Western hemisphere anyway).
+ * @param[in]: _lat     Observation latitude.
+ * @param[in]: _lon     Observation longitude.
+ * @param[in]: _obsTime UTC observation time.
+ * @returns 0 if day or query failed, non-zero if night.
+ */
+static int isNight(double _lat, double _lon, time_t _obsTime) {
+  time_t sr, ss;
   struct tm date;
 
-  /**
-   * Without retrieving the local date for each station, isNight requires
-   * checking either the previous or the next day's range since the UTC date
-   * may be different from the local date. So, it is either two sunrise/sunset
-   * API calls, or one along with an API call to a time zone map.
+  gmtime_r(&_obsTime, &date);
+
+  if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
+    return 0;
+  }
+
+  /* If the observation time is less than the sunrise date/time, check the 
+     prior day. If the observation date/time is greater than the sunset date/
+     time of the prior day, then we know it is night.
    */
-  date = *gmtime(&_obsTime);
-  if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
-    return -1;
+  if (_obsTime < sr) {
+    if (_obsTime > 86400) {
+      _obsTime -= 86400;
+    } else {
+      _obsTime = 0;
+    }
 
-  if (_obsTime < sr)
-  { // Check if < current day's sunrise and > previous day's sunset
-    n = _obsTime - 86400;
-    date = *gmtime(&n);
-    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
-      return -1;
+    gmtime_r(&_obsTime, &date);
 
-    return _obsTime > ss;
-  }
-  else if (_obsTime >= ss)
-  { // Check if >= current day's sunset and < next day's sunrise
-    n = _obsTime + 86400;
-    date = *gmtime(&n);
-    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0)
-      return -1;
+    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
+      return 0;
+    }
 
-    return _obsTime < sr;
+    return _obsTime >= ss;
   }
 
-  // >= current day's sunrise and < current day's sunset.
-  return 0;
+  /* Assuming the Western hemisphere, we do not need to check the next day if
+     the date/time is greater than sunset of the UTC day.
+   */
+  return _obsTime >= ss;
 }
 
-typedef enum __Tag
-{
+/**
+ * @enum  Tag
+ * @brief METAR XML tag ID.
+ */
+typedef enum {
   tagInvalid = -1,
 
   tagResponse = 1,
 
   tagData,
 
-  tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
-  tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
-  tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
-  tagSkyCond,     tagVertVis,
+  tagMETAR,
 
-  tagSkyCover,    tagCloudBase,
+  tagRawText,
+  tagStationId,
+  tagObsTime,
+  tagLat,
+  tagLon,
+  tagTemp,
+  tagDewpoint,
+  tagWindDir,
+  tagWindSpeed,
+  tagWindGust,
+  tagVis,
+  tagAlt,
+  tagCategory,
+  tagWxString,
+  tagSkyCond,
+  tagVertVis,
 
-  tagSCT,         tagFEW,           tagBKN,           tagOVC,         tagOVX,
-  tagCLR,         tagSKC,           tagCAVOK,
+  tagSkyCover,
+  tagCloudBase,
 
-  tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
+  tagSCT,
+  tagFEW,
+  tagBKN,
+  tagOVC,
+  tagOVX,
+  tagCLR,
+  tagSKC,
+  tagCAVOK,
+
+  tagVFR,
+  tagMVFR,
+  tagIFR,
+  tagLIFR,
 
   tagFirst = tagResponse,
   tagLast = tagLIFR
@@ -254,250 +379,322 @@ static const Tag tags[] = {
 
   tagData,
 
-  tagRawText,     tagStationId,     tagObsTime,       tagLat,         tagLon,
-  tagTemp,        tagDewpoint,      tagWindDir,       tagWindSpeed,
-  tagWindGust,    tagVis,           tagAlt,           tagCategory,    tagWxString,
-  tagSkyCond,     tagVertVis,
+    tagMETAR,
 
-  tagSkyCover,    tagCloudBase,
+    tagRawText,  tagStationId, tagObsTime,   tagLat,      tagLon, tagTemp,
+    tagDewpoint, tagWindDir,   tagWindSpeed, tagWindGust, tagVis, tagAlt,
+    tagCategory, tagWxString,  tagSkyCond,   tagVertVis,
 
-  tagSCT,         tagFEW,           tagBKN,           tagOVC,         tagOVX,
-  tagCLR,         tagSKC,           tagCAVOK,
+    tagSkyCover, tagCloudBase,
 
-  tagVFR,         tagMVFR,          tagIFR,           tagLIFR,
+    tagSCT,      tagFEW,       tagBKN,       tagOVC,      tagOVX, tagCLR,
+    tagSKC,      tagCAVOK,
+
+    tagVFR,      tagMVFR,      tagIFR,       tagLIFR,
 };
 
-static const char* tagNames[] = {
-  "response",
+static const char *tagNames[] = {"response",
 
   "data",
 
-  "raw_text",       "station_id",     "observation_time",       "latitude",
-  "longitude",      "temp_c",         "dewpoint_c",             "wind_dir_degrees",
-  "wind_speed_kt",  "wind_gust_kt",   "visibility_statute_mi",  "altim_in_hg",
-  "flight_category","wx_string",      "sky_condition",          "vert_vis_ft",
+                                 "METAR",
 
-  "sky_cover",      "cloud_base_ft_agl",
+                                 "raw_text",
+                                 "station_id",
+                                 "observation_time",
+                                 "latitude",
+                                 "longitude",
+                                 "temp_c",
+                                 "dewpoint_c",
+                                 "wind_dir_degrees",
+                                 "wind_speed_kt",
+                                 "wind_gust_kt",
+                                 "visibility_statute_mi",
+                                 "altim_in_hg",
+                                 "flight_category",
+                                 "wx_string",
+                                 "sky_condition",
+                                 "vert_vis_ft",
 
-  "SCT",            "FEW",            "BKN",                    "OVC",
-  "OVX",            "CLR",            "SKC",                    "CAVOK",
+                                 "sky_cover",
+                                 "cloud_base_ft_agl",
 
-  "VFR",            "MVFR",           "IFR",                    "LIFR",
+                                 "SCT",
+                                 "FEW",
+                                 "BKN",
+                                 "OVC",
+                                 "OVX",
+                                 "CLR",
+                                 "SKC",
+                                 "CAVOK",
 
-  NULL
-};
+                                 "VFR",
+                                 "MVFR",
+                                 "IFR",
+                                 "LIFR",
 
-static void initHash(xmlHashTablePtr _hash)
-{
+                                 NULL};
+
+/**
+ * @brief Initialize the tag map.
+ * @param[in]: _hash Tag hash map.
+ */
+static void initHash(xmlHashTablePtr _hash) {
   for (long i = 0; tagNames[i]; ++i)
-    xmlHashAddEntry(_hash, (xmlChar*)tagNames[i], (void*)tags[i]);
+    xmlHashAddEntry(_hash, (xmlChar *)tagNames[i], (void *)tags[i]);
 }
 
-static void hashDealloc(void *_payload, xmlChar *_name)
-{
+/**
+ * @brief   Hash destructor.
+ * @details Placeholder only, there is nothing to deallocate.
+ * @param[in] _payload: Data associated with tag.
+ * @param[in] _name:    The tag name.
+ */
+static void hashDealloc(void *_payload, xmlChar *_name) {}
 
-}
-
-static Tag getTag(xmlHashTablePtr _hash, const xmlChar *_tag)
-{
+/**
+ * @brief   Lookup the tag ID for a given tag name.
+ * @param[in]: _hash The tag hash map.
+ * @param[in]: _tag  The tag name.
+ * @returns The associated tag ID or tagInvalid.
+ */
+static Tag getTag(xmlHashTablePtr _hash, const xmlChar *_tag) {
   void *p = xmlHashLookup(_hash, _tag);
 
-  if (!p)
+  if (!p) {
     return tagInvalid;
+  }
 
   return (Tag)p;
 }
 
-typedef struct __METARCallbackData
-{
+/**
+ * @struct METARCallbackData
+ * @brief  User data structure for parsing METAR XML.
+ */
+typedef struct {
   xmlParserCtxtPtr ctxt;
 } METARCallbackData;
 
+/**
+ * @brief cURL data callback for the METAR XAML API.
+ * @param[in] _ptr      Data received.
+ * @param[in] _size     Size of a data item.
+ * @param[in] _nmemb    Data items received.
+ * @param[in] _userdata User callback data, i.e. Response object.
+ * @returns Bytes processed.
+ */
 static size_t metarCallback(char *_ptr, size_t _size, size_t _nmemb,
-  void *_userdata)
-{
-  METARCallbackData *data = (METARCallbackData*)_userdata;
-  size_t res = _nmemb;
+                            void *_userdata) {
+  METARCallbackData *data = (METARCallbackData *)_userdata;
+  size_t res = _nmemb * _size;
 
-  if (!data->ctxt)
-  {
+  if (!data->ctxt) {
     data->ctxt = xmlCreatePushParserCtxt(NULL, NULL, _ptr, _nmemb, NULL);
-    if (!data->ctxt)
+
+    if (!data->ctxt) {
       res = 0;
   }
-  else
-  {
-    if (xmlParseChunk(data->ctxt, _ptr, _nmemb, 0) != 0)
+  } else {
+    if (xmlParseChunk(data->ctxt, _ptr, _nmemb, 0) != 0) {
       res = 0;
+    }
   }
 
   return res;
 }
 
+/**
+ * @brief   Converts category text to a FlightCategory value.
+ * @param[in]: _node The flight category node.
+ * @param[in]: _hash The tag hash map.
+ * @returns The flight category or catInvalid.
+ */
+static FlightCategory getStationFlightCategory(xmlNodePtr _node,
+                                               xmlHashTablePtr _hash) {
+  Tag tag = getTag(_hash, _node->content);
+
+  switch (tag) {
+  case tagVFR:
+    return catVFR;
+  case tagMVFR:
+    return catMVFR;
+  case tagIFR:
+    return catIFR;
+  case tagLIFR:
+    return catLIFR;
+  default:
+    return catInvalid;
+  }
+}
+
+/**
+ * @brief   Convert cloud cover text to a CloudCover value.
+ * @param[in]: _attr The cloud cover attribute.
+ * @param[in]: _hash The tag hash map.
+ * @returns The cloud cover or skyInvalid.
+ */
+static CloudCover getLayerCloudCover(xmlAttr *_attr, xmlHashTablePtr _hash) {
+  Tag tag = getTag(_hash, _attr->children->content);
+
+  switch (tag) {
+  case tagSKC:
+  case tagCLR:
+  case tagCAVOK:
+    return skyClear;
+  case tagSCT:
+    return skyScattered;
+  case tagFEW:
+    return skyFew;
+  case tagBKN:
+    return skyBroken;
+  case tagOVC:
+    return skyOvercast;
+  case tagOVX:
+    return skyOvercastSurface;
+  default:
+    return skyInvalid;
+  }
+}
+
+/**
+ * @brief Adds a cloud layer to the list of layers.
+ * @param[in]: _node    The sky condition node.
+ * @param[in]: _station The station to receive the new layer.
+ * @param[in]: _hash    The tag hash map.
+ */
+static void addCloudLayer(xmlNodePtr _node, WxStation *_station,
+                          xmlHashTablePtr _hash) {
+  xmlAttr *a = _node->properties;
+  SkyCondition *newLayer, *p;
+  Tag tag;
+
+  newLayer = (SkyCondition *)malloc(sizeof(SkyCondition));
+  memset(newLayer, 0, sizeof(SkyCondition));
+
+  /* Get the layer information. */
+  while (a) {
+    tag = getTag(_hash, a->name);
+
+    switch (tag) {
+    case tagSkyCover:
+      newLayer->coverage = getLayerCloudCover(a, _hash);
+      break;
+    case tagCloudBase:
+      newLayer->height =
+          (int)strtol((const char *)a->children->content, NULL, 10);
+      break;
+    default:
+      break;
+    }
+
+    a = a->next;
+  }
+
+  /* Add the layer in sorted order. */
+  if (!_station->layers) {
+    _station->layers = newLayer;
+  } else {
+    p = _station->layers;
+
+    while (p) {
+      if (newLayer->height < p->height) {
+        /* Insert the layer before the current layer. If the current layer is
+           the start of the list, update the list pointer.
+         */
+        if (p == _station->layers) {
+          _station->layers = newLayer;
+        } else {
+          p->prev->next = newLayer;
+        }
+
+        p->prev = newLayer;
+        newLayer->next = p;
+        break;
+      } else if (!p->next) {
+        /* There are no more items in the list after this one. Thus, this layer
+           has to be placed after the current layer.
+         */
+        p->next = newLayer;
+        newLayer->prev = p;
+        break;
+      }
+
+      p = p->next;
+    }
+  }
+}
+
+/**
+ * @brief Reads a station METAR group.
+ * @param[in]: _node    The station node.
+ * @param[in]: _hash    The tag hash map.
+ * @param[in]: _station The station object to receive the METAR information.
+ */
 static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
-  WxStation *_station)
-{
+                        WxStation *_station) {
   Tag tag;
   struct tm obs;
-  SkyCondition *skyN, *skyP;
   xmlNodePtr c = _node->children;
-  xmlAttr *a;
 
-  while (c)
-  {
-    if (c->type == XML_TEXT_NODE)
-    {
+  while (c) {
+    if (c->type == XML_TEXT_NODE) {
       c = c->next;
       continue;
     }
 
     tag = getTag(_hash, c->name);
 
-    switch (tag)
-    {
+    switch (tag) {
     case tagRawText:
-      _station->raw = strdup((char*)c->children->content);
+      _station->raw = strdup((char *)c->children->content);
       break;
     case tagStationId:
-      _station->id = strdup((char*)c->children->content);
+      _station->id = strdup((char *)c->children->content);
       _station->localId = trimLocalId(_station->id);
       break;
     case tagObsTime:
-      parseUTCDateTime(&obs, (char*)c->children->content);
+      parseUTCDateTime((char *)c->children->content, &obs);
       _station->obsTime = timegm(&obs);
       break;
     case tagLat:
-      _station->lat = strtod((char*)c->children->content, NULL);
+      _station->lat = strtod((char *)c->children->content, NULL);
       break;
     case tagLon:
-      _station->lon = strtod((char*)c->children->content, NULL);
+      _station->lon = strtod((char *)c->children->content, NULL);
       break;
     case tagTemp:
-      _station->temp = strtod((char*)c->children->content, NULL);
+      _station->temp = strtod((char *)c->children->content, NULL);
       break;
     case tagDewpoint:
-      _station->dewPoint = strtod((char*)c->children->content, NULL);
+      _station->dewPoint = strtod((char *)c->children->content, NULL);
       break;
     case tagWindDir:
-      _station->windDir = atoi((char*)c->children->content);
+      _station->windDir = atoi((char *)c->children->content);
       break;
     case tagWindSpeed:
-      _station->windSpeed = atoi((char*)c->children->content);
+      _station->windSpeed = atoi((char *)c->children->content);
       break;
     case tagWindGust:
-      _station->windGust = atoi((char*)c->children->content);
+      _station->windGust = atoi((char *)c->children->content);
       break;
     case tagVis:
-      _station->visibility = strtod((char*)c->children->content, NULL);
+      _station->visibility = strtod((char *)c->children->content, NULL);
       break;
     case tagAlt:
-      _station->alt = strtod((char*)c->children->content, NULL);
+      _station->alt = strtod((char *)c->children->content, NULL);
       break;
     case tagWxString:
-      _station->wxString = strdup((char*)c->children->content);
+      _station->wxString = strdup((char *)c->children->content);
       break;
     case tagCategory:
-      tag = getTag(_hash, c->children->content);
-
-      switch (tag)
-      {
-      case tagVFR:
-        _station->cat = catVFR;
-        break;
-      case tagMVFR:
-        _station->cat = catMVFR;
-        break;
-      case tagIFR:
-        _station->cat = catIFR;
-        break;
-      case tagLIFR:
-        _station->cat = catLIFR;
-        break;
-      default:
-        _station->cat = catInvalid;
-        break;
-      }
-
+      _station->cat = getStationFlightCategory(c->children, _hash);
       break;
     case tagSkyCond:
-      a = c->properties;
-      skyN = (SkyCondition*)malloc(sizeof(SkyCondition));
-      memset(skyN, 0, sizeof(SkyCondition));
-
-      while (a)
-      {
-        tag = getTag(_hash, a->name);
-
-        switch (tag)
-        {
-        case tagSkyCover:
-          tag = getTag(_hash, a->children->content);
-
-          switch (tag)
-          {
-          case tagSKC:
-          case tagCLR:
-          case tagCAVOK:
-            skyN->coverage = skyClear;
-            break;
-          case tagSCT:
-            skyN->coverage = skyScattered;
-            break;
-          case tagFEW:
-            skyN->coverage = skyFew;
-            break;
-          case tagBKN:
-            skyN->coverage = skyBroken;
-            break;
-          case tagOVC:
-            skyN->coverage = skyOvercast;
-            break;
-          case tagOVX:
-            skyN->coverage = skyOvercastSurface;
-            break;
-          default:
-            skyN->coverage = skyInvalid;
-            break;
-          }
-
-          break;
-        case tagCloudBase:
-          skyN->height = atoi((char*)a->children->content);
-          break;
-        default:
-          break;
-        }
-
-        a = a->next;
-      }
-
-      if (!_station->layers)
-        _station->layers = skyN;
-      else
-      {
-        skyP = _station->layers;
-
-        while (skyP)
-        {
-          if (skyN->height < skyP->height)
-          {
-            if (skyP == _station->layers)
-              _station->layers = skyN;
-            else
-              skyP->prev->next = skyN;
-
-            skyP->prev = skyN;
-            skyN->next = skyP;
-            break;
-          }
-
-          skyP = skyP->next;
-        }
-      }
-
+      addCloudLayer(c, _station, _hash);
       break;
     case tagVertVis:
-      _station->vertVis = strtod((char*)c->children->content, NULL);
+      _station->vertVis = strtod((char *)c->children->content, NULL);
       break;
     default:
       break;
@@ -507,32 +704,48 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
   }
 }
 
-static void classifyDominantWeather(WxStation *_station)
-{
+/**
+ * @enum Intensity
+ * @brief Weather intensity value.
+ */
+typedef enum {
+  intensityInvalid,
+  intensityLight,
+  intensityModerate,
+  intensityHeavy
+} Intensity;
+
+/**
+ * @brief   Classifies the dominant weather phenomenon.
+ * @details Examines all of the reported weather phenomena and returns the
+ *          dominant, i.e. most impactful, phenomenon.
+ * @param[in]: _station The weather station to classify.
+ */
+static void classifyDominantWeather(WxStation *_station) {
   yyscan_t scanner;
   YY_BUFFER_STATE buf;
-  int c, h, intensity, descriptor;
+  int c, h, descriptor;
+  Intensity intensity;
   SkyCondition *s;
 
-  _station->wx = wxInvalid;
+  /* Assume clear skies to start. */
+  _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
 
   s = _station->layers;
-  h = 99999;
+  h = INT_MAX;
 
-  while (s)
-  {
-    if (s->coverage < skyScattered && _station->wx < wxClearDay)
+  /* First, find the most impactful cloud cover. */
+  while (s) {
+    if (s->coverage < skyScattered && _station->wx < wxClearDay) {
       _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
-    else if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay)
-      _station->wx = (_station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay);
-    else if (s->coverage < skyOvercast && s->height < h &&
-             _station->wx < wxBrokenDay)
-    {
+    } else if (s->coverage < skyBroken && _station->wx < wxScatteredOrFewDay) {
+      _station->wx =
+          (_station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay);
+    } else if (s->coverage < skyOvercast && s->height < h &&
+             _station->wx < wxBrokenDay) {
       _station->wx = (_station->isNight ? wxBrokenNight : wxBrokenDay);
       h = s->height;
-    }
-    else if (_station->wx < wxOvercast && s->height < h)
-    {
+    } else if (_station->wx < wxOvercast && s->height < h) {
       _station->wx = wxOvercast;
       h = s->height;
     }
@@ -540,108 +753,137 @@ static void classifyDominantWeather(WxStation *_station)
     s = s->next;
   }
 
-  if (_station->wx == wxInvalid)
-    _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
-
-  if (!_station->wxString)
+  /* If there are no reported phenomena, just use the sky coverage. */
+  if (!_station->wxString) {
     return;
+  }
 
+  /* Tokenize the weather phenomena string. */
   wxtype_lex_init(&scanner);
   buf = wxtype__scan_string(_station->wxString, scanner);
 
-  intensity = -1;
+  intensity = intensityInvalid;
   descriptor = 0;
 
-  while ((c = wxtype_lex(scanner)) != 0)
-  {
-    if (intensity < 0 && c != ' ' && c != '-' && c != '+' && c != wxVC)
-      intensity = 2;
+  while ((c = wxtype_lex(scanner)) != 0) {
+    /* If the intensity is invalid and the current token does not specify an
+       intensity level, just use moderate intensity, e.g. SH is moderate showers
+       versus -SH for light showers.
+     */
+    if (intensity ==intensityInvalid && c != ' ' && c != '-' && c != '+') {
+      intensity = intensityModerate;
+    }
 
-    switch (c)
-    {
-    case ' ':
-      intensity = -1;
+    switch (c) {
+    case ' ': /* Reset token */
+      intensity = intensityInvalid;
       descriptor = 0;
       break;
-    case wxVC:
-      intensity = 0;
+    case wxVC: /* Nothing to do for in vincinity */
       break;
     case '-':
-      intensity = 1;
+      intensity = intensityLight;
       break;
     case '+':
-      intensity = 3;
+      intensity = intensityHeavy;
       break;
-    case wxMI: case wxPR: case wxBC: case wxDR:
-    case wxBL: case wxSH: case wxFZ:
+    case wxMI: /* Shallow descriptor */
+    case wxPR: /* Partial descriptor */
+    case wxBC: /* Patchy descriptor */
+    case wxDR: /* Drifting descriptor */
+    case wxBL: /* Blowing descriptor */
+    case wxSH: /* Showery descriptor */
+    case wxFZ: /* Freezing descriptor */
       descriptor = c;
       break;
     case wxTS:
-      if (intensity < 2 && _station->wx < wxLightTstormsSqualls)
+      /* If the currently known phenomenon is a lower priority than
+         Thunderstorms, update it with the appropriate light or moderate/heavy
+         Thunderstorm classification.
+       */
+      if (intensity < intensityModerate && _station->wx < wxLightTstormsSqualls) {
         _station->wx = wxLightTstormsSqualls;
-      else if (_station->wx < wxTstormsSqualls)
+      } else if (_station->wx < wxTstormsSqualls) {
         _station->wx = wxTstormsSqualls;
+      }
 
       break;
-    case wxBR: case wxHZ:
-      if (_station->wx < wxLightMistHaze)
+    case wxBR: /* Mist */
+    case wxHZ: /* Haze */
+      if (_station->wx < wxLightMistHaze) {
         _station->wx = wxLightMistHaze;
+      }
 
       break;
-    case wxDZ: case wxRA:
-      if (descriptor != wxFZ)
-      {
-        if (intensity < 2 && _station->wx < wxLightDrizzleRain)
+    case wxDZ: /* Drizzle */
+      /* Let drizzle fall through. DZ and RA will be categorized as rain. */
+    case wxRA: /* Rain */
+      if (descriptor != wxFZ) {
+        if (intensity < intensityModerate && _station->wx < wxLightDrizzleRain) {
           _station->wx = wxLightDrizzleRain;
-        else if (_station->wx < wxRain)
+        } else if (_station->wx < wxRain) {
           _station->wx = wxRain;
       }
-      else
-      {
-        if (intensity < 2 && _station->wx < wxLightFreezingRain)
+      } else {
+        if (intensity < intensityModerate && _station->wx < wxLightFreezingRain) {
           _station->wx = wxLightFreezingRain;
-        else if (_station->wx < wxFreezingRain)
+        } else if (_station->wx < wxFreezingRain) {
           _station->wx = wxFreezingRain;
+        }
       }
 
       break;
-    case wxSN: case wxSG:
-      if (intensity == 0 && _station->wx < wxFlurries)
+    case wxSN: /* Snow */
+    case wxSG: /* Snow grains */
+      if (intensity == intensityLight && _station->wx < wxFlurries) {
         _station->wx = wxFlurries;
-      else if (intensity == 1 && _station->wx < wxLightSnow)
+      } else if (intensity == intensityModerate && _station->wx < wxLightSnow) {
         _station->wx = wxLightSnow;
-      else if (_station->wx < wxSnow)
+      } else if (_station->wx < wxSnow) {
         _station->wx = wxSnow;
+      }
 
       break;
-    case wxIC: case wxPL: case wxGR: case wxGS:
-      if (intensity < 2 && _station->wx < wxLightFreezingRain)
+    case wxIC: /* Ice crystals */
+    case wxPL: /* Ice pellets */
+    case wxGR: /* Hail */
+    case wxGS: /* Small hail */
+      /* Reuse the freezing rain category. */
+      if (intensity < intensityModerate && _station->wx < wxLightFreezingRain) {
         _station->wx = wxLightFreezingRain;
-      else if (_station->wx < wxFreezingRain)
+      } else if (_station->wx < wxFreezingRain) {
         _station->wx = wxLightFreezingRain;
+      }
 
       break;
-    case wxFG: case wxFU: case wxDU: case wxSS:
-    case wxDS:
-      if (_station->wx < wxObscuration)
+    case wxFG: /* Fog */
+    case wxFU: /* Smoke */
+    case wxDU: /* Dust */
+    case wxSS: /* Sand storm */
+    case wxDS: /* Dust storm */
+      if (_station->wx < wxObscuration) {
         _station->wx = wxObscuration;
+      }
 
       break;
-    case wxVA:
-      if (_station->wx < wxVolcanicAsh)
+    case wxVA: /* Volcanic ash */
+      if (_station->wx < wxVolcanicAsh) {
         _station->wx = wxVolcanicAsh;
+      }
 
       break;
-    case wxSQ:
-      if (intensity < 2 && _station->wx < wxLightTstormsSqualls)
+    case wxSQ: /* Squalls */
+      if (intensity < intensityModerate && _station->wx < wxLightTstormsSqualls) {
         _station->wx = wxLightTstormsSqualls;
-      else if (_station->wx < wxTstormsSqualls)
+      } else if (_station->wx < wxTstormsSqualls) {
         _station->wx = wxTstormsSqualls;
+      }
 
       break;
-    case wxFC:
-      if (_station->wx < wxFunnelCloud)
+    case wxFC: /* Funnel cloud */
+      if (_station->wx < wxFunnelCloud) {
         _station->wx = wxFunnelCloud;
+      }
 
       break;
     }
@@ -651,8 +893,30 @@ static void classifyDominantWeather(WxStation *_station)
   wxtype_lex_destroy(scanner);
 }
 
-WxStation* queryWx(const char *_stations, int *err)
-{
+/**
+ * @brief   Search the parent's children for a specific tag.
+ * @param[in]: _parent The parent tag.
+ * @param[in]: _tag    The tag to find.
+ * @returns The first instance of the specified tag or null.
+ */
+static xmlNodePtr getChildTag(xmlNodePtr _children, Tag _tag, xmlHashTablePtr _hash) {
+  xmlNodePtr p = _children;
+  Tag tag;
+
+  while (p) {
+    tag = getTag(_hash, p->name);
+
+    if (tag == _tag) {
+      return p;
+    }
+
+    p = p->next;
+  }
+
+  return NULL;
+}
+
+WxStation *queryWx(const char *_stations, int *err) {
   CURL *curlLib;
   CURLcode res;
   char url[4096];
@@ -661,11 +925,15 @@ WxStation* queryWx(const char *_stations, int *err)
   xmlNodePtr p;
   xmlHashTablePtr hash = NULL;
   Tag tag;
-  WxStation *start = NULL, *cur, *n;
+  WxStation *start = NULL, *cur, *newStation;
   int ok = 0, count, len;
 
   *err = 0;
 
+  /* Build the query string to look for reports within the last hour and a half.
+     It is possible some stations lag more than an hour, but typically not more
+     than an hour and a half.
+   */
   strncpy(url,
     "https://aviationweather.gov/adds/dataserver_current/httpparam?"
     "dataSource=metars&"
@@ -678,14 +946,18 @@ WxStation* queryWx(const char *_stations, int *err)
 
   count = 4096 - strlen(url);
   len = strlen(_stations);
-  if (len >= count)
+
+  if (len >= count) {
     return NULL;
+  }
 
   strcat(url, _stations);
 
   curlLib = curl_easy_init();
-  if (!curlLib)
+
+  if (!curlLib) {
     return NULL;
+  }
 
   data.ctxt = NULL;
   curl_easy_setopt(curlLib, CURLOPT_URL, url);
@@ -694,15 +966,13 @@ WxStation* queryWx(const char *_stations, int *err)
   res = curl_easy_perform(curlLib);
   curl_easy_cleanup(curlLib);
 
-  if (data.ctxt)
-  {
+  if (data.ctxt) {
     xmlParseChunk(data.ctxt, NULL, 0, 1);
     doc = data.ctxt->myDoc;
     xmlFreeParserCtxt(data.ctxt);
   }
 
-  if (res != CURLE_OK)
-  {
+  if (res != CURLE_OK) {
     *err = res;
     goto cleanup;
   }
@@ -710,63 +980,53 @@ WxStation* queryWx(const char *_stations, int *err)
   hash = xmlHashCreate(tagLast);
   initHash(hash);
 
-  p = doc->children;
-  while (p)
-  {
-    tag = getTag(hash, p->name);
-    if (tag == tagResponse)
-      break;
+  /* Find the response tag. */
+  p = getChildTag(doc->children, tagResponse, hash);
 
-    p = p->next;
+  if (!p) {
+    goto cleanup;
   }
 
-  if (!p)
+  /* Find the data tag. */
+  p = getChildTag(p->children, tagData, hash);
+
+  if (!p) {
     goto cleanup;
-
-  p = p->children;
-  while (p)
-  {
-    tag = getTag(hash, p->name);
-    if (tag == tagData)
-      break;
-
-    p = p->next;
   }
 
-  if (!p)
-    goto cleanup;
-
+  /* Scan for METAR groups. */
   p = p->children;
-  while (p)
-  {
-    if (p->type == XML_TEXT_NODE)
-    {
+  
+  while (p) {
+    tag = getTag(hash, p->name);
+
+    if (tag != tagMETAR) {
       p = p->next;
       continue;
     }
 
-    n = (WxStation*)malloc(sizeof(WxStation));
-    memset(n, 0, sizeof(WxStation));
+    newStation = (WxStation *)malloc(sizeof(WxStation));
+    memset(newStation, 0, sizeof(WxStation));
 
-    if (!start)
-    {
-      start = cur = n;
+    /* Add the station to the circular list. */
+    if (!start) {
+      start = cur = newStation;
       cur->next = cur;
       cur->prev = cur;
-    }
-    else
-    {
-      start->prev = n;
-      cur->next = n;
-      n->next = start;
-      n->prev = cur;
-      cur = n;
+    } else {
+      start->prev = newStation;
+      cur->next = newStation;
+      newStation->next = start;
+      newStation->prev = cur;
+      cur = newStation;
     }
 
-    readStation(p, hash, n);
-    n->isNight = isNight(n->lat, n->lon, n->obsTime);
-    n->blinkState = 1;
-    classifyDominantWeather(n);
+    /* Read the station and get the night status for classifying weather. */
+    readStation(p, hash, newStation);
+    newStation->isNight = isNight(newStation->lat, newStation->lon, newStation->obsTime);
+    newStation->blinkState = 1;
+
+    classifyDominantWeather(newStation);
 
     p = p->next;
   }
@@ -774,12 +1034,15 @@ WxStation* queryWx(const char *_stations, int *err)
   ok = 1;
 
 cleanup:
-  if (doc)
+  if (doc) {
     xmlFreeDoc(doc);
-  if (hash)
+  }
+
+  if (hash) {
     xmlHashFree(hash, hashDealloc);
-  if (start && !ok)
-  {
+  }
+  
+  if (start && !ok) {
     freeStations(start);
     start = NULL;
   }
@@ -787,28 +1050,31 @@ cleanup:
   return start;
 }
 
-void freeStations(WxStation *_stations)
-{
+void freeStations(WxStation *_stations) {
   WxStation *p;
   SkyCondition *s;
 
+  /* Break the circular list. */
   _stations->prev->next = NULL;
 
-  while (_stations)
-  {
+  while (_stations) {
     p = _stations;
 
     _stations = _stations->next;
 
-    if (p->id)
+    if (p->id) {
       free(p->id);
-    if (p->localId)
-      free(p->localId);
-    if (p->raw)
-      free(p->raw);
+    }
 
-    while (p->layers)
-    {
+    if (p->localId) {
+      free(p->localId);
+    }
+
+    if (p->raw) {
+      free(p->raw);
+    }
+
+    while (p->layers) {
       s = p->layers;
       p->layers = p->layers->next;
       free(s);
