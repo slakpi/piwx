@@ -5,8 +5,6 @@ include(CheckFunctionExists)
 project("piwx")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3 -Wall -Wno-unused-function")
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -O0 -g")
 set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
 
 if (NOT DEFINED SHARE_PREFIX)
@@ -44,10 +42,12 @@ BISON_TARGET(ConfParser
   conf_file.y
   ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.c
   DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.h)
+
 FLEX_TARGET(ConfLexer
   conf_file.l
   ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.c
   DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.h)
+
 ADD_FLEX_BISON_DEPENDENCY(ConfLexer ConfParser)
 
 FLEX_TARGET(WxTypeLexer
@@ -57,23 +57,30 @@ FLEX_TARGET(WxTypeLexer
 
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 
+add_library(parsers
+  ${BISON_ConfParser_OUTPUTS}
+  ${FLEX_ConfLexer_OUTPUTS}
+  ${FLEX_WxTypeLexer_OUTPUTS})
+target_compile_options(parsers PRIVATE
+  -Wno-unused-function -Wno-unused-variable)
+
 set(PIWX_SOURCES
   config.c
   util.c
   gfx.c
   piwx.c
-  wx.c
-  ${BISON_ConfParser_OUTPUTS}
-  ${FLEX_ConfLexer_OUTPUTS}
-  ${FLEX_WxTypeLexer_OUTPUTS})
+  wx.c)
 
 if (WITH_LED_SUPPORT)
   set(PIWX_SOURCES ${PIWX_SOURCES} led.c)
 endif (WITH_LED_SUPPORT)
 
 add_executable(piwx ${PIWX_SOURCES})
+target_compile_options(piwx PRIVATE
+  -Wall -Werror=unused-function -Werror=unused-variable -mfpu=neon)
+target_link_options(piwx PRIVATE -lm)
 
-set(PIWX_LIBS curl xml2 png jansson wiringPi)
+set(PIWX_LIBS parsers curl xml2 png jansson wiringPi)
 
 if (WITH_LED_SUPPORT)
   set(PIWX_LIBS ${PIWX_LIBS} ws2811)
