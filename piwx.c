@@ -379,8 +379,7 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
 
   setTextColor(_resources->font6, &rgbWhite);
 
-  switch (sky->coverage)
-  {
+  switch (sky->coverage) {
   case skyClear:
     strncpy(buf, "Clear", _countof(buf));
     drawText(_resources->sfc, _resources->font6, 172, 126, buf, strlen(buf));
@@ -427,7 +426,8 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
  * @param[in]: _resources The common drawing resources.
  * @param[in]: _station   The weather station.
  */
-static void drawTempDewPointVis(DrawResources *_resources, WxStation *_station) {
+static void drawTempDewPointVis(DrawResources *_resources,
+                                WxStation *_station) {
   char buf[33];
 
   setTextColor(_resources->font6, &rgbWhite);
@@ -435,8 +435,8 @@ static void drawTempDewPointVis(DrawResources *_resources, WxStation *_station) 
   snprintf(buf, _countof(buf), "%dsm vis", _station->visibility);
   drawText(_resources->sfc, _resources->font6, 172, 172, buf, strlen(buf));
 
-  snprintf(buf, _countof(buf), "%.0f\x01/%.0f\x01\x43", 
-          _station->temp, _station->dewPoint);
+  snprintf(buf, _countof(buf), "%.0f\x01/%.0f\x01\x43", _station->temp,
+           _station->dewPoint);
   drawText(_resources->sfc, _resources->font6, 0, 206, buf, strlen(buf));
 
   snprintf(buf, _countof(buf), "%.2f\"", _station->alt);
@@ -538,7 +538,7 @@ static int go(boolean _test, boolean _verbose) {
   WxStation *wx = NULL, *curStation = NULL;
   time_t nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   boolean first = TRUE, draw;
-  int  i, err;
+  int i, err;
   unsigned int b, bl = 0, bc, retry = 0;
 
   if (_verbose) {
