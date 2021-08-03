@@ -32,8 +32,8 @@ typedef struct {
  * @brief  Private implementation of Bitmap
  */
 typedef struct {
-  Rectangle dim;                       /* Dimensions of the PNG.              */
-  RGBA **rows;                         /* Row markers.                        */
+  Rectangle dim; /* Dimensions of the PNG. */
+  RGBA **rows;   /* Row markers. */
 } _Bitmap;
 
 /**
@@ -47,14 +47,12 @@ typedef _Bitmap _Surface;
  * @brief  Configuration of a compose operation.
  */
 typedef struct {
-  _Bitmap *from;                       /* Source bitmap.                      */
-  Rectangle source;                    /* Source rectangle.                   */
-
-  RGBA color;                          /* Foreground color.                   */
-  RGBA bkgnd;                          /* Background color.                   */
-
-  _Surface *to;                        /* Target surface.                     */
-  int x, y;                            /* Top-left corner of output.          */
+  _Bitmap *from;    /* Source bitmap. */
+  Rectangle source; /* Source rectangle. */
+  _Surface *to;     /* Target surface. */
+  int x, y;         /* Top-left corner of output. */
+  RGBA color;       /* Foreground color. */
+  RGBA bkgnd;       /* Background color. */
 } Compose;
 
 /**
@@ -243,7 +241,7 @@ static _Bitmap *allocateEmptyBitmap(int _w, int _h) {
   bmp->dim.t = 0;
   bmp->dim.r = _w;
   bmp->dim.b = _h;
-  bmp->rows  = (RGBA **)malloc(sizeof(RGBA*) * _h);
+  bmp->rows = (RGBA **)malloc(sizeof(RGBA *) * _h);
 
   if (!bmp->rows) {
     goto cleanup;
@@ -428,11 +426,11 @@ cleanup:
  * @brief  Windows bitmap file header.
  */
 typedef struct {
-  u_int8_t signature[2];               /* Bitmap file signature.              */
-  u_int32_t fileSize;                  /* Total bitmap file size.             */
-  u_int16_t reserved1;                 /* Ignored.                            */
-  u_int16_t reserved2;                 /* Ignored.                            */
-  u_int32_t pixelOffset;               /* Offset to pixel data.               */
+  u_int8_t signature[2]; /* Bitmap file signature. */
+  u_int32_t fileSize;    /* Total bitmap file size. */
+  u_int16_t reserved1;   /* Ignored. */
+  u_int16_t reserved2;   /* Ignored. */
+  u_int32_t pixelOffset; /* Offset to pixel data. */
 } _BITMAPFILEHEADER;
 
 /**
@@ -440,17 +438,17 @@ typedef struct {
  * @brief  Windows bitmap information header.
  */
 typedef struct {
-  u_int32_t size;                      /* Header size.                        */
-  u_int32_t width;                     /* Bitmap width in pixels.             */
-  u_int32_t height;                    /* Bitmap height in pixels.            */
-  u_int16_t planes;                    /* Color planes, must be 1.            */
-  u_int16_t bpp;                       /* Bits-per-pixel                      */
-  u_int32_t compression;               /* Compression method.                 */
-  u_int32_t bmpSize;                   /* Raw bitmap size, 0 for BI_RGB.      */
-  u_int32_t hRes;                      /* Horizontal resolution px per meter. */
-  u_int32_t vRes;                      /* Vertical resolution px per meter.   */
-  u_int32_t paletteSize;               /* Colors in palette.                  */
-  u_int32_t importantColors;           /* Important colors in palette, 0.     */
+  u_int32_t size;            /* Header size. */
+  u_int32_t width;           /* Bitmap width in pixels. */
+  u_int32_t height;          /* Bitmap height in pixels. */
+  u_int16_t planes;          /* Color planes, must be 1. */
+  u_int16_t bpp;             /* Bits-per-pixel. */
+  u_int32_t compression;     /* Compression method. */
+  u_int32_t bmpSize;         /* Raw bitmap size, 0 for BI_RGB. */
+  u_int32_t hRes;            /* Horizontal resolution px per meter. */
+  u_int32_t vRes;            /* Vertical resolution px per meter. */
+  u_int32_t paletteSize;     /* Colors in palette. */
+  u_int32_t importantColors; /* Important colors in palette, 0. */
 } _BITMAPINFOHEADER;
 
 int writeSurfaceToBMP(const Surface _surface, const char *_file) {
@@ -588,7 +586,8 @@ static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
   _Bitmap *bmp = NULL;
 
   // Verify the designed format is supported.
-  if (_colorFormat != PNG_COLOR_TYPE_GRAY && _colorFormat != PNG_COLOR_TYPE_RGBA) {
+  if (_colorFormat != PNG_COLOR_TYPE_GRAY &&
+      _colorFormat != PNG_COLOR_TYPE_RGBA) {
     return NULL;
   }
 

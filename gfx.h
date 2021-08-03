@@ -12,9 +12,9 @@
  */
 typedef float32x4_t RGBA;
 
-#define RED(c)   ((c)[0])
+#define RED(c) ((c)[0])
 #define GREEN(c) ((c)[1])
-#define BLUE(c)  ((c)[2])
+#define BLUE(c) ((c)[2])
 #define ALPHA(c) ((c)[3])
 #endif
 
@@ -120,7 +120,7 @@ void drawBitmap(Surface _surface, const Bitmap _bmp, int _x, int _y);
  *          the bitmap matched to the center of the specified rectangle on the
  *          target surface. Any part of the bitmap that falls outside of the
  *          target surface is ignored.
- * 
+ *
  *          The rectangle excludes the right and bottom, e.g. valid columns are
  *          in the interval [l, r) and valid rows are in the interval [t, b).
  * @param[in] _surface The target surface to receive the bitmap.
@@ -137,7 +137,7 @@ void drawBitmapInBox(Surface _surface, const Bitmap _bmp, int _l, int _t,
  * @typedef Font
  * @brief   Handle representing a fixed-width font character map.
  * @details A font character map contains the following:
- * 
+ *
  *            0 . . . . No character
  *            1 . . . . Degree symbol
  *            2-19. . . No characters
@@ -150,12 +150,7 @@ typedef void *Font;
  * @enum  FontSize
  * @brief Available font character maps.
  */
-typedef enum {
-  font_16pt,
-  font_10pt,
-  font_8pt,
-  font_6pt
-} FontSize;
+typedef enum { font_16pt, font_10pt, font_8pt, font_6pt } FontSize;
 
 /**
  * @brief   Allocate a font character map.
