@@ -522,6 +522,9 @@ static void drawStation(DrawResources *_resources, WxStation *_station) {
 
   // Draw temperature, dewpoint, and visibility.
   drawTempDewPointVis(_resources, _station);
+
+  // Update the screen.
+  commitSurface(_resources->sfc);
 }
 
 /**
