@@ -68,13 +68,10 @@ static void _freeBitmap(_Bitmap *_bmp) {
   }
 
   if (_bmp->rows) {
-    if (_bmp->rows[0]) {
-      free(_bmp->rows[0]);
-    }
-
-    free(_bmp->rows);
+    free(_bmp->rows[0]);
   }
 
+  free(_bmp->rows);
   free(_bmp);
 }
 
@@ -414,12 +411,10 @@ cleanup:
   }
 
   if (rows) {
-    if (rows[0]) {
-      free(rows[0]);
-    }
-
-    free(rows);
+    free(rows[0]);
   }
+
+  free(rows);
 
   return ok;
 }
@@ -515,9 +510,7 @@ cleanup:
     fclose(bmp);
   }
 
-  if (buf) {
-    free(buf);
-  }
+  free(buf);
 
   return ok;
 }
@@ -560,9 +553,7 @@ cleanup:
     close(fb);
   }
 
-  if (buf) {
-    free(buf);
-  }
+  free(buf);
 
   return ok;
 }
@@ -716,14 +707,12 @@ cleanup:
   }
 
   if (rows) {
-    if (rows[0]) {
-      free(rows[0]);
-    }
-
-    free(rows);
+    free(rows[0]);
   }
 
-  if (bmp && !ok) {
+  free(rows);
+
+  if (!ok) {
     _freeBitmap(bmp);
     bmp = NULL;
   }
@@ -840,10 +829,7 @@ void freeFont(Font _font) {
     return;
   }
 
-  if (font->bmp) {
-    freeBitmap(font->bmp);
-  }
-
+  freeBitmap(font->bmp);
   free(font);
 }
 
