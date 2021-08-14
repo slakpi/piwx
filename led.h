@@ -4,7 +4,7 @@
 #ifndef LED_H
 #define LED_H
 
-#include "config_helpers.h"
+#include "conf_file.h"
 #include "wx.h"
 
 /**
