@@ -13,7 +13,7 @@
 
 typedef void *yyscan_t;
 
-#include "wxtype.lexer.h"
+#include "wx.lexer.h"
 
 /**
  * @brief   Trims a local airport ID for display.

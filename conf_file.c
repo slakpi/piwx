@@ -1,3 +1,6 @@
+/**
+ * @file conf_file.c
+ */
 #include <config.h>
 #include <string.h>
 
@@ -5,14 +8,14 @@ typedef void *yyscan_t;
 
 // clang-format off
 // These includes must be in this order.
-#include "config_helpers.h"
 #include "conf_file.h"
-#include "conf_file.parser.h"
+#include "conf_param.h"
+#include "conf.parser.h"
 // clang-format on
 
 #define YYSTYPE CONF_STYPE
 
-#include "conf_file.lexer.h"
+#include "conf.lexer.h"
 
 PiwxConfig *getPiwxConfig() {
   FILE *cfgFile;
@@ -59,34 +62,15 @@ void freePiwxConfig(PiwxConfig *_cfg) {
     return;
   }
 
-  if (_cfg->installPrefix) {
-    free(_cfg->installPrefix);
-  }
-
-  if (_cfg->imageResources) {
-    free(_cfg->imageResources);
-  }
-
-  if (_cfg->fontResources) {
-    free(_cfg->fontResources);
-  }
-
-  if (_cfg->configFile) {
-    free(_cfg->configFile);
-  }
-
-  if (_cfg->stationQuery) {
-    free(_cfg->stationQuery);
-  }
-
-  if (_cfg->nearestAirport) {
-    free(_cfg->nearestAirport);
-  }
+  free(_cfg->installPrefix);
+  free(_cfg->imageResources);
+  free(_cfg->fontResources);
+  free(_cfg->configFile);
+  free(_cfg->stationQuery);
+  free(_cfg->nearestAirport);
 
   for (i = 0; i < MAX_LEDS; ++i) {
-    if (_cfg->ledAssignments[i]) {
-      free(_cfg->ledAssignments[i]);
-    }
+    free(_cfg->ledAssignments[i]);
   }
 
   free(_cfg);
@@ -94,12 +78,12 @@ void freePiwxConfig(PiwxConfig *_cfg) {
 
 /**
  * @brief   Append a file name to a path prefix.
- * @details A POSIX-only function to append a trailing backslash to the prefix,
- *          if necessary, followed by the specified file name.
+ * @details A POSIX-only function to append a trailing backslash to @a _prefix,
+ *          if necessary, followed by @a _name.
  * @param[in] _prefix Null-terminated path prefix.
  * @param[in] _file   Null-terminated file name.
- * @param[in] _path   Output buffer.
- * @param[in] _len    Length of the output buffer.
+ * @param[in] _path   Output buffer. May not overlap @a _prefix or @a _file.
+ * @param[in] _len    Length of @a _path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
 static char *appendFileToPath(const char *_prefix, const char *_file,

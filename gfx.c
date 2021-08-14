@@ -1,5 +1,5 @@
+#include "conf_file.h"
 #include "gfx.h"
-#include "config_helpers.h"
 #include "util.h"
 #include <fcntl.h>
 #include <float.h>

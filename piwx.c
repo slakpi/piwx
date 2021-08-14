@@ -1,4 +1,4 @@
-#include "config_helpers.h"
+#include "conf_file.h"
 #include "gfx.h"
 #include "util.h"
 #include "wx.h"

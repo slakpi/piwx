@@ -8,9 +8,9 @@
 %{
 
 #include <string.h>
-#include "../config_helpers.h"
 #include "../conf_file.h"
-#include "conf_file.parser.h"
+#include "../conf_param.h"
+#include "conf.parser.h"
 
 #define YYSTYPE CONF_STYPE
 

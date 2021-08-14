@@ -39,37 +39,32 @@ find_package(Jansson REQUIRED)
 find_package(WiringPi REQUIRED)
 
 BISON_TARGET(ConfParser
-  conf_file.y
-  ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.c
-  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.parser.h)
+  conf_parser.y
+  ${CMAKE_CURRENT_BINARY_DIR}/conf.parser.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf.parser.h)
 
 FLEX_TARGET(ConfLexer
-  conf_file.l
-  ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.c
-  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf_file.lexer.h)
+  conf_lexer.l
+  ${CMAKE_CURRENT_BINARY_DIR}/conf.lexer.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/conf.lexer.h)
 
 ADD_FLEX_BISON_DEPENDENCY(ConfLexer ConfParser)
 
-FLEX_TARGET(WxTypeLexer
-  wxtype.l
-  ${CMAKE_CURRENT_BINARY_DIR}/wxtype.lexer.c
-  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/wxtype.lexer.h)
+FLEX_TARGET(WxLexer
+  wx_lexer.l
+  ${CMAKE_CURRENT_BINARY_DIR}/wx.lexer.c
+  DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/wx.lexer.h)
 
 include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
 
 add_library(parsers
   ${BISON_ConfParser_OUTPUTS}
   ${FLEX_ConfLexer_OUTPUTS}
-  ${FLEX_WxTypeLexer_OUTPUTS})
+  ${FLEX_WxLexer_OUTPUTS})
 target_compile_options(parsers PRIVATE
   -Wno-unused-function -Wno-unused-variable)
 
-set(PIWX_SOURCES
-  config.c
-  util.c
-  gfx.c
-  piwx.c
-  wx.c)
+set(PIWX_SOURCES conf_file.c gfx.c piwx.c util.c wx.c)
 
 if (WITH_LED_SUPPORT)
   set(PIWX_SOURCES ${PIWX_SOURCES} led.c)

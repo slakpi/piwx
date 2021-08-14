@@ -1,3 +1,6 @@
+/**
+ * @file wxtype.h
+ */
 #ifndef WXTYPE_H
 #define WXTYPE_H
 
@@ -14,4 +17,4 @@ typedef enum {
 } WxCode;
 // clang-format on
 
-#endif
+#endif  /* WXTYPE_H */

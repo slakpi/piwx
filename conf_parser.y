@@ -4,11 +4,11 @@
 
 typedef void* yyscan_t;
 
-#include "../config_helpers.h"
 #include "../conf_file.h"
+#include "../conf_param.h"
 #include "../util.h"
-#include "conf_file.parser.h"
-#include "conf_file.lexer.h"
+#include "conf.parser.h"
+#include "conf.lexer.h"
 
 static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error) {
 
