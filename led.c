@@ -1,3 +1,6 @@
+/**
+ * @file led.c
+ */
 #include "led.h"
 #include "util.h"
 #include <string.h>
@@ -138,8 +141,9 @@ int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
       p = p->next;
 
       // Circular list.
-      if (p == _wx)
+      if (p == _wx) {
         break;
+      }
     }
 
     // Reset the pointer.
@@ -164,8 +168,9 @@ int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
     p = p->next;
 
     // Circular list.
-    if (p == _wx)
+    if (p == _wx) {
       break;
+    }
   }
 
   // Commit the color configuration to the string.

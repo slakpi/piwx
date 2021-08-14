@@ -1,3 +1,6 @@
+/**
+ * @file util.h
+ */
 #ifndef UTIL_H
 #define UTIL_H
 
@@ -24,4 +27,4 @@ typedef int boolean;
 
 #define _countof(arr) (sizeof(arr) / sizeof(*(arr)))
 
-#endif
+#endif  /* UTIL_H */

@@ -1,3 +1,6 @@
+/**
+ * @file piwx.c
+ */
 #include "conf_file.h"
 #include "gfx.h"
 #include "util.h"
@@ -66,6 +69,10 @@ static unsigned int scanButtons() {
   return buttons;
 }
 
+/**
+ * @brief Print the configuration values.
+ * @param[in]: _config The PiWx configuration to print.
+ */
 static void printConfiguration(const PiwxConfig *_config) {
   int i;
 

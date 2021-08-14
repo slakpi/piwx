@@ -1,3 +1,6 @@
+/**
+ * @file gfx.c
+ */
 #include "conf_file.h"
 #include "gfx.h"
 #include "util.h"

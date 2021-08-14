@@ -1,3 +1,6 @@
+/**
+ * @file wx.c
+ */
 #include "wx.h"
 #include "wxtype.h"
 #include <ctype.h>

@@ -1,3 +1,6 @@
+/**
+ * @file wx.h
+ */
 #ifndef WX_H
 #define WX_H
 
@@ -103,4 +106,4 @@ WxStation *queryWx(const char *_stations, int *_err);
  */
 void freeStations(WxStation *_stations);
 
-#endif
+#endif  /* WX_H */

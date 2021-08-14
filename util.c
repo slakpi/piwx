@@ -1,3 +1,6 @@
+/**
+ * @file util.c
+ */
 #include "util.h"
 
 int min(int _a, int _b) {

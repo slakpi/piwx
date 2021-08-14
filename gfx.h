@@ -1,3 +1,6 @@
+/**
+ * @file gfx.h
+ */
 #ifndef GFX_H
 #define GFX_H
 
@@ -16,7 +19,7 @@ typedef float32x4_t RGBA;
 #define GREEN(c) ((c)[1])
 #define BLUE(c) ((c)[2])
 #define ALPHA(c) ((c)[3])
-#endif
+#endif  /* __ARM_NEON__ */
 
 extern const RGBA rgbNull;
 extern const RGBA rgbRed;
@@ -58,7 +61,7 @@ void clearSurface(Surface _surface);
  *          dimensions using RGBA8888. An existing file will be overwritten.
  * @param[in] _surface The drawing surface to output.
  * @param[in] _file    The name of the PNG file.
- * @returns Returns 0 if successful.
+ * @returns Returns 0 if successful, non-zero otherwise.
  */
 int writeSurfaceToPNG(const Surface _surface, const char *_file);
 
@@ -68,7 +71,7 @@ int writeSurfaceToPNG(const Surface _surface, const char *_file);
  *          dimensions using RGB565. An existing file will be overwritten.
  * @param[in] _surface The drawing surface to output.
  * @param[in] _file    The name of the BMP file.
- * @returns Returns 0 if successful.
+ * @returns Returns 0 if successful, non-zero otherwise.
  */
 int writeSurfaceToBMP(const Surface _surface, const char *_file);
 
@@ -77,7 +80,7 @@ int writeSurfaceToBMP(const Surface _surface, const char *_file);
  * @details Converts the RGBA data to 16-bit RGB565 color and transfers the
  *          contents of the drawing surface to the framebuffer for display.
  * @param[in] _surface The drawing surface to display.
- * @returns Returns 0 if successful.
+ * @returns Returns 0 if successful, non-zero otherwise.
  */
 int commitSurface(const Surface _surface);
 
@@ -135,7 +138,7 @@ void drawBitmapInBox(Surface _surface, const Bitmap _bmp, int _l, int _t,
 
 /**
  * @typedef Font
- * @brief   Handle representing a fixed-width font character map.
+ * @brief   Handle representing a 7-bit, fixed-width font character map.
  * @details A font character map contains the following:
  *
  *            0 . . . . No character
@@ -209,4 +212,4 @@ void setBackgroundColor(Font _font, const RGBA *_bkgnd);
 void drawText(Surface _surface, const Font _font, int _x, int _y,
               const char *_str, size_t _len);
 
-#endif
+#endif  /* GFX_H */
