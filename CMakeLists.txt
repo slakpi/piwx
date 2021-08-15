@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
 
-include(CheckFunctionExists)
-
 project("piwx")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
@@ -73,27 +71,12 @@ endif (WITH_LED_SUPPORT)
 add_executable(piwx ${PIWX_SOURCES})
 target_compile_options(piwx PRIVATE
   -Wall -Werror=unused-function -Werror=unused-variable -mfpu=neon)
-target_link_options(piwx PRIVATE -lm)
 
 set(PIWX_LIBS parsers curl xml2 png jansson wiringPi)
 
 if (WITH_LED_SUPPORT)
   set(PIWX_LIBS ${PIWX_LIBS} ws2811)
 endif (WITH_LED_SUPPORT)
-
-if (NOT CEIL_FUNCTION_EXISTS AND NOT NEED_LINKING_AGAINST_LIBM)
-  CHECK_FUNCTION_EXISTS(ceil CEIL_FUNCTION_EXISTS)
-  if (NOT CEIL_FUNCTION_EXISTS)
-    unset(CEIL_FUNCTION_EXISTS CACHE)
-    list(APPEND CMAKE_REQUIRED_LIBRARIES m)
-    CHECK_FUNCTION_EXISTS(ceil CEIL_FUNCTION_EXISTS)
-    if (CEIL_FUNCTION_EXISTS)
-      set(PIWX_LIBS ${PIWX_LIBS} m)
-    else()
-      message(FATAL_ERROR "Failed to make math functions available")
-    endif()
-  endif()
-endif()
 
 target_link_libraries(piwx ${PIWX_LIBS})
 
