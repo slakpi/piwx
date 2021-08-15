@@ -45,11 +45,11 @@ typedef enum { catInvalid, catVFR, catMVFR, catIFR, catLIFR } FlightCategory;
  */
 typedef enum {
   wxInvalid,
-  wxClearDay,                          /* Clear; no other weather.            */
+  wxClearDay,            /* Clear; no other weather.            */
   wxClearNight,
-  wxScatteredOrFewDay,                 /* Scattered or few; no other weather. */
+  wxScatteredOrFewDay,   /* Scattered or few; no other weather. */
   wxScatteredOrFewNight,
-  wxBrokenDay, /* Broken; no other weather.           */
+  wxBrokenDay,           /* Broken; no other weather.           */
   wxBrokenNight,
   wxOvercast,            /* Overcast; no other weather.         */
   wxLightMistHaze,       /* BR, HZ                              */
@@ -106,4 +106,4 @@ WxStation *queryWx(const char *_stations, int *_err);
  */
 void freeStations(WxStation *_stations);
 
-#endif  /* WX_H */
+#endif /* WX_H */

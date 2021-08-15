@@ -2,9 +2,9 @@
  * @file wx.c
  */
 #include "wx.h"
+#include "util.h"
 #include "wxtype.h"
 #include <ctype.h>
-#include <math.h>
 #include <curl/curl.h>
 #include <jansson.h>
 #include <libxml/parser.h>
@@ -17,6 +17,8 @@
 typedef void *yyscan_t;
 
 #include "wx.lexer.h"
+
+#define MAX_DATETIME_LEN 20
 
 /**
  * @brief   Trims a local airport ID for display.
@@ -204,7 +206,7 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
     return -1;
   }
 
-  snprintf(tmp, 257,
+  snprintf(tmp, _countof(tmp),
            "https://api.sunrise-sunset.org/json?"
            "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
            _lat, _lon, _date->tm_year + 1900, _date->tm_mon + 1,
@@ -248,15 +250,15 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   }
 
   // Copy the date/time strings into the temporary string buffer with an
-  // explicit limit of 19 (YYYY-MM-DDTHH:MM:SS).
+  // explicit limit on the correct format ("YYYY-MM-DDTHH:MM:SS\0").
 
-  strncpy(tmp, json_string_value(sunrise), 19);
+  strncpy(tmp, json_string_value(sunrise), MAX_DATETIME_LEN);
 
   if (parseUTCDateTime(tmp, &dtSunrise) != 0) {
     goto cleanup;
   }
 
-  strncpy(tmp, json_string_value(sunset), 19);
+  strncpy(tmp, json_string_value(sunset), MAX_DATETIME_LEN);
 
   if (parseUTCDateTime(tmp, &dtSunset) != 0) {
     goto cleanup;
@@ -307,22 +309,22 @@ static int isNight(double _lat, double _lon, time_t _obsTime) {
       return 0; // Underflow
     }
 
-      _obsTime -= 86400;
+    _obsTime -= 86400;
   } else if (_obsTime >= ss) {
     if (_obsTime + 86400 < _obsTime) {
       return 0; // Overflow
     }
 
     _obsTime += 86400;
-    } else {
+  } else {
     return 0; // Between sunrise and sunset; it's day time.
-    }
+  }
 
-    gmtime_r(&_obsTime, &date);
+  gmtime_r(&_obsTime, &date);
 
-    if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
-      return 0;
-    }
+  if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
+    return 0;
+  }
 
   // It's night time if greater than sunset on the previous day or less than
   // sunrise on the next day.
@@ -934,11 +936,13 @@ WxStation *queryWx(const char *_stations, int *err) {
           "hoursBeforeNow=1.5&"
           "mostRecentForEachStation=true&"
           "stationString=",
-          4096);
+          _countof(url));
 
-  count = 4096 - strlen(url);
+  count = _countof(url) - strlen(url);
   len = strlen(_stations);
 
+  // TODO: Eventually this should split the station string into multiple queries
+  // if it is too long. For now, just abort.
   if (len >= count) {
     return NULL;
   }
@@ -1055,9 +1059,9 @@ void freeStations(WxStation *_stations) {
 
     _stations = _stations->next;
 
-      free(p->id);
-      free(p->localId);
-      free(p->raw);
+    free(p->id);
+    free(p->localId);
+    free(p->raw);
 
     while (p->layers) {
       s = p->layers;
