@@ -952,7 +952,7 @@ WxStation *queryWx(const char *_stations, int *err) {
   }
 
   data.ctxt = NULL;
-  curl_easy_setopt(curlLib, CURLOPT_URL, tmp);
+  curl_easy_setopt(curlLib, CURLOPT_URL, url);
   curl_easy_setopt(curlLib, CURLOPT_WRITEFUNCTION, metarCallback);
   curl_easy_setopt(curlLib, CURLOPT_WRITEDATA, &data);
   res = curl_easy_perform(curlLib);
