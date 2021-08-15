@@ -123,14 +123,8 @@ static void freeResponse(Response *_res) {
  * @returns 0 if successful, non-zero otherwise.
  */
 static int parseUTCDateTime(const char *_str, struct tm *_tm) {
-  char *end;
-
-  _tm->tm_year = (int)strtol(_str, &end, 10);
-  _tm->tm_mon = (int)strtol(_str, &end, 10);
-  _tm->tm_mday = (int)strtol(_str, &end, 10);
-  _tm->tm_hour = (int)strtol(_str, &end, 10);
-  _tm->tm_min = (int)strtol(_str, &end, 10);
-  _tm->tm_sec = (int)strtol(_str, NULL, 10);
+  sscanf(_str, "%d-%d-%dT%d:%d:%d", &_tm->tm_year, &_tm->tm_mon, &_tm->tm_mday,
+         &_tm->tm_hour, &_tm->tm_min, &_tm->tm_sec);
 
   if (_tm->tm_year < 1900) {
     return -1;
@@ -196,7 +190,7 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   CURLcode res;
   json_t *root, *times, *sunrise, *sunset;
   json_error_t err;
-  char url[257];
+  char tmp[257];
   Response json;
   struct tm dtSunrise, dtSunset;
   int ok = -1;
@@ -210,7 +204,7 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
     return -1;
   }
 
-  snprintf(url, 257,
+  snprintf(tmp, 257,
            "https://api.sunrise-sunset.org/json?"
            "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
            _lat, _lon, _date->tm_year + 1900, _date->tm_mon + 1,
@@ -218,7 +212,7 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
 
   initResponse(&json);
 
-  curl_easy_setopt(curlLib, CURLOPT_URL, url);
+  curl_easy_setopt(curlLib, CURLOPT_URL, tmp);
   curl_easy_setopt(curlLib, CURLOPT_WRITEFUNCTION, sunriseSunsetCallback);
   curl_easy_setopt(curlLib, CURLOPT_WRITEDATA, &json);
   res = curl_easy_perform(curlLib);
@@ -253,11 +247,18 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
     goto cleanup;
   }
 
-  if (parseUTCDateTime(json_string_value(sunrise), &dtSunrise) != 0) {
+  // Copy the date/time strings into the temporary string buffer with an
+  // explicit limit of 19 (YYYY-MM-DDTHH:MM:SS).
+
+  strncpy(tmp, json_string_value(sunrise), 19);
+
+  if (parseUTCDateTime(tmp, &dtSunrise) != 0) {
     goto cleanup;
   }
 
-  if (parseUTCDateTime(json_string_value(sunset), &dtSunset) != 0) {
+  strncpy(tmp, json_string_value(sunset), 19);
+
+  if (parseUTCDateTime(tmp, &dtSunset) != 0) {
     goto cleanup;
   }
 
@@ -278,17 +279,16 @@ cleanup:
  * @brief   Checks if the given observation time is night at the given location.
  * @details Consider a report issued at 1753L on July 31 in the US Pacific
  *          Daylight time zone. The UTC date/time is 0053Z on Aug 1, so the
- *          query will return the sunrise/sunset for Aug 1, not July 31. In this
- *          situation, isNight() will return 1 even though it is still day at a
- *          station in the PDT time zone.
+ *          query will return the sunrise/sunset for Aug 1, not July 31. Using
+ *          the Aug 1 data, 0053Z will be less than the sunrise time and
+ *          @a isNight would indicate night time despite it being day time PDT.
  *
- *          Without converting the station observation date/times to local, we
- *          have to check the current UTC day and prior UTC day (for the
- *          Western hemisphere anyway).
+ *          @a isNight checks the previous and next days as necessary to make a
+ *          determination without knowing the station's local time zone.
  * @param[in]: _lat     Observation latitude.
  * @param[in]: _lon     Observation longitude.
  * @param[in]: _obsTime UTC observation time.
- * @returns 0 if day or query failed, non-zero if night.
+ * @returns 0 if day or there is an error, non-zero if night.
  */
 static int isNight(double _lat, double _lon, time_t _obsTime) {
   time_t sr, ss;
@@ -301,13 +301,21 @@ static int isNight(double _lat, double _lon, time_t _obsTime) {
   }
 
   // If the observation time is less than the sunrise date/time, check the
-  // prior day. If the observation date/time is greater than the sunset date/
-  // time of the prior day, then we know it is night.
+  // prior day. Otherwise, check the next day.
   if (_obsTime < sr) {
-    if (_obsTime > 86400) {
+    if (_obsTime < 86400) {
+      return 0; // Underflow
+    }
+
       _obsTime -= 86400;
+  } else if (_obsTime >= ss) {
+    if (_obsTime + 86400 < _obsTime) {
+      return 0; // Overflow
+    }
+
+    _obsTime += 86400;
     } else {
-      _obsTime = 0;
+    return 0; // Between sunrise and sunset; it's day time.
     }
 
     gmtime_r(&_obsTime, &date);
@@ -316,12 +324,9 @@ static int isNight(double _lat, double _lon, time_t _obsTime) {
       return 0;
     }
 
-    return _obsTime >= ss;
-  }
-
-  // Assuming the Western hemisphere, we do not need to check the next day if
-  // the date/time is greater than sunset of the UTC day.
-  return _obsTime >= ss;
+  // It's night time if greater than sunset on the previous day or less than
+  // sunrise on the next day.
+  return (_obsTime >= ss || _obsTime < sr);
 }
 
 /**
