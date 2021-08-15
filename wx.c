@@ -952,7 +952,7 @@ WxStation *queryWx(const char *_stations, int *err) {
   }
 
   data.ctxt = NULL;
-  curl_easy_setopt(curlLib, CURLOPT_URL, url);
+  curl_easy_setopt(curlLib, CURLOPT_URL, tmp);
   curl_easy_setopt(curlLib, CURLOPT_WRITEFUNCTION, metarCallback);
   curl_easy_setopt(curlLib, CURLOPT_WRITEDATA, &data);
   res = curl_easy_perform(curlLib);
@@ -1035,7 +1035,7 @@ cleanup:
     xmlHashFree(hash, hashDealloc);
   }
 
-  if (start && !ok) {
+  if (!ok) {
     freeStations(start);
     start = NULL;
   }
@@ -1055,17 +1055,9 @@ void freeStations(WxStation *_stations) {
 
     _stations = _stations->next;
 
-    if (p->id) {
       free(p->id);
-    }
-
-    if (p->localId) {
       free(p->localId);
-    }
-
-    if (p->raw) {
       free(p->raw);
-    }
 
     while (p->layers) {
       s = p->layers;
