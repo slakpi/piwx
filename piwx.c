@@ -681,7 +681,7 @@ int main(int _argc, char *_argv[]) {
       break;
     case 't':
       standAlone = TRUE;
-      t = 1;
+      t = TRUE;
       break;
     case 'V':
       verbose = TRUE;
