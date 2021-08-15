@@ -15,11 +15,11 @@
  */
 typedef float32x4_t RGBA;
 
-#define RED(c) ((c)[0])
+#define RED(c)   ((c)[0])
 #define GREEN(c) ((c)[1])
-#define BLUE(c) ((c)[2])
+#define BLUE(c)  ((c)[2])
 #define ALPHA(c) ((c)[3])
-#endif  /* __ARM_NEON__ */
+#endif /* __ARM_NEON__ */
 
 extern const RGBA rgbNull;
 extern const RGBA rgbRed;
@@ -212,4 +212,4 @@ void setBackgroundColor(Font _font, const RGBA *_bkgnd);
 void drawText(Surface _surface, const Font _font, int _x, int _y,
               const char *_str, size_t _len);
 
-#endif  /* GFX_H */
+#endif /* GFX_H */

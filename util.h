@@ -22,9 +22,9 @@ int max(int _a, int _b);
 
 typedef int boolean;
 
-#define TRUE 1
+#define TRUE  1
 #define FALSE 0
 
 #define _countof(arr) (sizeof(arr) / sizeof(*(arr)))
 
-#endif  /* UTIL_H */
+#endif /* UTIL_H */

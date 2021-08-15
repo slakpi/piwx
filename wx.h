@@ -25,8 +25,8 @@ typedef enum {
  * @brief  METAR cloud layer entry.
  */
 typedef struct __SkyCondition {
-  CloudCover coverage;
-  int height;
+  CloudCover             coverage;
+  int                    height;
   struct __SkyCondition *prev, *next;
 } SkyCondition;
 
@@ -45,11 +45,11 @@ typedef enum { catInvalid, catVFR, catMVFR, catIFR, catLIFR } FlightCategory;
  */
 typedef enum {
   wxInvalid,
-  wxClearDay,            /* Clear; no other weather.            */
+  wxClearDay, /* Clear; no other weather.            */
   wxClearNight,
-  wxScatteredOrFewDay,   /* Scattered or few; no other weather. */
+  wxScatteredOrFewDay, /* Scattered or few; no other weather. */
   wxScatteredOrFewNight,
-  wxBrokenDay,           /* Broken; no other weather.           */
+  wxBrokenDay, /* Broken; no other weather.           */
   wxBrokenNight,
   wxOvercast,            /* Overcast; no other weather.         */
   wxLightMistHaze,       /* BR, HZ                              */
@@ -72,21 +72,21 @@ typedef enum {
  * @brief  Weather station data entry.
  */
 typedef struct __WxStation {
-  char *id;
-  char *localId;
-  char *raw;
-  time_t obsTime;
-  double lat, lon;
-  int isNight;
-  DominantWeather wx;
-  char *wxString;
-  SkyCondition *layers;
-  int windDir, windSpeed, windGust;
-  int visibility, vertVis;
-  double temp, dewPoint;
-  double alt;
-  FlightCategory cat;
-  int blinkState;
+  char *              id;
+  char *              localId;
+  char *              raw;
+  time_t              obsTime;
+  double              lat, lon;
+  int                 isNight;
+  DominantWeather     wx;
+  char *              wxString;
+  SkyCondition *      layers;
+  int                 windDir, windSpeed, windGust;
+  int                 visibility, vertVis;
+  double              temp, dewPoint;
+  double              alt;
+  FlightCategory      cat;
+  int                 blinkState;
   struct __WxStation *next;
   struct __WxStation *prev;
 } WxStation;

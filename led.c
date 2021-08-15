@@ -7,14 +7,14 @@
 #include <ws2811/ws2811.h>
 
 #define TARGET_FREQ WS2811_TARGET_FREQ
-#define GPIO_PIN 18
-#define DMA 10
+#define GPIO_PIN    18
+#define DMA         10
 /**
  * The library is incorrect for some WS2811 strings. The GBR constant is
  * really BRG ordering on the ALITOVE string.
  */
-#define STRIP_TYPE WS2811_STRIP_GBR
-#define LED_COUNT 50
+#define STRIP_TYPE  WS2811_STRIP_GBR
+#define LED_COUNT   50
 
 /**
  * @brief   Translate weather to a WS2811 color value.
@@ -61,30 +61,30 @@ static ws2811_led_t getColor(const PiwxConfig *_cfg, WxStation *_wx) {
 }
 
 int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
-  WxStation *p = _wx;
-  int i;
+  WxStation *     p = _wx;
+  int             i;
   ws2811_return_t ret;
-  ws2811_t ledstring = {
-    .freq = TARGET_FREQ,
-    .dmanum = DMA,
-    .channel =
-      {
-        [0] =
+  ws2811_t        ledstring = {
+      .freq   = TARGET_FREQ,
+      .dmanum = DMA,
+      .channel =
           {
-            .gpionum = GPIO_PIN,
-            .count = LED_COUNT,
-            .invert = 0,
-            .brightness = 255,
-            .strip_type = STRIP_TYPE,
+              [0] =
+                  {
+                      .gpionum    = GPIO_PIN,
+                      .count      = LED_COUNT,
+                      .invert     = 0,
+                      .brightness = 255,
+                      .strip_type = STRIP_TYPE,
+                  },
+              [1] =
+                  {
+                      .gpionum    = 0,
+                      .count      = 0,
+                      .invert     = 0,
+                      .brightness = 0,
+                  },
           },
-        [1] =
-          {
-            .gpionum = 0,
-            .count = 0,
-            .invert = 0,
-            .brightness = 0,
-          },
-      },
   };
 
   // Expect the data pin and DMA channel values to be valid. Fail otherwise.

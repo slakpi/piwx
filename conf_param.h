@@ -21,4 +21,4 @@ typedef enum {
   confLEDDMAChannel,
 } ConfParam;
 
-#endif  /* CONF_PARAM_H */
+#endif /* CONF_PARAM_H */

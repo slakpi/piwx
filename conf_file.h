@@ -22,14 +22,14 @@ typedef struct {
   char *configFile;               /* Compile-time config file path.      */
   char *stationQuery;             /* List of weather stations to query.  */
   char *nearestAirport;           /* Nearest airport for LED dimming.    */
-  int cycleTime;                  /* Airport display cycle time in sec.  */
-  int highWindSpeed;              /* High wind threshold in knts.        */
-  int highWindBlink;              /* High wind blink rate in sec.        */
+  int   cycleTime;                /* Airport display cycle time in sec.  */
+  int   highWindSpeed;            /* High wind threshold in knts.        */
+  int   highWindBlink;            /* High wind blink rate in sec.        */
   char *ledAssignments[MAX_LEDS]; /* Airport LED assignments.            */
-  int ledBrightness;              /* Day LED brightness, 0-255           */
-  int ledNightBrightness;         /* Night LED brightness, 0-255         */
-  int ledDataPin;                 /* LED Rpi data pin.                   */
-  int ledDMAChannel;              /* LED Rpi DMA channel                 */
+  int   ledBrightness;            /* Day LED brightness, 0-255           */
+  int   ledNightBrightness;       /* Night LED brightness, 0-255         */
+  int   ledDataPin;               /* LED Rpi data pin.                   */
+  int   ledDMAChannel;            /* LED Rpi DMA channel                 */
 } PiwxConfig;
 
 /**
@@ -70,4 +70,4 @@ char *getPathForBitmap(const char *_file, char *_path, size_t _len);
  */
 char *getPathForFont(const char *_file, char *_path, size_t _len);
 
-#endif  /* CONF_FILE_H */
+#endif /* CONF_FILE_H */

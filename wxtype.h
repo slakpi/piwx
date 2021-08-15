@@ -17,4 +17,4 @@ typedef enum {
 } WxCode;
 // clang-format on
 
-#endif  /* WXTYPE_H */
+#endif /* WXTYPE_H */

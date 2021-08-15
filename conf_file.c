@@ -18,8 +18,8 @@ typedef void *yyscan_t;
 #include "conf.lexer.h"
 
 PiwxConfig *getPiwxConfig() {
-  FILE *cfgFile;
-  yyscan_t scanner;
+  FILE *      cfgFile;
+  yyscan_t    scanner;
   PiwxConfig *cfg = (PiwxConfig *)malloc(sizeof(PiwxConfig));
 
   if (!cfg) {
@@ -114,7 +114,7 @@ static char *appendFileToPath(const char *_prefix, const char *_file,
   // terminator so the file name copy occurs after the backslash.
   if (_path[pl - 1] != '/') {
     _path[pl - 1] = '/';
-    _path[pl] = 0;
+    _path[pl]     = 0;
   }
 
   strcat(_path, _file);

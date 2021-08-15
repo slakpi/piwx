@@ -15,4 +15,4 @@
  */
 int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx);
 
-#endif  /* LED_H */
+#endif /* LED_H */

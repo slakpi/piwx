@@ -19,14 +19,14 @@
 #include "led.h"
 #endif
 
-#define BUTTONS 4
+#define BUTTONS  4
 #define BUTTON_1 0x1
 #define BUTTON_2 0x2
 #define BUTTON_3 0x4
 #define BUTTON_4 0x8
 
-static const int buttonPins[] = {17, 22, 23, 27};
-static const char *shortArgs = "stVv";
+static const int   buttonPins[] = {17, 22, 23, 27};
+static const char *shortArgs    = "stVv";
 // clang-format off
 static const struct option longArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
@@ -58,7 +58,7 @@ static void signalHandler(int _signo) {
  * @returns Bitmask of pressed buttons.
  */
 static unsigned int scanButtons() {
-  int i;
+  int          i;
   unsigned int buttons = 0;
 
   for (i = 0; i < BUTTONS; ++i) {
@@ -133,11 +133,11 @@ static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len) {
  */
 typedef struct {
   Surface sfc;
-  Font font16;
-  Font font8;
-  Font font6;
-  Bitmap dlIcon;
-  Bitmap dlErr;
+  Font    font16;
+  Font    font8;
+  Font    font6;
+  Bitmap  dlIcon;
+  Bitmap  dlErr;
 } DrawResources;
 
 /**
@@ -146,12 +146,12 @@ typedef struct {
  * @returns TRUE if successful, FALSE if otherwise.
  */
 static boolean allocateDrawResources(DrawResources *_resources) {
-  _resources->sfc = allocateSurface(320, 240);
+  _resources->sfc    = allocateSurface(320, 240);
   _resources->font16 = allocateFont(font_16pt);
-  _resources->font8 = allocateFont(font_8pt);
-  _resources->font6 = allocateFont(font_6pt);
+  _resources->font8  = allocateFont(font_8pt);
+  _resources->font6  = allocateFont(font_6pt);
   _resources->dlIcon = allocateBitmap("downloading.png");
-  _resources->dlErr = allocateBitmap("download_err.png");
+  _resources->dlErr  = allocateBitmap("download_err.png");
 
   if (!_resources->sfc || !_resources->font16 || !_resources->font8 ||
       !_resources->font6 || !_resources->dlIcon || !_resources->dlErr) {
@@ -200,7 +200,7 @@ static void drawDownloadScreen(DrawResources *_resources) {
  */
 static void drawErrorScreen(DrawResources *_resources, int _err, int _attempt) {
   char buf[33];
-  int len;
+  int  len;
 
   clearSurface(_resources->sfc);
 
@@ -382,7 +382,7 @@ static void drawWindText(DrawResources *_resources, WxStation *_station) {
  */
 static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
   SkyCondition *sky = _station->layers;
-  char buf[33];
+  char          buf[33];
 
   setTextColor(_resources->font6, &rgbWhite);
 
@@ -434,7 +434,7 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
  * @param[in]: _station   The weather station.
  */
 static void drawTempDewPointVis(DrawResources *_resources,
-                                WxStation *_station) {
+                                WxStation *    _station) {
   char buf[33];
 
   setTextColor(_resources->font6, &rgbWhite);
@@ -457,8 +457,8 @@ static void drawTempDewPointVis(DrawResources *_resources,
  */
 static void drawStation(DrawResources *_resources, WxStation *_station) {
   Bitmap icon = NULL;
-  char *str;
-  int w, x;
+  char * str;
+  int    w, x;
   size_t len;
 
   clearSurface(_resources->sfc);
@@ -505,9 +505,9 @@ static void drawStation(DrawResources *_resources, WxStation *_station) {
   // Draw the weather phenomena string.
   if (_station->wxString) {
     len = strlen(_station->wxString);
-    w = getFontCharWidth(_resources->font8);
-    x = len * w;
-    x = (320 - x) / 2;
+    w   = getFontCharWidth(_resources->font8);
+    x   = len * w;
+    x   = (320 - x) / 2;
     drawText(_resources->sfc, _resources->font8, x < 0 ? 0 : x, 81,
              _station->wxString, len);
   }
@@ -543,13 +543,13 @@ static void drawStation(DrawResources *_resources, WxStation *_station) {
  * @returns 0 if successful, non-zero otherwise.
  */
 static int go(boolean _test, boolean _verbose) {
-  PiwxConfig *cfg = getPiwxConfig();
+  PiwxConfig *  cfg = getPiwxConfig();
   DrawResources drawRes;
-  WxStation *wx = NULL, *curStation = NULL;
-  time_t nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
-  boolean first = TRUE, draw;
-  int i, err;
-  unsigned int b, bl = 0, bc, retry = 0;
+  WxStation *   wx = NULL, *curStation = NULL;
+  time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
+  boolean       first = TRUE, draw;
+  int           i, err;
+  unsigned int  b, bl = 0, bc, retry = 0;
 
   if (_verbose) {
     printConfiguration(cfg);
@@ -577,7 +577,7 @@ static int go(boolean _test, boolean _verbose) {
 
     // Scan the buttons. Mask off any buttons that were pressed on the last scan
     // and are either still pressed or were released.
-    b = scanButtons();
+    b  = scanButtons();
     bc = (~bl) & b;
     bl = b;
 
@@ -592,13 +592,13 @@ static int go(boolean _test, boolean _verbose) {
 
       drawDownloadScreen(&drawRes);
 
-      wx = queryWx(cfg->stationQuery, &err);
+      wx         = queryWx(cfg->stationQuery, &err);
       curStation = wx;
-      first = FALSE;
-      draw = (wx != NULL);
+      first      = FALSE;
+      draw       = (wx != NULL);
       nextUpdate = ((now / 1200) + 1) * 1200;
-      nextWx = now + 1;
-      nextBlink = 10;
+      nextWx     = now + 1;
+      nextBlink  = 10;
 
       if (wx) {
         retry = 0;
@@ -623,12 +623,12 @@ static int go(boolean _test, boolean _verbose) {
       //   * Button 2 pressed? Move backward in the circular list.
       if (now >= nextWx || (bc & BUTTON_3)) {
         curStation = curStation->next;
-        draw = TRUE;
-        nextWx = now + cfg->cycleTime;
+        draw       = TRUE;
+        nextWx     = now + cfg->cycleTime;
       } else if (bc & BUTTON_2) {
         curStation = curStation->prev;
-        draw = TRUE;
-        nextWx = now + cfg->cycleTime;
+        draw       = TRUE;
+        nextWx     = now + cfg->cycleTime;
       }
 
       // If the blink timeout expired, update the LEDs.
@@ -669,8 +669,8 @@ static int go(boolean _test, boolean _verbose) {
  * @brief The C-program entry point we all know and love.
  */
 int main(int _argc, char *_argv[]) {
-  pid_t pid, sid;
-  int c;
+  pid_t   pid, sid;
+  int     c;
   boolean t = FALSE, standAlone = FALSE, verbose = FALSE;
 
   // Parse the command line parameters.
@@ -681,7 +681,7 @@ int main(int _argc, char *_argv[]) {
       break;
     case 't':
       standAlone = TRUE;
-      t = TRUE;
+      t          = TRUE;
       break;
     case 'V':
       verbose = TRUE;

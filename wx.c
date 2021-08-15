@@ -31,7 +31,7 @@ typedef void *yyscan_t;
  * @returns A duplicate of either the original ID or the shortened non-ICAO ID.
  */
 static char *trimLocalId(const char *_id) {
-  size_t i, len = strlen(_id);
+  size_t      i, len = strlen(_id);
   const char *p = _id;
 
   if (len < 1) {
@@ -53,7 +53,7 @@ static char *trimLocalId(const char *_id) {
  * @brief  Buffer to hold response data from cURL.
  */
 typedef struct __Response {
-  char *str;
+  char * str;
   size_t len, bufLen;
 } Response;
 
@@ -62,9 +62,9 @@ typedef struct __Response {
  * @param[in] _res The response buffer.
  */
 static void initResponse(Response *_res) {
-  _res->str = (char *)malloc(sizeof(char) * 256);
+  _res->str    = (char *)malloc(sizeof(char) * 256);
   _res->str[0] = 0;
-  _res->len = 0;
+  _res->len    = 0;
   _res->bufLen = 256;
 }
 
@@ -85,7 +85,7 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len) {
   while (1) {
     if (_res->len + _len < newBuf) {
       if (_res->bufLen < newBuf) {
-        _res->str = realloc(_res->str, newBuf);
+        _res->str    = realloc(_res->str, newBuf);
         _res->bufLen = newBuf;
       }
 
@@ -110,8 +110,8 @@ static void appendToResponse(Response *_res, const char *_str, size_t _len) {
  */
 static void freeResponse(Response *_res) {
   free(_res->str);
-  _res->str = NULL;
-  _res->len = 0;
+  _res->str    = NULL;
+  _res->len    = 0;
   _res->bufLen = 0;
 }
 
@@ -169,8 +169,8 @@ static int parseUTCDateTime(const char *_str, struct tm *_tm) {
  */
 static size_t sunriseSunsetCallback(char *_ptr, size_t _size, size_t _nmemb,
                                     void *_userdata) {
-  Response *res = (Response *)_userdata;
-  size_t bytes = _size * _nmemb;
+  Response *res   = (Response *)_userdata;
+  size_t    bytes = _size * _nmemb;
   appendToResponse(res, _ptr, bytes);
   return bytes;
 }
@@ -188,17 +188,17 @@ static size_t sunriseSunsetCallback(char *_ptr, size_t _size, size_t _nmemb,
  */
 static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
                                   time_t *_sunrise, time_t *_sunset) {
-  CURL *curlLib;
-  CURLcode res;
-  json_t *root, *times, *sunrise, *sunset;
+  CURL *       curlLib;
+  CURLcode     res;
+  json_t *     root, *times, *sunrise, *sunset;
   json_error_t err;
-  char tmp[257];
-  Response json;
-  struct tm dtSunrise, dtSunset;
-  int ok = -1;
+  char         tmp[257];
+  Response     json;
+  struct tm    dtSunrise, dtSunset;
+  int          ok = -1;
 
   *_sunrise = 0;
-  *_sunset = 0;
+  *_sunset  = 0;
 
   curlLib = curl_easy_init();
 
@@ -265,7 +265,7 @@ static int getSunriseSunsetForDay(double _lat, double _lon, struct tm *_date,
   }
 
   *_sunrise = timegm(&dtSunrise);
-  *_sunset = timegm(&dtSunset);
+  *_sunset  = timegm(&dtSunset);
 
   ok = 0;
 
@@ -293,7 +293,7 @@ cleanup:
  * @returns 0 if day or there is an error, non-zero if night.
  */
 static int isNight(double _lat, double _lon, time_t _obsTime) {
-  time_t sr, ss;
+  time_t    sr, ss;
   struct tm date;
 
   gmtime_r(&_obsTime, &date);
@@ -480,7 +480,7 @@ typedef struct {
 static size_t metarCallback(char *_ptr, size_t _size, size_t _nmemb,
                             void *_userdata) {
   METARCallbackData *data = (METARCallbackData *)_userdata;
-  size_t res = _nmemb * _size;
+  size_t             res  = _nmemb * _size;
 
   if (!data->ctxt) {
     data->ctxt = xmlCreatePushParserCtxt(NULL, NULL, _ptr, _nmemb, NULL);
@@ -503,7 +503,7 @@ static size_t metarCallback(char *_ptr, size_t _size, size_t _nmemb,
  * @param[in]: _hash The tag hash map.
  * @returns The flight category or catInvalid.
  */
-static FlightCategory getStationFlightCategory(xmlNodePtr _node,
+static FlightCategory getStationFlightCategory(xmlNodePtr      _node,
                                                xmlHashTablePtr _hash) {
   Tag tag = getTag(_hash, _node->content);
 
@@ -558,9 +558,9 @@ static CloudCover getLayerCloudCover(xmlAttr *_attr, xmlHashTablePtr _hash) {
  */
 static void addCloudLayer(xmlNodePtr _node, WxStation *_station,
                           xmlHashTablePtr _hash) {
-  xmlAttr *a = _node->properties;
+  xmlAttr *     a = _node->properties;
   SkyCondition *newLayer, *p;
-  Tag tag;
+  Tag           tag;
 
   newLayer = (SkyCondition *)malloc(sizeof(SkyCondition));
   memset(newLayer, 0, sizeof(SkyCondition));
@@ -600,13 +600,13 @@ static void addCloudLayer(xmlNodePtr _node, WxStation *_station,
           p->prev->next = newLayer;
         }
 
-        p->prev = newLayer;
+        p->prev        = newLayer;
         newLayer->next = p;
         break;
       } else if (!p->next) {
         // There are no more items in the list after this one. Thus, this layer
         // has to be placed after the current layer.
-        p->next = newLayer;
+        p->next        = newLayer;
         newLayer->prev = p;
         break;
       }
@@ -624,8 +624,8 @@ static void addCloudLayer(xmlNodePtr _node, WxStation *_station,
  */
 static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
                         WxStation *_station) {
-  Tag tag;
-  struct tm obs;
+  Tag        tag;
+  struct tm  obs;
   xmlNodePtr c = _node->children;
 
   while (c) {
@@ -641,7 +641,7 @@ static void readStation(xmlNodePtr _node, xmlHashTablePtr _hash,
       _station->raw = strdup((char *)c->children->content);
       break;
     case tagStationId:
-      _station->id = strdup((char *)c->children->content);
+      _station->id      = strdup((char *)c->children->content);
       _station->localId = trimLocalId(_station->id);
       break;
     case tagObsTime:
@@ -713,11 +713,11 @@ typedef enum {
  * @param[in]: _station The weather station to classify.
  */
 static void classifyDominantWeather(WxStation *_station) {
-  yyscan_t scanner;
+  yyscan_t        scanner;
   YY_BUFFER_STATE buf;
-  int c, h, descriptor;
-  Intensity intensity;
-  SkyCondition *s;
+  int             c, h, descriptor;
+  Intensity       intensity;
+  SkyCondition *  s;
 
   // Assume clear skies to start.
   _station->wx = (_station->isNight ? wxClearNight : wxClearDay);
@@ -735,10 +735,10 @@ static void classifyDominantWeather(WxStation *_station) {
     } else if (s->coverage < skyOvercast && s->height < h &&
                _station->wx < wxBrokenDay) {
       _station->wx = (_station->isNight ? wxBrokenNight : wxBrokenDay);
-      h = s->height;
+      h            = s->height;
     } else if (_station->wx < wxOvercast && s->height < h) {
       _station->wx = wxOvercast;
-      h = s->height;
+      h            = s->height;
     }
 
     s = s->next;
@@ -753,7 +753,7 @@ static void classifyDominantWeather(WxStation *_station) {
   wxtype_lex_init(&scanner);
   buf = wxtype__scan_string(_station->wxString, scanner);
 
-  intensity = intensityInvalid;
+  intensity  = intensityInvalid;
   descriptor = 0;
 
   while ((c = wxtype_lex(scanner)) != 0) {
@@ -766,7 +766,7 @@ static void classifyDominantWeather(WxStation *_station) {
 
     switch (c) {
     case ' ': // Reset token
-      intensity = intensityInvalid;
+      intensity  = intensityInvalid;
       descriptor = 0;
       break;
     case wxVC: // Nothing to do for in vincinity
@@ -896,7 +896,7 @@ static void classifyDominantWeather(WxStation *_station) {
 static xmlNodePtr getChildTag(xmlNodePtr _children, Tag _tag,
                               xmlHashTablePtr _hash) {
   xmlNodePtr p = _children;
-  Tag tag;
+  Tag        tag;
 
   while (p) {
     tag = getTag(_hash, p->name);
@@ -912,16 +912,16 @@ static xmlNodePtr getChildTag(xmlNodePtr _children, Tag _tag,
 }
 
 WxStation *queryWx(const char *_stations, int *err) {
-  CURL *curlLib;
-  CURLcode res;
-  char url[4096];
+  CURL *            curlLib;
+  CURLcode          res;
+  char              url[4096];
   METARCallbackData data;
-  xmlDocPtr doc = NULL;
-  xmlNodePtr p;
-  xmlHashTablePtr hash = NULL;
-  Tag tag;
-  WxStation *start = NULL, *cur, *newStation;
-  int ok = 0, count, len;
+  xmlDocPtr         doc = NULL;
+  xmlNodePtr        p;
+  xmlHashTablePtr   hash = NULL;
+  Tag               tag;
+  WxStation *       start = NULL, *cur, *newStation;
+  int               ok    = 0, count, len;
 
   *err = 0;
 
@@ -939,7 +939,7 @@ WxStation *queryWx(const char *_stations, int *err) {
           _countof(url));
 
   count = _countof(url) - strlen(url);
-  len = strlen(_stations);
+  len   = strlen(_stations);
 
   // TODO: Eventually this should split the station string into multiple queries
   // if it is too long. For now, just abort.
@@ -1007,14 +1007,14 @@ WxStation *queryWx(const char *_stations, int *err) {
     // Add the station to the circular list.
     if (!start) {
       start = cur = newStation;
-      cur->next = cur;
-      cur->prev = cur;
+      cur->next   = cur;
+      cur->prev   = cur;
     } else {
-      start->prev = newStation;
-      cur->next = newStation;
+      start->prev      = newStation;
+      cur->next        = newStation;
       newStation->next = start;
       newStation->prev = cur;
-      cur = newStation;
+      cur              = newStation;
     }
 
     // Read the station and get the night status for classifying weather.
@@ -1048,7 +1048,7 @@ cleanup:
 }
 
 void freeStations(WxStation *_stations) {
-  WxStation *p;
+  WxStation *   p;
   SkyCondition *s;
 
   // Break the circular list.
@@ -1064,7 +1064,7 @@ void freeStations(WxStation *_stations) {
     free(p->raw);
 
     while (p->layers) {
-      s = p->layers;
+      s         = p->layers;
       p->layers = p->layers->next;
       free(s);
     }
