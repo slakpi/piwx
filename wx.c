@@ -293,10 +293,11 @@ cleanup:
  * @returns 0 if day or there is an error, non-zero if night.
  */
 static int isNight(double _lat, double _lon, time_t _obsTime) {
+  time_t    t = _obsTime;
   time_t    sr, ss;
   struct tm date;
 
-  gmtime_r(&_obsTime, &date);
+  gmtime_r(&t, &date);
 
   if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
     return 0;
@@ -305,22 +306,22 @@ static int isNight(double _lat, double _lon, time_t _obsTime) {
   // If the observation time is less than the sunrise date/time, check the
   // prior day. Otherwise, check the next day.
   if (_obsTime < sr) {
-    if (_obsTime < 86400) {
+    if (t < 86400) {
       return 0; // Underflow
     }
 
-    _obsTime -= 86400;
+    t -= 86400;
   } else if (_obsTime >= ss) {
-    if (_obsTime + 86400 < _obsTime) {
+    if (t + 86400 < t) {
       return 0; // Overflow
     }
 
-    _obsTime += 86400;
+    t += 86400;
   } else {
     return 0; // Between sunrise and sunset; it's day time.
   }
 
-  gmtime_r(&_obsTime, &date);
+  gmtime_r(&t, &date);
 
   if (getSunriseSunsetForDay(_lat, _lon, &date, &sr, &ss) != 0) {
     return 0;
