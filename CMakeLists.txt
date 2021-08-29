@@ -53,12 +53,12 @@ FLEX_TARGET(WxLexer
   ${CMAKE_CURRENT_BINARY_DIR}/wx.lexer.c
   DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/wx.lexer.h)
 
-include_directories(piwx ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
-
 add_library(parsers
-  ${BISON_ConfParser_OUTPUTS}
-  ${FLEX_ConfLexer_OUTPUTS}
-  ${FLEX_WxLexer_OUTPUTS})
+  ${BISON_ConfParser_OUTPUTS} ${FLEX_ConfLexer_OUTPUTS} ${FLEX_WxLexer_OUTPUTS})
+
+target_include_directories(parsers PRIVATE
+  ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
+
 target_compile_options(parsers PRIVATE
   -Wno-unused-function -Wno-unused-variable)
 
@@ -69,10 +69,20 @@ if (WITH_LED_SUPPORT)
 endif (WITH_LED_SUPPORT)
 
 add_executable(piwx ${PIWX_SOURCES})
-target_compile_options(piwx PRIVATE
-  -Wall -Werror=unused-function -Werror=unused-variable -mfpu=neon)
 
-set(PIWX_LIBS parsers curl xml2 png jansson wiringPi)
+target_include_directories(piwx PRIVATE
+  ${CMAKE_BINARY_DIR} ${LIBXML2_INCLUDE_DIR})
+
+target_compile_options(piwx PRIVATE
+  -Wall -Werror=unused-function -Werror=unused-variable)
+
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+  target_compile_options(piwx PRIVATE -mfpu=neon)
+endif ()
+
+set(PIWX_LIBS
+  parsers ${CURL_LIBRARIES} ${LIBXML2_LIBRARIES} ${PNG_LIBRARIES}
+  ${JANSSON_LIBRARIES} ${WIRINGPI_LIBRARIES})
 
 if (WITH_LED_SUPPORT)
   set(PIWX_LIBS ${PIWX_LIBS} ws2811)
@@ -81,8 +91,7 @@ endif (WITH_LED_SUPPORT)
 target_link_libraries(piwx ${PIWX_LIBS})
 
 if (WITH_LED_SUPPORT)
-  add_executable(led_test
-    test/led_test.c)
+  add_executable(led_test test/led_test.c)
   target_link_libraries(led_test ws2811)
 endif (WITH_LED_SUPPORT)
 
