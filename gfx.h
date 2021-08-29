@@ -4,10 +4,12 @@
 #ifndef GFX_H
 #define GFX_H
 
-#include <stddef.h>
+#if !defined __ARM_NEON__ && !defined __ARM_NEON
+#error ARM NEON intrinsics required.
+#endif
 
-#ifdef __ARM_NEON__
 #include <arm_neon.h>
+#include <stddef.h>
 
 /**
  * @typedef RGBA
@@ -19,7 +21,6 @@ typedef float32x4_t RGBA;
 #define GREEN(c) ((c)[1])
 #define BLUE(c)  ((c)[2])
 #define ALPHA(c) ((c)[3])
-#endif /* __ARM_NEON__ */
 
 extern const RGBA rgbNull;
 extern const RGBA rgbRed;
