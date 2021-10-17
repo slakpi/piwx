@@ -35,6 +35,7 @@ find_package(CURL REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Jansson REQUIRED)
 find_package(WiringPi REQUIRED)
+find_package(SIMD REQUIRED)
 
 BISON_TARGET(ConfParser
   conf_parser.y
@@ -76,8 +77,8 @@ target_include_directories(piwx PRIVATE
 target_compile_options(piwx PRIVATE
   -Wall -Werror=unused-function -Werror=unused-variable)
 
-if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
-  target_compile_options(piwx PRIVATE -mfpu=neon)
+if (SIMD_FOUND)
+  target_compile_options(piwx PRIVATE ${SIMD_C_FLAGS})
 endif ()
 
 set(PIWX_LIBS
