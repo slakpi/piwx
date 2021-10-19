@@ -7,10 +7,11 @@
 
 %{
 
-#include <string.h>
 #include "../conf_file.h"
 #include "../conf_param.h"
+#include "../log.h"
 #include "conf.parser.h"
+#include <string.h>
 
 #define YYSTYPE CONF_STYPE
 
@@ -40,12 +41,32 @@ WS          [\v\r\n\t ]+
 
 "off" {
   yylval->val = 0;
-  return TOKEN_VALUE;
+  return TOKEN_ONOFF;
 }
 
 "on" {
   yylval->val = 1;
-  return TOKEN_VALUE;
+  return TOKEN_ONOFF;
+}
+
+"quiet" {
+  yylval->val = LOG_QUIET;
+  return TOKEN_LOGLEVEL;
+}
+
+"warning" {
+  yylval->val = LOG_WARNING;
+  return TOKEN_LOGLEVEL;
+}
+
+"info" {
+  yylval->val = LOG_INFO;
+  return TOKEN_LOGLEVEL;
+}
+
+"debug" {
+  yylval->val = LOG_DEBUG;
+  return TOKEN_LOGLEVEL;
 }
 
 "stations" {
@@ -96,6 +117,11 @@ WS          [\v\r\n\t ]+
 
 "leddma" {
   yylval->p.param = confLEDDMAChannel;
+  return TOKEN_PARAM;
+}
+
+"loglevel" {
+  yylval->p.param = confLogLevel;
   return TOKEN_PARAM;
 }
 

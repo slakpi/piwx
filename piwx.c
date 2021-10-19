@@ -2,11 +2,11 @@
  * @file piwx.c
  */
 #include "conf_file.h"
+#include "config.h"
 #include "gfx.h"
 #include "log.h"
 #include "util.h"
 #include "wx.h"
-#include <config.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
@@ -87,6 +87,7 @@ static void printConfiguration(const PiwxConfig *_config) {
   printf("LED Night Brightness: %d\n", _config->ledNightBrightness);
   printf("LED Data Pin: %d\n", _config->ledDataPin);
   printf("LED DMA Channel: %d\n", _config->ledDMAChannel);
+  printf("Log Level: %d\n", _config->logLevel);
 
   for (i = 0; i < MAX_LEDS; ++i) {
     if (_config->ledAssignments[i]) {
@@ -560,7 +561,7 @@ static int go(boolean _test, boolean _verbose) {
     return 0; // Nothing to do.
   }
 
-  openLog(LOG_DEBUG);
+  openLog(cfg->logLevel);
   writeLog(LOG_INFO, "Starting up.");
 
   // Setup wiringPi.

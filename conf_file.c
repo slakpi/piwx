@@ -1,9 +1,6 @@
 /**
  * @file conf_file.c
  */
-#include <config.h>
-#include <string.h>
-
 typedef void *yyscan_t;
 
 // clang-format off
@@ -16,6 +13,9 @@ typedef void *yyscan_t;
 #define YYSTYPE CONF_STYPE
 
 #include "conf.lexer.h"
+#include "config.h"
+#include "log.h"
+#include <string.h>
 
 PiwxConfig *getPiwxConfig() {
   FILE *      cfgFile;
@@ -38,6 +38,7 @@ PiwxConfig *getPiwxConfig() {
   cfg->ledNightBrightness = 32;
   cfg->ledDataPin         = 18;
   cfg->ledDMAChannel      = 10;
+  cfg->logLevel           = LOG_WARNING;
 
   cfgFile = fopen(CONFIG_FILE, "r");
 
