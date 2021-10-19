@@ -13,6 +13,10 @@ if (NOT DEFINED ETC_PREFIX)
   set(ETC_PREFIX etc/)
 endif (NOT DEFINED ETC_PREFIX)
 
+if (NOT DEFINED VAR_PREFIX)
+  set(VAR_PREFIX var/piwx/)
+endif (NOT DEFINED VAR_PREFIX)
+
 option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
 
 execute_process(
@@ -25,6 +29,7 @@ execute_process(
 set(IMAGE_RESOURCES ${CMAKE_INSTALL_PREFIX}/${SHARE_PREFIX}wxicons)
 set(FONT_RESOURCES ${CMAKE_INSTALL_PREFIX}/${SHARE_PREFIX}fonts)
 set(CONFIG_FILE ${CMAKE_INSTALL_PREFIX}/${ETC_PREFIX}piwx.conf)
+set(LOG_FILE ${CMAKE_INSTALL_PREFIX}/${VAR_PREFIX}piwx.log)
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
 configure_file(config.h.in config.h)
 
@@ -63,7 +68,7 @@ target_include_directories(parsers PRIVATE
 target_compile_options(parsers PRIVATE
   -Wno-unused-function -Wno-unused-variable)
 
-set(PIWX_SOURCES conf_file.c gfx.c piwx.c util.c wx.c)
+set(PIWX_SOURCES conf_file.c gfx.c log.c piwx.c util.c wx.c)
 
 if (WITH_LED_SUPPORT)
   set(PIWX_SOURCES ${PIWX_SOURCES} led.c)
@@ -100,3 +105,4 @@ install(TARGETS piwx DESTINATION bin)
 install(DIRECTORY wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
 install(DIRECTORY fonts/ DESTINATION ${SHARE_PREFIX}fonts)
 install(FILES piwx.conf.example DESTINATION ${ETC_PREFIX})
+install(DIRECTORY DESTINATION ${VAR_PREFIX})

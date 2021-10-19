@@ -3,6 +3,7 @@
  */
 #include "conf_file.h"
 #include "gfx.h"
+#include "log.h"
 #include "util.h"
 #include "wx.h"
 #include <config.h>
@@ -559,6 +560,9 @@ static int go(boolean _test, boolean _verbose) {
     return 0; // Nothing to do.
   }
 
+  openLog(LOG_DEBUG);
+  writeLog(LOG_INFO, "Starting up.");
+
   // Setup wiringPi.
   wiringPiSetupGpio();
 
@@ -586,6 +590,14 @@ static int go(boolean _test, boolean _verbose) {
     // If this is the first run, the update time has expired, or someone pressed
     // the refresh button, then requery the weather data.
     if (first || now >= nextUpdate || (bc & BUTTON_1)) {
+      if (first) {
+        writeLog(LOG_DEBUG, "Performing startup weather query.");
+      } else if (now >= nextUpdate) {
+        writeLog(LOG_DEBUG, "Update time out: %lu >= %lu", now, nextUpdate);
+      } else if (bc & BUTTON_1) {
+        writeLog(LOG_DEBUG, "Update button pressed.");
+      }
+
       if (wx) {
         freeStations(wx);
       }
@@ -655,12 +667,16 @@ static int go(boolean _test, boolean _verbose) {
     }
   } while (run);
 
+  writeLog(LOG_INFO, "Shutting down.");
+
   // Clear the screen, turn off the LEDs, and free common draw resources.
   clearScreen(&drawRes);
 #ifdef WITH_LED_SUPPORT
   updateLEDs(cfg, NULL);
 #endif
   freeDrawResources(&drawRes);
+
+  closeLog();
 
   return 0;
 }
