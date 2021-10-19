@@ -386,6 +386,10 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
   SkyCondition *sky = _station->layers;
   char          buf[33];
 
+  if (!sky) {
+    return;
+  }
+
   setTextColor(_resources->font6, &rgbWhite);
 
   switch (sky->coverage) {
