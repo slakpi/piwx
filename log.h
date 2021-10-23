@@ -21,18 +21,18 @@ typedef enum {
 
 /**
  * @brief Open the log.
- * @param[in] _level The maximum level to output.
+ * @param[in] maxLevel The maximum level to output.
  * @returns TRUE if successful, FALSE otherwise.
  */
-boolean openLog(LogLevel _maxLevel);
+boolean openLog(LogLevel maxLevel);
 
 /**
  * @brief Write a message at the specified log level.
- * @param[in] _level The log level for the message.
- * @param[in] _fmt   The @a printf style format string.
+ * @param[in] level The log level for the message.
+ * @param[in] fmt   The @a printf style format string.
  * @param[in] ...    The format parameters.
  */
-void writeLog(LogLevel _level, const char *_fmt, ...);
+void writeLog(LogLevel level, const char *fmt, ...);
 
 /**
  * @brief Close the log file.

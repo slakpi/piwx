@@ -11,7 +11,7 @@ typedef void* yyscan_t;
 #include "conf.parser.h"
 #include "conf.lexer.h"
 
-static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error) {
+static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error) {
 
 }
 
@@ -28,9 +28,9 @@ static void conf_error(yyscan_t _scanner, PiwxConfig *_cfg, char *_error) {
 
 %define api.pure
 %define api.prefix {conf_}
-%parse-param {yyscan_t _scanner}
-%lex-param {yyscan_t _scanner}
-%parse-param {PiwxConfig *_cfg}
+%parse-param {yyscan_t scanner}
+%lex-param {yyscan_t scanner}
+%parse-param {PiwxConfig *cfg}
 
 %token<p> TOKEN_PARAM
 %token<str> TOKEN_STRING
@@ -48,21 +48,21 @@ assignment
 : TOKEN_PARAM '=' TOKEN_STRING ';' {
     switch($1.param) {
     case confStations:
-      _cfg->stationQuery = $3;
+      cfg->stationQuery = $3;
       break;
     case confNearestAirport:
-      _cfg->nearestAirport = $3;
+      cfg->nearestAirport = $3;
       break;
     case confLED:
       if ($1.n < 1 || $1.n > MAX_LEDS) {
         break;
       }
 
-      if (_cfg->ledAssignments[$1.n - 1]) {
-        free(_cfg->ledAssignments[$1.n - 1]);
+      if (cfg->ledAssignments[$1.n - 1]) {
+        free(cfg->ledAssignments[$1.n - 1]);
       }
 
-      _cfg->ledAssignments[$1.n - 1] = $3;
+      cfg->ledAssignments[$1.n - 1] = $3;
 
       break;
     default:
@@ -72,25 +72,25 @@ assignment
 | TOKEN_PARAM '=' TOKEN_VALUE ';' {
     switch($1.param) {
     case confCycleTime:
-      _cfg->cycleTime = $3;
+      cfg->cycleTime = $3;
       break;
     case confHighWindSpeed:
-      _cfg->highWindSpeed = $3;
+      cfg->highWindSpeed = $3;
       break;
     case confHighWindBlink:
-      _cfg->highWindBlink = $3;
+      cfg->highWindBlink = $3;
       break;
     case confLEDBrightness:
-      _cfg->ledBrightness = min(max($3, 0), 255);
+      cfg->ledBrightness = min(max($3, 0), 255);
       break;
     case confLEDNightBrightness:
-      _cfg->ledNightBrightness = min(max($3, 0), 255);
+      cfg->ledNightBrightness = min(max($3, 0), 255);
       break;
     case confLEDDataPin:
-      _cfg->ledDataPin = $3;
+      cfg->ledDataPin = $3;
       break;
     case confLEDDMAChannel:
-      _cfg->ledDMAChannel = $3;
+      cfg->ledDMAChannel = $3;
       break;
     default:
       YYERROR;
@@ -101,22 +101,22 @@ assignment
     case confHighWindSpeed:
       if ($3 == 0) {
         // Only handle `off`. `on` will just leave the current value / default.
-        _cfg->highWindSpeed = 0;
+        cfg->highWindSpeed = 0;
       }
       break;
     case confHighWindBlink:
-      _cfg->highWindBlink = $3;
+      cfg->highWindBlink = $3;
       break;
     case confLEDBrightness:
       if ($3 == 0) {
         // Only handle `off`. `on` will just leave the current value / default.
-        _cfg->ledBrightness = 0;
+        cfg->ledBrightness = 0;
       }
       break;
     case confLEDNightBrightness:
       if ($3 == 0) {
         // Only handle `off`. `on` will just leave the current value / default.
-        _cfg->ledNightBrightness = 0;
+        cfg->ledNightBrightness = 0;
       }
       break;
     default:
@@ -130,10 +130,10 @@ assignment
       case LOG_WARNING:
       case LOG_INFO:
       case LOG_DEBUG:
-        _cfg->logLevel = $3;
+        cfg->logLevel = $3;
         break;
       default:
-        _cfg->logLevel = LOG_QUIET;
+        cfg->logLevel = LOG_QUIET;
         break;
       }
     default:

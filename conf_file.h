@@ -46,30 +46,30 @@ PiwxConfig *getPiwxConfig();
 
 /**
  * @brief Free an allocated configuration struct.
- * @param[in] _cfg The configuration struct to free.
+ * @param[in] cfg The configuration struct to free.
  */
-void freePiwxConfig(PiwxConfig *_cfg);
+void freePiwxConfig(PiwxConfig *cfg);
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
- * @details Appends @a _file to the @a IMAGE_RESOURCES path using @a _path as
+ * @details Appends @a file to the @a IMAGE_RESOURCES path using @a path as
  *          an output buffer.
- * @param[in] _file The bitmap file to append.
- * @param[in] _path The buffer to hold the fully-qualified path.
- * @param[in] _len  The length of @a _path.
+ * @param[in] file The bitmap file to append.
+ * @param[in] path The buffer to hold the fully-qualified path.
+ * @param[in] len  The length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *getPathForBitmap(const char *_file, char *_path, size_t _len);
+char *getPathForBitmap(const char *file, char *path, size_t len);
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
- * @details Appends @a _file to the @a FONT_RESOURCES path using @a _path as an
+ * @details Appends @a file to the @a FONT_RESOURCES path using @a path as an
  *          output buffer.
- * @param[in] _file The font file to append.
- * @param[in] _path The buffer to hold the fully-qualified path.
- * @param[in] _len  The length of @a _path.
+ * @param[in] file The font file to append.
+ * @param[in] path The buffer to hold the fully-qualified path.
+ * @param[in] len  The length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *getPathForFont(const char *_file, char *_path, size_t _len);
+char *getPathForFont(const char *file, char *path, size_t len);
 
 #endif /* CONF_FILE_H */

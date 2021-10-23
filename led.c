@@ -18,28 +18,28 @@
 
 /**
  * @brief   Translate weather to a WS2811 color value.
- * @param [in] _cfg PiWx configuration.
- * @param [in] _wx  Current weather station.
+ * @param [in] cfg PiWx configuration.
+ * @param [in] wx  Current weather station.
  */
-static ws2811_led_t getColor(const PiwxConfig *_cfg, WxStation *_wx) {
+static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
   char r = 0, g = 0, b = 0;
 
   // If a high-wind threshold has been set, check the speed and gust against
   // the threshold. If the wind exceeds the threshold use yellow if blink is
   // turned OFF or the blink state is zero. Otherwise, reset the blink state and
   // use the METAR color.
-  if (_cfg->highWindSpeed > 0) {
-    if (max(_wx->windSpeed, _wx->windGust) >= _cfg->highWindSpeed) {
-      if (_wx->blinkState == 0 || _cfg->highWindBlink == 0) {
-        _wx->blinkState = 1;
+  if (cfg->highWindSpeed > 0) {
+    if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
+      if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
+        wx->blinkState = 1;
         return (255 << 8) | 192;
       } else {
-        _wx->blinkState = 0;
+        wx->blinkState = 0;
       }
     }
   }
 
-  switch (_wx->cat) {
+  switch (wx->cat) {
   case catVFR:
     g = 255;
     break;
@@ -60,45 +60,47 @@ static ws2811_led_t getColor(const PiwxConfig *_cfg, WxStation *_wx) {
   return (b << 16) | (r << 8) | g;
 }
 
-int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
-  WxStation *     p = _wx;
+int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
+  WxStation *     p = wx;
   int             i;
   ws2811_return_t ret;
   ws2811_t        ledstring = {
-      .freq   = TARGET_FREQ,
-      .dmanum = DMA,
-      .channel =
+  // clang-format off
+    .freq   = TARGET_FREQ,
+    .dmanum = DMA,
+    .channel =
+      {
+        [0] =
           {
-              [0] =
-                  {
-                      .gpionum    = GPIO_PIN,
-                      .count      = LED_COUNT,
-                      .invert     = 0,
-                      .brightness = 255,
-                      .strip_type = STRIP_TYPE,
-                  },
-              [1] =
-                  {
-                      .gpionum    = 0,
-                      .count      = 0,
-                      .invert     = 0,
-                      .brightness = 0,
-                  },
+            .gpionum    = GPIO_PIN,
+            .count      = LED_COUNT,
+            .invert     = 0,
+            .brightness = 255,
+            .strip_type = STRIP_TYPE,
           },
+        [1] =
+          {
+            .gpionum    = 0,
+            .count      = 0,
+            .invert     = 0,
+            .brightness = 0,
+          },
+      },
+  // clang-format on
   };
 
   // Expect the data pin and DMA channel values to be valid. Fail otherwise.
 
-  switch (_cfg->ledDataPin) {
+  switch (cfg->ledDataPin) {
   case 12:
   case 18:
-    ledstring.channel[0].gpionum = _cfg->ledDataPin;
+    ledstring.channel[0].gpionum = cfg->ledDataPin;
     break;
   default:
     return -1;
   }
 
-  switch (_cfg->ledDMAChannel) {
+  switch (cfg->ledDMAChannel) {
   case 4:
   case 5:
   case 8:
@@ -108,7 +110,7 @@ int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
   case 12:
   case 13:
   case 14:
-    ledstring.dmanum = _cfg->ledDMAChannel;
+    ledstring.dmanum = cfg->ledDMAChannel;
     break;
   default:
     return -1;
@@ -119,56 +121,56 @@ int updateLEDs(const PiwxConfig *_cfg, WxStation *_wx) {
     return -1;
   }
 
-  ledstring.channel[0].brightness = _cfg->ledBrightness;
+  ledstring.channel[0].brightness = cfg->ledBrightness;
 
   // If the user has selected a nearest airport, scan the weather list for that
   // airport and check if the night brightness level should be used instead.
-  if (_cfg->nearestAirport) {
+  if (cfg->nearestAirport) {
     while (p) {
       i = p->isNight;
 
-      if (strcmp(_cfg->nearestAirport, p->localId) != 0) {
-        if (strcmp(_cfg->nearestAirport, p->id) != 0) {
+      if (strcmp(cfg->nearestAirport, p->localId) != 0) {
+        if (strcmp(cfg->nearestAirport, p->id) != 0) {
           i = 0;
         }
       }
 
       if (i == 1) {
-        ledstring.channel[0].brightness = _cfg->ledNightBrightness;
+        ledstring.channel[0].brightness = cfg->ledNightBrightness;
         break;
       }
 
       p = p->next;
 
       // Circular list.
-      if (p == _wx) {
+      if (p == wx) {
         break;
       }
     }
 
     // Reset the pointer.
-    p = _wx;
+    p = wx;
   }
 
   // Assign the lights according to the configuration.
   while (p) {
     for (i = 0; i < MAX_LEDS; ++i) {
-      if (!_cfg->ledAssignments[i]) {
+      if (!cfg->ledAssignments[i]) {
         continue;
       }
 
-      if (strcmp(p->id, _cfg->ledAssignments[i]) != 0) {
+      if (strcmp(p->id, cfg->ledAssignments[i]) != 0) {
         continue;
       }
 
-      ledstring.channel[0].leds[i] = getColor(_cfg, p);
+      ledstring.channel[0].leds[i] = getColor(cfg, p);
       break;
     }
 
     p = p->next;
 
     // Circular list.
-    if (p == _wx) {
+    if (p == wx) {
       break;
     }
   }

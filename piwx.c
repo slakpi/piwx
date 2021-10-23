@@ -2,11 +2,11 @@
  * @file piwx.c
  */
 #include "conf_file.h"
-#include "config.h"
 #include "gfx.h"
 #include "log.h"
 #include "util.h"
 #include "wx.h"
+#include <config.h>
 #include <getopt.h>
 #include <signal.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <wiringPi.h>
-#ifdef WITH_LED_SUPPORT
+#if defined WITH_LED_SUPPORT
 #include "led.h"
 #endif
 
@@ -42,10 +42,10 @@ static int run = 1;
 
 /**
  * @brief Signal handler callback.
- * @param[in]: _signo Signal number raised.
+ * @param[in] signo Signal number raised.
  */
-static void signalHandler(int _signo) {
-  switch (_signo) {
+static void signalHandler(int signo) {
+  switch (signo) {
   case SIGINT:
   case SIGTERM:
   case SIGHUP:
@@ -72,40 +72,40 @@ static unsigned int scanButtons() {
 
 /**
  * @brief Print the configuration values.
- * @param[in]: _config The PiWx configuration to print.
+ * @param[in] config The PiWx configuration to print.
  */
-static void printConfiguration(const PiwxConfig *_config) {
+static void printConfiguration(const PiwxConfig *config) {
   int i;
 
-  printf("Image Resources: %s\n", _config->imageResources);
-  printf("Font Resources: %s\n", _config->fontResources);
-  printf("Station Query: %s\n", _config->stationQuery);
-  printf("Nearest Airport: %s\n", _config->nearestAirport);
-  printf("Cycle Time: %d\n", _config->cycleTime);
-  printf("High-Wind Speed: %d\n", _config->highWindSpeed);
-  printf("LED Brightness: %d\n", _config->ledBrightness);
-  printf("LED Night Brightness: %d\n", _config->ledNightBrightness);
-  printf("LED Data Pin: %d\n", _config->ledDataPin);
-  printf("LED DMA Channel: %d\n", _config->ledDMAChannel);
-  printf("Log Level: %d\n", _config->logLevel);
+  printf("Image Resources: %s\n", config->imageResources);
+  printf("Font Resources: %s\n", config->fontResources);
+  printf("Station Query: %s\n", config->stationQuery);
+  printf("Nearest Airport: %s\n", config->nearestAirport);
+  printf("Cycle Time: %d\n", config->cycleTime);
+  printf("High-Wind Speed: %d\n", config->highWindSpeed);
+  printf("LED Brightness: %d\n", config->ledBrightness);
+  printf("LED Night Brightness: %d\n", config->ledNightBrightness);
+  printf("LED Data Pin: %d\n", config->ledDataPin);
+  printf("LED DMA Channel: %d\n", config->ledDMAChannel);
+  printf("Log Level: %d\n", config->logLevel);
 
   for (i = 0; i < MAX_LEDS; ++i) {
-    if (_config->ledAssignments[i]) {
-      printf("LED %d = %s\n", i + 1, _config->ledAssignments[i]);
+    if (config->ledAssignments[i]) {
+      printf("LED %d = %s\n", i + 1, config->ledAssignments[i]);
     }
   }
 }
 
 /**
  * @brief Converts cloud layer data to a string METAR-style string.
- * @param[in]: _sky Cloud layer information.
- * @param[in]: _buf Buffer to receive the string.
- * @param[in]: _len Size of the string buffer.
+ * @param[in] sky Cloud layer information.
+ * @param[in] buf Buffer to receive the string.
+ * @param[in] len Size of the string buffer.
  */
-static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len) {
+static void layerToString(const SkyCondition *sky, char *buf, size_t len) {
   const char *cover = NULL;
 
-  switch (_sky->coverage) {
+  switch (sky->coverage) {
   case skyScattered:
     cover = "SCT";
     break;
@@ -123,9 +123,9 @@ static void layerToString(const SkyCondition *_sky, char *_buf, size_t _len) {
   }
 
   if (cover) {
-    snprintf(_buf, _len, "%s %d", cover, _sky->height);
+    snprintf(buf, len, "%s %d", cover, sky->height);
   } else {
-    snprintf(_buf, _len, "--- %d", _sky->height);
+    snprintf(buf, len, "--- %d", sky->height);
   }
 }
 
@@ -144,19 +144,19 @@ typedef struct {
 
 /**
  * @brief   Allocate common drawing resources.
- * @param[in]: _resources The structure to receive the resources.
+ * @param[in] resources The structure to receive the resources.
  * @returns TRUE if successful, FALSE if otherwise.
  */
-static boolean allocateDrawResources(DrawResources *_resources) {
-  _resources->sfc    = allocateSurface(320, 240);
-  _resources->font16 = allocateFont(font_16pt);
-  _resources->font8  = allocateFont(font_8pt);
-  _resources->font6  = allocateFont(font_6pt);
-  _resources->dlIcon = allocateBitmap("downloading.png");
-  _resources->dlErr  = allocateBitmap("download_err.png");
+static boolean allocateDrawResources(DrawResources *resources) {
+  resources->sfc    = allocateSurface(320, 240);
+  resources->font16 = allocateFont(font_16pt);
+  resources->font8  = allocateFont(font_8pt);
+  resources->font6  = allocateFont(font_6pt);
+  resources->dlIcon = allocateBitmap("downloading.png");
+  resources->dlErr  = allocateBitmap("download_err.png");
 
-  if (!_resources->sfc || !_resources->font16 || !_resources->font8 ||
-      !_resources->font6 || !_resources->dlIcon || !_resources->dlErr) {
+  if (!resources->sfc || !resources->font16 || !resources->font8 ||
+      !resources->font6 || !resources->dlIcon || !resources->dlErr) {
     return FALSE;
   }
 
@@ -165,63 +165,63 @@ static boolean allocateDrawResources(DrawResources *_resources) {
 
 /**
  * @brief Frees the common drawing resources.
- * @param[in]: _resources The common resources to free.
+ * @param[in] resources The common resources to free.
  */
-static void freeDrawResources(DrawResources *_resources) {
-  freeSurface(_resources->sfc);
-  freeFont(_resources->font16);
-  freeFont(_resources->font8);
-  freeFont(_resources->font6);
-  freeBitmap(_resources->dlIcon);
-  freeBitmap(_resources->dlErr);
+static void freeDrawResources(DrawResources *resources) {
+  freeSurface(resources->sfc);
+  freeFont(resources->font16);
+  freeFont(resources->font8);
+  freeFont(resources->font6);
+  freeBitmap(resources->dlIcon);
+  freeBitmap(resources->dlErr);
 }
 
 /**
  * @brief Clears the screen.
  */
-static void clearScreen(DrawResources *_resources) {
-  clearSurface(_resources->sfc);
-  commitSurface(_resources->sfc);
+static void clearScreen(DrawResources *resources) {
+  clearSurface(resources->sfc);
+  commitSurface(resources->sfc);
 }
 
 /**
  * @brief Draw the downloading status screen.
- * @param[in]: _resources The common resources for drawing.
+ * @param[in] resources The common resources for drawing.
  */
-static void drawDownloadScreen(DrawResources *_resources) {
-  clearSurface(_resources->sfc);
-  drawBitmapInBox(_resources->sfc, _resources->dlIcon, 0, 0, 320, 240);
-  commitSurface(_resources->sfc);
+static void drawDownloadScreen(DrawResources *resources) {
+  clearSurface(resources->sfc);
+  drawBitmapInBox(resources->sfc, resources->dlIcon, 0, 0, 320, 240);
+  commitSurface(resources->sfc);
 }
 
 /**
  * @brief Draw the error status screen.
- * @param[in]: _resources The common resources for drawing.
- * @param[in]: _err       The last error code received.
- * @param[in]: _attempt   The number of attempts performed.
+ * @param[in] resources The common resources for drawing.
+ * @param[in] err       The last error code received.
+ * @param[in] attempt   The number of attempts performed.
  */
-static void drawErrorScreen(DrawResources *_resources, int _err, int _attempt) {
+static void drawErrorScreen(DrawResources *resources, int err, int attempt) {
   char buf[33];
   int  len;
 
-  clearSurface(_resources->sfc);
+  clearSurface(resources->sfc);
 
-  setTextColor(_resources->font6, &rgbWhite);
-  len = snprintf(buf, _countof(buf), "Error %d, Retry %d", _err, _attempt);
-  drawText(_resources->sfc, _resources->font6, 0, 0, buf, len);
+  setTextColor(resources->font6, &rgbWhite);
+  len = snprintf(buf, COUNTOF(buf), "Error %d, Retry %d", err, attempt);
+  drawText(resources->sfc, resources->font6, 0, 0, buf, len);
 
-  drawBitmapInBox(_resources->sfc, _resources->dlErr, 0, 0, 320, 240);
-  commitSurface(_resources->sfc);
+  drawBitmapInBox(resources->sfc, resources->dlErr, 0, 0, 320, 240);
+  commitSurface(resources->sfc);
 }
 
 /**
  * @brief   Loads the icon for a dominant weather phenomenon.
- * @param[in]: _wx The weather phenomenon.
+ * @param[in] wx The weather phenomenon.
  * @returns The icon bitmap or null if no icon available or the icon fails to
  *          load.
  */
-static Bitmap getWeatherIcon(DominantWeather _wx) {
-  switch (_wx) {
+static Bitmap getWeatherIcon(DominantWeather wx) {
+  switch (wx) {
   case wxClearDay:
     return allocateBitmap("wx_clear_day.png");
   case wxClearNight:
@@ -268,12 +268,12 @@ static Bitmap getWeatherIcon(DominantWeather _wx) {
 
 /**
  * @brief   Loads the icon for a flight category.
- * @param[in]: _cat The station flight category.
+ * @param[in] cat The station flight category.
  * @returns The icon bitmap or null if no icon available or the icon fails to
  *          load.
  */
-static Bitmap getFlightCategoryIcon(FlightCategory _cat) {
-  switch (_cat) {
+static Bitmap getFlightCategoryIcon(FlightCategory cat) {
+  switch (cat) {
   case catLIFR:
     return allocateBitmap("cat_lifr.png");
   case catIFR:
@@ -289,17 +289,17 @@ static Bitmap getFlightCategoryIcon(FlightCategory _cat) {
 
 /**
  * @brief   Loads the icon for a wind direction.
- * @param[in]: _dir The wind direction.
+ * @param[in] dir The wind direction.
  * @returns The icon bitmap or null if no icon available or the icon fails to
  *          load.
  */
-static Bitmap getWindIcon(int _dir) {
-  switch ((_dir + 15) / 30 * 30) {
+static Bitmap getWindIcon(int dir) {
+  switch ((dir + 15) / 30 * 30) {
   case 0:
     // If the explicit wind direction is zero, this means winds calm. However,
     // if the wind direction is 1-14, the sector will still be centered on 0,
     // so handle both cases here.
-    if (_dir == 0) {
+    if (dir == 0) {
       return allocateBitmap("wind_calm.png");
     } else {
       return allocateBitmap("wind_360.png");
@@ -335,43 +335,43 @@ static Bitmap getWindIcon(int _dir) {
 
 /**
  * @brief Draws the wind information text.
- * @param[in]: _resources The common drawing resources.
- * @param[in]: _station   The weather station.
+ * @param[in] resources The common drawing resources.
+ * @param[in] station   The weather station.
  */
-static void drawWindText(DrawResources *_resources, WxStation *_station) {
+static void drawWindText(DrawResources *resources, WxStation *station) {
   char buf[33];
 
-  setTextColor(_resources->font6, &rgbWhite);
+  setTextColor(resources->font6, &rgbWhite);
 
-  if (_station->windDir > 0) {
-    snprintf(buf, _countof(buf), "%d\x01", _station->windDir);
+  if (station->windDir > 0) {
+    snprintf(buf, COUNTOF(buf), "%d\x01", station->windDir);
   } else {
-    if (_station->windSpeed == 0) {
-      strncpy(buf, "Calm", _countof(buf));
+    if (station->windSpeed == 0) {
+      strncpy(buf, "Calm", COUNTOF(buf));
     } else {
-      strncpy(buf, "Var", _countof(buf));
+      strncpy(buf, "Var", COUNTOF(buf));
     }
   }
 
-  drawText(_resources->sfc, _resources->font6, 84, 126, buf, strlen(buf));
+  drawText(resources->sfc, resources->font6, 84, 126, buf, strlen(buf));
 
-  if (_station->windSpeed == 0) {
-    strncpy(buf, "---", _countof(buf));
+  if (station->windSpeed == 0) {
+    strncpy(buf, "---", COUNTOF(buf));
   } else {
-    snprintf(buf, _countof(buf), "%dkt", _station->windSpeed);
+    snprintf(buf, COUNTOF(buf), "%dkt", station->windSpeed);
   }
 
-  drawText(_resources->sfc, _resources->font6, 84, 149, buf, strlen(buf));
+  drawText(resources->sfc, resources->font6, 84, 149, buf, strlen(buf));
 
-  setTextColor(_resources->font6, &rgbRed);
+  setTextColor(resources->font6, &rgbRed);
 
-  if (_station->windGust == 0) {
-    strncpy(buf, "---", _countof(buf));
+  if (station->windGust == 0) {
+    strncpy(buf, "---", COUNTOF(buf));
   } else {
-    snprintf(buf, _countof(buf), "%dkt", _station->windGust);
+    snprintf(buf, COUNTOF(buf), "%dkt", station->windGust);
   }
 
-  drawText(_resources->sfc, _resources->font6, 84, 172, buf, strlen(buf));
+  drawText(resources->sfc, resources->font6, 84, 172, buf, strlen(buf));
 }
 
 /**
@@ -379,27 +379,27 @@ static void drawWindText(DrawResources *_resources, WxStation *_station) {
  * @details Draws layer information for the lowest ceiling and the next highest
  *          cloud layer, or, if there is no ceiling, the lowest and next highest
  *          cloud layers.
- * @param[in]: _resources The common drawing resources.
- * @param[in]: _station   The weather station.
+ * @param[in] resources The common drawing resources.
+ * @param[in] station   The weather station.
  */
-static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
-  SkyCondition *sky = _station->layers;
+static void drawCloudLayers(DrawResources *resources, WxStation *station) {
+  SkyCondition *sky = station->layers;
   char          buf[33];
 
   if (!sky) {
     return;
   }
 
-  setTextColor(_resources->font6, &rgbWhite);
+  setTextColor(resources->font6, &rgbWhite);
 
   switch (sky->coverage) {
   case skyClear:
-    strncpy(buf, "Clear", _countof(buf));
-    drawText(_resources->sfc, _resources->font6, 172, 126, buf, strlen(buf));
+    strncpy(buf, "Clear", COUNTOF(buf));
+    drawText(resources->sfc, resources->font6, 172, 126, buf, strlen(buf));
     break;
   case skyOvercastSurface:
-    snprintf(buf, _countof(buf), "VV %d", _station->vertVis);
-    drawText(_resources->sfc, _resources->font6, 172, 126, buf, strlen(buf));
+    snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
+    drawText(resources->sfc, resources->font6, 172, 126, buf, strlen(buf));
     break;
   default:
     // Find the ceiling.
@@ -417,17 +417,17 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
 
     // No ceiling of broken or overcast, draw the lowest layer.
     if (!sky) {
-      sky = _station->layers;
+      sky = station->layers;
     }
 
-    layerToString(sky, buf, _countof(buf));
-    drawText(_resources->sfc, _resources->font6, 172, sky->next ? 149 : 126,
-             buf, strlen(buf));
+    layerToString(sky, buf, COUNTOF(buf));
+    drawText(resources->sfc, resources->font6, 172, sky->next ? 149 : 126, buf,
+             strlen(buf));
 
     // Draw the next highest layer if there is one.
     if (sky->next) {
-      layerToString(sky->next, buf, _countof(buf));
-      drawText(_resources->sfc, _resources->font6, 172, 126, buf, strlen(buf));
+      layerToString(sky->next, buf, COUNTOF(buf));
+      drawText(resources->sfc, resources->font6, 172, 126, buf, strlen(buf));
     }
 
     break;
@@ -436,119 +436,118 @@ static void drawCloudLayers(DrawResources *_resources, WxStation *_station) {
 
 /**
  * @brief Draws the temperature, dewpoint, and visibility information.
- * @param[in]: _resources The common drawing resources.
- * @param[in]: _station   The weather station.
+ * @param[in] resources The common drawing resources.
+ * @param[in] station   The weather station.
  */
-static void drawTempDewPointVis(DrawResources *_resources,
-                                WxStation *    _station) {
+static void drawTempDewPointVis(DrawResources *resources, WxStation *station) {
   char buf[33];
 
-  setTextColor(_resources->font6, &rgbWhite);
+  setTextColor(resources->font6, &rgbWhite);
 
-  snprintf(buf, _countof(buf), "%dsm vis", _station->visibility);
-  drawText(_resources->sfc, _resources->font6, 172, 172, buf, strlen(buf));
+  snprintf(buf, COUNTOF(buf), "%dsm vis", station->visibility);
+  drawText(resources->sfc, resources->font6, 172, 172, buf, strlen(buf));
 
-  snprintf(buf, _countof(buf), "%.0f\x01/%.0f\x01\x43", _station->temp,
-           _station->dewPoint);
-  drawText(_resources->sfc, _resources->font6, 0, 206, buf, strlen(buf));
+  snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp,
+           station->dewPoint);
+  drawText(resources->sfc, resources->font6, 0, 206, buf, strlen(buf));
 
-  snprintf(buf, _countof(buf), "%.2f\"", _station->alt);
-  drawText(_resources->sfc, _resources->font6, 172, 206, buf, strlen(buf));
+  snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
+  drawText(resources->sfc, resources->font6, 172, 206, buf, strlen(buf));
 }
 
 /**
  * @brief Draws a station information screen.
- * @param[in]: _resources The common drawing resources.
- * @param[in]: _station   The weather station.
+ * @param[in] resources The common drawing resources.
+ * @param[in] station   The weather station.
  */
-static void drawStation(DrawResources *_resources, WxStation *_station) {
+static void drawStation(DrawResources *resources, WxStation *station) {
   Bitmap icon = NULL;
   char * str;
   int    w, x;
   size_t len;
 
-  clearSurface(_resources->sfc);
-  setTextColor(_resources->font16, &rgbWhite);
-  setTextColor(_resources->font8, &rgbWhite);
-  setTextColor(_resources->font6, &rgbWhite);
+  clearSurface(resources->sfc);
+  setTextColor(resources->font16, &rgbWhite);
+  setTextColor(resources->font8, &rgbWhite);
+  setTextColor(resources->font6, &rgbWhite);
 
   // Draw the screen layout.
   icon = allocateBitmap("separators.png");
 
   if (icon) {
-    drawBitmapInBox(_resources->sfc, icon, 0, 0, 320, 240);
+    drawBitmapInBox(resources->sfc, icon, 0, 0, 320, 240);
     freeBitmap(icon);
     icon = NULL;
   }
 
   // Draw the local or ICAO airport identifier.
-  str = _station->localId;
+  str = station->localId;
 
   if (!str) {
-    str = _station->id;
+    str = station->id;
   }
 
-  drawText(_resources->sfc, _resources->font16, 0, 0, str, strlen(str));
+  drawText(resources->sfc, resources->font16, 0, 0, str, strlen(str));
 
   // Draw the dominant weather phenomenon icon.
-  icon = getWeatherIcon(_station->wx);
+  icon = getWeatherIcon(station->wx);
 
   if (icon) {
-    drawBitmapInBox(_resources->sfc, icon, 236, 0, 320, 81);
+    drawBitmapInBox(resources->sfc, icon, 236, 0, 320, 81);
     freeBitmap(icon);
     icon = NULL;
   }
 
   // Draw the flight category icon.
-  icon = getFlightCategoryIcon(_station->cat);
+  icon = getFlightCategoryIcon(station->cat);
 
   if (icon) {
-    drawBitmapInBox(_resources->sfc, icon, 174, 0, 236, 81);
+    drawBitmapInBox(resources->sfc, icon, 174, 0, 236, 81);
     freeBitmap(icon);
     icon = NULL;
   }
 
   // Draw the weather phenomena string.
-  if (_station->wxString) {
-    len = strlen(_station->wxString);
-    w   = getFontCharWidth(_resources->font8);
+  if (station->wxString) {
+    len = strlen(station->wxString);
+    w   = getFontCharWidth(resources->font8);
     x   = len * w;
     x   = (320 - x) / 2;
-    drawText(_resources->sfc, _resources->font8, x < 0 ? 0 : x, 81,
-             _station->wxString, len);
+    drawText(resources->sfc, resources->font8, x < 0 ? 0 : x, 81,
+             station->wxString, len);
   }
 
   // Draw the wind sock icon.
-  icon = getWindIcon(_station->windDir);
+  icon = getWindIcon(station->windDir);
 
   if (icon) {
-    drawBitmap(_resources->sfc, icon, 10, 132);
+    drawBitmap(resources->sfc, icon, 10, 132);
     freeBitmap(icon);
     icon = NULL;
   }
 
   // Draw the wind information.
-  drawWindText(_resources, _station);
+  drawWindText(resources, station);
 
   // Draw the cloud layers.
-  drawCloudLayers(_resources, _station);
+  drawCloudLayers(resources, station);
 
   // Draw temperature, dewpoint, and visibility.
-  drawTempDewPointVis(_resources, _station);
+  drawTempDewPointVis(resources, station);
 
   // Update the screen.
-  commitSurface(_resources->sfc);
+  commitSurface(resources->sfc);
 }
 
 /**
  * @brief   The program loop.
  * @details Test mode performs the weather query, then writes the first screen
  *          update to a PNG file before exiting.
- * @param[in]: _test    Run a test.
- * @param[in]: _verbose Output extra debug information.
+ * @param[in] test    Run a test.
+ * @param[in] verbose Output extra debug information.
  * @returns 0 if successful, non-zero otherwise.
  */
-static int go(boolean _test, boolean _verbose) {
+static int go(boolean test, boolean verbose) {
   PiwxConfig *  cfg = getPiwxConfig();
   DrawResources drawRes;
   WxStation *   wx = NULL, *curStation = NULL;
@@ -557,7 +556,7 @@ static int go(boolean _test, boolean _verbose) {
   int           i, err;
   unsigned int  b, bl = 0, bc, retry = 0;
 
-  if (_verbose) {
+  if (verbose) {
     printConfiguration(cfg);
   }
 
@@ -619,12 +618,12 @@ static int go(boolean _test, boolean _verbose) {
 
       if (wx) {
         retry = 0;
-#ifdef WITH_LED_SUPPORT
+#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
 #endif
       } else {
         drawErrorScreen(&drawRes, err, ++retry);
-#ifdef WITH_LED_SUPPORT
+#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, NULL);
 #endif
 
@@ -651,7 +650,7 @@ static int go(boolean _test, boolean _verbose) {
       // If the blink timeout expired, update the LEDs.
       if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 &&
           now > nextBlink) {
-#ifdef WITH_LED_SUPPORT
+#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
 #endif
         nextBlink = now + 1;
@@ -666,7 +665,7 @@ static int go(boolean _test, boolean _verbose) {
 
     drawStation(&drawRes, curStation);
 
-    if (_test) {
+    if (test) {
       writeSurfaceToPNG(drawRes.sfc, "test.png");
       run = 0;
     }
@@ -676,7 +675,7 @@ static int go(boolean _test, boolean _verbose) {
 
   // Clear the screen, turn off the LEDs, and free common draw resources.
   clearScreen(&drawRes);
-#ifdef WITH_LED_SUPPORT
+#if defined WITH_LED_SUPPORT
   updateLEDs(cfg, NULL);
 #endif
   freeDrawResources(&drawRes);
@@ -689,13 +688,13 @@ static int go(boolean _test, boolean _verbose) {
 /**
  * @brief The C-program entry point we all know and love.
  */
-int main(int _argc, char *_argv[]) {
+int main(int argc, char *argv[]) {
   pid_t   pid, sid;
   int     c;
   boolean t = FALSE, standAlone = FALSE, verbose = FALSE;
 
   // Parse the command line parameters.
-  while ((c = getopt_long(_argc, _argv, shortArgs, longArgs, 0)) != -1) {
+  while ((c = getopt_long(argc, argv, shortArgs, longArgs, 0)) != -1) {
     switch (c) {
     case 's':
       standAlone = TRUE;

@@ -31,53 +31,53 @@ typedef struct {
 } Rectangle;
 
 /**
- * @struct _Bitmap
+ * @struct Bitmap_
  * @brief  Private implementation of Bitmap
  */
 typedef struct {
-  Rectangle dim;  /* Dimensions of the PNG. */
-  RGBA **   rows; /* Row markers. */
-} _Bitmap;
+  Rectangle dim;  // Dimensions of the PNG.
+  RGBA **   rows; // Row markers.
+} Bitmap_;
 
 /**
- * @typedef _Surface
+ * @typedef Surface_
  * @brief   Private implementation of Surface.
  */
-typedef _Bitmap _Surface;
+typedef Bitmap_ Surface_;
 
 /**
  * @struct Compose
  * @brief  Configuration of a compose operation.
  */
 typedef struct {
-  _Bitmap * from;   /* Source bitmap. */
-  Rectangle source; /* Source rectangle. */
-  _Surface *to;     /* Target surface. */
-  int       x, y;   /* Top-left corner of output. */
-  RGBA      color;  /* Foreground color. */
-  RGBA      bkgnd;  /* Background color. */
+  Bitmap_ * from;   // Source bitmap.
+  Rectangle source; // Source rectangle.
+  Surface_ *to;     // Target surface.
+  int       x, y;   // Top-left corner of output.
+  RGBA      color;  // Foreground color.
+  RGBA      bkgnd;  // Background color.
 } Compose;
 
 /**
  * @brief Private implementation of @a freeBitmap.
- * @param[in] _bmp The bitmap to free.
+ * @param[in] bmp The bitmap to free.
  */
-static void _freeBitmap(_Bitmap *_bmp) {
-  if (!_bmp) {
+static void freeBitmap_(Bitmap_ *bmp) {
+  if (!bmp) {
     return;
   }
 
-  if (_bmp->rows) {
-    free(_bmp->rows[0]);
+  if (bmp->rows) {
+    free(bmp->rows[0]);
   }
 
-  free(_bmp->rows);
-  free(_bmp);
+  free(bmp->rows);
+  free(bmp);
 }
 
 /**
  * @brief   Alpha blend two colors.
- * @details Blends the foreground color @a _fg with background color @a _bg.
+ * @details Blends the foreground color @a fg with background color @a bg.
  *
  *          For Alpha:          Ao = Af + Ab * (1 - Af)
  *          For RGB components: [ Co = Cf * Af + Cb * Ab * (1 - Af) ] / Ao
@@ -88,73 +88,73 @@ static void _freeBitmap(_Bitmap *_bmp) {
  *
  *          If the composite alpha component is sufficiently close to 0.0, just
  *          output clear black.
- * @param[in]  _fg  The foreground color.
- * @param[in]  _bg  The background color.
- * @param[out] _out The final composite color. It is safe to reuse either the
- *                  foreground or background pointer for output.
+ * @param[in]  fg  The foreground color.
+ * @param[in]  bg  The background color.
+ * @param[out] out The final composite color. It is safe to reuse either the
+ *                 foreground or background pointer for output.
  */
-static void mix(const RGBA *_fg, const RGBA *_bg, RGBA *_out) {
+static void mix(const RGBA *fg, const RGBA *bg, RGBA *out) {
   RGBA  tmp;
   float ba, ao;
 
-  if (!_fg || !_bg || !_out) {
+  if (!(fg && bg && out)) {
     return;
   }
 
   // Shortcut the blend if the background color's alpha is sufficiently large.
   // There is no need to calculate a composite alpha.
-  if (ALPHA(*_bg) > 1.0f - FLT_EPSILON) {
-    tmp        = (*_fg) * ALPHA(*_fg) + (*_bg) * (1.0f - ALPHA(*_fg));
+  if (ALPHA(*bg) > 1.0f - FLT_EPSILON) {
+    tmp        = (*fg) * ALPHA(*fg) + (*bg) * (1.0f - ALPHA(*fg));
     ALPHA(tmp) = 1.0f;
 
-    *_out = tmp;
+    *out = tmp;
 
     return;
   }
 
   // Precalculate Ab * (1.0 - Af) and the final output alpha.
-  ba = ALPHA(*_bg) * (1.0f - ALPHA(*_fg));
-  ao = ALPHA(*_fg) + ba;
+  ba = ALPHA(*bg) * (1.0f - ALPHA(*fg));
+  ao = ALPHA(*fg) + ba;
 
   // Shortcut the blend if the composite alpha is sufficiently small. Just set
   // the final color to clear black.
   if (ao < FLT_EPSILON) {
-    *_out = rgbNull;
+    *out = rgbNull;
     return;
   }
 
   // Blend the RGB components.
-  tmp = (*_fg) * ALPHA(*_fg) + (*_bg) * ba;
+  tmp = (*fg) * ALPHA(*fg) + (*bg) * ba;
   tmp /= ao;
   ALPHA(tmp) = ao;
 
-  *_out = tmp;
+  *out = tmp;
 }
 
 /**
  * @brief   Finds the intersection of two rectangles.
- * @param[in] _a      First rectangle.
- * @param[in] _b      Second rectangle.
- * @param[out] _isect Intersected rectangle. It is safe for this to be a pointer
- *                    to @a _a or @a _b.
- * @returns 0 if the intersection is non-empty.
+ * @param[in] a      First rectangle.
+ * @param[in] b      Second rectangle.
+ * @param[out] isect Intersected rectangle. It is safe for this to be a pointer
+ *                   to @a a or @a b.
+ * @returns TRUE if the intersection is non-empty, FALSE otherwise.
  */
-static int rectangleIntersection(const Rectangle *_a, const Rectangle *_b,
-                                 Rectangle *_isect) {
+static boolean rectangleIntersection(const Rectangle *a, const Rectangle *b,
+                                     Rectangle *isect) {
   Rectangle tmp;
 
-  tmp.l = max(_a->l, _b->l);
-  tmp.t = max(_a->t, _b->t);
-  tmp.r = min(_a->r, _b->r);
-  tmp.b = min(_a->b, _b->b);
+  tmp.l = max(a->l, b->l);
+  tmp.t = max(a->t, b->t);
+  tmp.r = min(a->r, b->r);
+  tmp.b = min(a->b, b->b);
 
-  *_isect = tmp;
+  *isect = tmp;
 
-  if (tmp.l >= tmp.r || tmp.t >= tmp.b) {
-    return -1;
+  if (!(tmp.l < tmp.r && tmp.t < tmp.b)) {
+    return FALSE;
   }
 
-  return 0;
+  return TRUE;
 }
 
 /**
@@ -168,70 +168,71 @@ static int rectangleIntersection(const Rectangle *_a, const Rectangle *_b,
  *
  *          To perform a simple copy, set the foreground to opaque white and the
  *          background color to transparent black.
- * @param[in] _cmp The compose operation details.
+ * @param[in] cmp The compose operation details.
  */
-static void compose(const Compose *_cmp) {
+static void compose(const Compose *cmp) {
   int       u, v, x, y;
   Rectangle source, target;
   RGBA      tmp;
 
-  if (!_cmp || !_cmp->to || !_cmp->from) {
+  if (!(cmp && cmp->to && cmp->from)) {
     return;
   }
 
   // Initialize the rectangle to the same dimensions as the source, position it
   // at the target location, and intersect it with the surface bounds.
-  target.l = _cmp->x;
-  target.t = _cmp->y;
-  target.r = target.l + (_cmp->source.r - _cmp->source.l);
-  target.b = target.t + (_cmp->source.b - _cmp->source.t);
+  target.l = cmp->x;
+  target.t = cmp->y;
+  target.r = target.l + (cmp->source.r - cmp->source.l);
+  target.b = target.t + (cmp->source.b - cmp->source.t);
 
-  if (rectangleIntersection(&_cmp->to->dim, &target, &target) != 0) {
+  if (!rectangleIntersection(&cmp->to->dim, &target, &target)) {
     return;
   }
 
   // Adjust the source rectangle. We know the rectangle above will be the same
   // size or smaller than the source rectangle and can only move in the +x and
   // +y directions.
-  source.l += (target.l - _cmp->x);
-  source.t += (target.t - _cmp->y);
+  source   = cmp->source;
+  source.l += (target.l - cmp->x);
+  source.t += (target.t - cmp->y);
   source.r = source.l + target.r - target.l;
   source.b = source.t + target.b - target.t;
 
   // Intersect the new source rectangle with the bitmap bounds.
-  if (rectangleIntersection(&_cmp->from->dim, &_cmp->source, &source) != 0) {
+  if (!rectangleIntersection(&cmp->from->dim, &cmp->source, &source)) {
     return;
   }
 
   for (v = source.t, y = target.t; y < target.b; ++y, ++v) {
     for (u = source.l, x = target.l; x < target.r; ++x, ++u) {
       // Multiply by the foreground color, then mix with the background color.
-      tmp = _cmp->from->rows[v][u];
-      tmp *= _cmp->color;
-      mix(&tmp, &_cmp->bkgnd, &tmp);
+      tmp = cmp->from->rows[v][u];
+      tmp *= cmp->color;
+      mix(&tmp, &cmp->bkgnd, &tmp);
 
       if (ALPHA(tmp) > 1.0f - FLT_EPSILON) {
         // Shortcut the mix if the alpha is sufficiently large.
-        _cmp->to->rows[y][x] = tmp;
+        cmp->to->rows[y][x] = tmp;
       } else {
         // Mix with the surface color. The mix will shortcut if the alpha is
         // sufficiently small.
-        mix(&tmp, &_cmp->to->rows[y][x], &_cmp->to->rows[y][x]);
+        mix(&tmp, &cmp->to->rows[y][x], &cmp->to->rows[y][x]);
       }
     }
   }
 }
 
-static _Bitmap *allocateEmptyBitmap(int _w, int _h) {
-  _Bitmap *bmp;
+static Bitmap_ *allocateEmptyBitmap(int w, int h) {
+  Bitmap_ *bmp;
   RGBA *   p;
   int      y;
 
-  if (_w <= 0 || _h <= 0) {
+  if (!(w > 0 && h > 0)) {
     return NULL;
   }
 
-  bmp = (_Bitmap *)malloc(sizeof(_Bitmap));
+  bmp = malloc(sizeof(Bitmap_));
 
   if (!bmp) {
     return NULL;
@@ -239,15 +240,15 @@ static _Bitmap *allocateEmptyBitmap(int _w, int _h) {
 
   bmp->dim.l = 0;
   bmp->dim.t = 0;
-  bmp->dim.r = _w;
-  bmp->dim.b = _h;
-  bmp->rows  = (RGBA **)malloc(sizeof(RGBA *) * _h);
+  bmp->dim.r = w;
+  bmp->dim.b = h;
+  bmp->rows  = malloc(sizeof(RGBA *) * h);
 
   if (!bmp->rows) {
     goto cleanup;
   }
 
-  bmp->rows[0] = (RGBA *)aligned_alloc(sizeof(RGBA), sizeof(RGBA) * _w * _h);
+  bmp->rows[0] = aligned_alloc(sizeof(RGBA), sizeof(RGBA) * w * h);
 
   if (!bmp->rows[0]) {
     goto cleanup;
@@ -255,8 +256,8 @@ static _Bitmap *allocateEmptyBitmap(int _w, int _h) {
 
   p = bmp->rows[0];
 
-  for (y = 1; y < _h; ++y) {
-    p += _w;
+  for (y = 1; y < h; ++y) {
+    p += w;
     bmp->rows[y] = p;
   }
 
@@ -265,19 +266,19 @@ static _Bitmap *allocateEmptyBitmap(int _w, int _h) {
   return bmp;
 
 cleanup:
-  _freeBitmap(bmp);
+  freeBitmap_(bmp);
 
   return NULL;
 }
 
-Surface allocateSurface(int _w, int _h) { return allocateEmptyBitmap(_w, _h); }
+Surface allocateSurface(int w, int h) { return allocateEmptyBitmap(w, h); }
 
-void freeSurface(Surface _surface) { _freeBitmap((_Bitmap *)_surface); }
+void freeSurface(Surface surface) { freeBitmap_((Bitmap_ *)surface); }
 
-void clearSurface(Surface _surface) {
-  _Surface *sfc = (_Surface *)_surface;
+void clearSurface(Surface surface) {
+  Surface_ *sfc = (Surface_ *)surface;
 
-  if (!sfc || !sfc->rows) {
+  if (!(sfc && sfc->rows)) {
     return;
   }
 
@@ -286,21 +287,21 @@ void clearSurface(Surface _surface) {
 
 /**
  * @brief Convert a drawing surface to a RGB565 bitmap.
- * @param[in]  _sfc    The drawing surface.
- * @param[out] _bitmap The output buffer for the 16-bit RGB565 data.
+ * @param[in]  sfc    The drawing surface.
+ * @param[out] bitmap The output buffer for the 16-bit RGB565 data.
  */
-void ditherSurface(const _Surface *_sfc, u_int16_t *_bitmap) {
+void ditherSurface(const Surface_ *sfc, u_int16_t *bitmap) {
   u_int16_t *q;
   RGBA *     p, tmp;
   size_t     i, px;
 
-  if (!_sfc) {
+  if (!sfc) {
     return;
   }
 
-  px = _sfc->dim.r * _sfc->dim.b;
-  p  = _sfc->rows[0];
-  q  = _bitmap;
+  px = sfc->dim.r * sfc->dim.b;
+  p  = sfc->rows[0];
+  q  = bitmap;
 
   // Convert the 32-bit pixels to 16-bit RGB565. Pre-multiply with the alpha
   // value, then convert the components.
@@ -315,8 +316,8 @@ void ditherSurface(const _Surface *_sfc, u_int16_t *_bitmap) {
   }
 }
 
-int writeSurfaceToPNG(const Surface _surface, const char *_file) {
-  _Surface *  sfc     = (_Surface *)_surface;
+boolean writeSurfaceToPNG(const Surface surface, const char *file) {
+  Surface_ *  sfc     = (Surface_ *)surface;
   FILE *      png     = NULL;
   png_structp pngPtr  = NULL;
   png_infop   pngInfo = NULL;
@@ -324,13 +325,14 @@ int writeSurfaceToPNG(const Surface _surface, const char *_file) {
   png_bytep * rows = NULL;
   png_byte *  t;
   RGBA *      s;
-  int         ok = -1, x, y;
+  int         x, y;
+  boolean     ok = FALSE;
 
   if (!sfc) {
     return -1;
   }
 
-  png = fopen(_file, "wb");
+  png = fopen(file, "wb");
 
   if (!png) {
     goto cleanup;
@@ -368,8 +370,8 @@ int writeSurfaceToPNG(const Surface _surface, const char *_file) {
   // to the beginning of the next row which is `rowBytes` ahead of the current
   // row.
   rowBytes = png_get_rowbytes(pngPtr, pngInfo);
-  rows     = (png_bytep *)malloc(sizeof(png_bytep) * sfc->dim.b);
-  rows[0]  = (png_byte *)malloc(rowBytes * sfc->dim.b);
+  rows     = malloc(sizeof(png_bytep) * sfc->dim.b);
+  rows[0]  = malloc(rowBytes * sfc->dim.b);
 
   for (y = 1; y < sfc->dim.b; ++y) {
     rows[y] = rows[y - 1] + rowBytes;
@@ -394,7 +396,7 @@ int writeSurfaceToPNG(const Surface _surface, const char *_file) {
   png_write_image(pngPtr, rows);
   png_write_end(pngPtr, NULL);
 
-  ok = 0;
+  ok = TRUE;
 
 cleanup:
   if (png) {
@@ -415,43 +417,43 @@ cleanup:
 }
 
 /**
- * @struct _BITMAPFILEHEADER
+ * @struct BITMAPFILEHEADER
  * @brief  Windows bitmap file header.
  */
 typedef struct {
-  u_int8_t  signature[2]; /* Bitmap file signature. */
-  u_int32_t fileSize;     /* Total bitmap file size. */
-  u_int16_t reserved1;    /* Ignored. */
-  u_int16_t reserved2;    /* Ignored. */
-  u_int32_t pixelOffset;  /* Offset to pixel data. */
-} _BITMAPFILEHEADER;
+  u_int8_t  signature[2]; // Bitmap file signature.
+  u_int32_t fileSize;     // Total bitmap file size.
+  u_int16_t reserved1;    // Ignored.
+  u_int16_t reserved2;    // Ignored.
+  u_int32_t pixelOffset;  // Offset to pixel data.
+} BITMAPFILEHEADER;
 
 /**
- * @struct _BITMAPINFOHEADER
+ * @struct BITMAPINFOHEADER
  * @brief  Windows bitmap information header.
  */
 typedef struct {
-  u_int32_t size;            /* Header size. */
-  u_int32_t width;           /* Bitmap width in pixels. */
-  u_int32_t height;          /* Bitmap height in pixels. */
-  u_int16_t planes;          /* Color planes, must be 1. */
-  u_int16_t bpp;             /* Bits-per-pixel. */
-  u_int32_t compression;     /* Compression method. */
-  u_int32_t bmpSize;         /* Raw bitmap size, 0 for BI_RGB. */
-  u_int32_t hRes;            /* Horizontal resolution px per meter. */
-  u_int32_t vRes;            /* Vertical resolution px per meter. */
-  u_int32_t paletteSize;     /* Colors in palette. */
-  u_int32_t importantColors; /* Important colors in palette, 0. */
-} _BITMAPINFOHEADER;
+  u_int32_t size;            // Header size.
+  u_int32_t width;           // Bitmap width in pixels.
+  u_int32_t height;          // Bitmap height in pixels.
+  u_int16_t planes;          // Color planes, must be 1.
+  u_int16_t bpp;             // Bits-per-pixel.
+  u_int32_t compression;     // Compression method.
+  u_int32_t bmpSize;         // Raw bitmap size, 0 for BI_RGB.
+  u_int32_t hRes;            // Horizontal resolution px per meter.
+  u_int32_t vRes;            // Vertical resolution px per meter.
+  u_int32_t paletteSize;     // Colors in palette.
+  u_int32_t importantColors; // Important colors in palette, 0.
+} BITMAPINFOHEADER;
 
-int writeSurfaceToBMP(const Surface _surface, const char *_file) {
-  _Surface *        sfc = (_Surface *)_surface;
-  FILE *            bmp = NULL;
-  u_int16_t *       buf = NULL;
-  _BITMAPFILEHEADER hdr;
-  _BITMAPINFOHEADER info;
-  size_t            px;
-  int               ok = -1;
+boolean writeSurfaceToBMP(const Surface surface, const char *file) {
+  Surface_ *       sfc = (Surface_ *)surface;
+  FILE *           bmp = NULL;
+  u_int16_t *      buf = NULL;
+  BITMAPFILEHEADER hdr;
+  BITMAPINFOHEADER info;
+  size_t           px;
+  boolean          ok = FALSE;
 
   if (!sfc) {
     return -1;
@@ -459,11 +461,11 @@ int writeSurfaceToBMP(const Surface _surface, const char *_file) {
 
   hdr.signature[0] = 0x42;
   hdr.signature[1] = 0x4d;
-  hdr.fileSize     = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER) +
+  hdr.fileSize     = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) +
                  sizeof(u_int16_t) * sfc->dim.r * sfc->dim.b;
   hdr.reserved1   = 0;
   hdr.reserved2   = 0;
-  hdr.pixelOffset = sizeof(_BITMAPFILEHEADER) + sizeof(_BITMAPINFOHEADER);
+  hdr.pixelOffset = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
   info.size            = sizeof(hdr);
   info.width           = sfc->dim.r;
@@ -477,7 +479,7 @@ int writeSurfaceToBMP(const Surface _surface, const char *_file) {
   info.paletteSize     = 0;
   info.importantColors = 0;
 
-  bmp = fopen(_file, "wb");
+  bmp = fopen(file, "wb");
 
   if (bmp < 0) {
     goto cleanup;
@@ -485,7 +487,7 @@ int writeSurfaceToBMP(const Surface _surface, const char *_file) {
 
   // Allocate a new buffer for the RGB565 data.
   px  = sfc->dim.r * sfc->dim.b;
-  buf = (u_int16_t *)malloc(sizeof(u_int16_t) * px);
+  buf = malloc(sizeof(u_int16_t) * px);
 
   if (!buf) {
     goto cleanup;
@@ -498,7 +500,7 @@ int writeSurfaceToBMP(const Surface _surface, const char *_file) {
   fwrite(&info, sizeof(info), 1, bmp);
   fwrite(buf, sizeof(u_int16_t), px, bmp);
 
-  ok = 0;
+  ok = TRUE;
 
 cleanup:
   if (bmp) {
@@ -510,12 +512,12 @@ cleanup:
   return ok;
 }
 
-int commitSurface(const Surface _surface) {
-  const _Surface *sfc = (const _Surface *)_surface;
+boolean commitSurface(const Surface surface) {
+  const Surface_ *sfc = (const Surface_ *)surface;
   int             fb;
   u_int16_t *     buf = NULL;
   size_t          px;
-  int             ok = -1;
+  boolean         ok = FALSE;
 
   if (!sfc) {
     return -1;
@@ -529,7 +531,7 @@ int commitSurface(const Surface _surface) {
 
   // Allocate a new buffer for the RGB565 data.
   px  = sfc->dim.r * sfc->dim.b;
-  buf = (u_int16_t *)malloc(sizeof(u_int16_t) * px);
+  buf = malloc(sizeof(u_int16_t) * px);
 
   if (!buf) {
     goto cleanup;
@@ -541,7 +543,7 @@ int commitSurface(const Surface _surface) {
   // Blt the 16-bit image to the framebuffer.
   write(fb, buf, sizeof(u_int16_t) * px);
 
-  ok = 0;
+  ok = TRUE;
 
 cleanup:
   if (fb) {
@@ -555,15 +557,16 @@ cleanup:
 
 /**
  * @brief   Private implementation of @a allocateBitmap.
- * @details Loads the specified PNG file into a @a _Bitmap.
- * @param[in] _png         The path of the PNG file to load.
- * @param[in] _colorFormat The desired color format.
- * @param[in] _bits        The desired bit depth.
- * @returns The initialized @a _Bitmap structure, or null if the PNG does not
+ * @details Loads the specified PNG file into a @a Bitmap_.
+ * @param[in] pngFile     The path of the PNG file to load.
+ * @param[in] colorFormat The desired color format.
+ * @param[in] channelBits The desired bits per channel.
+ * @returns The initialized @a Bitmap_ structure, or null if the PNG does not
  *          match the desired color format and bit depth or memory could not be
  *          allocated to hold the bitmap.
  */
-static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
+static Bitmap_ *allocateBitmap_(const char *pngFile, int colorFormat,
+                                int channelBits) {
   FILE *      png = NULL;
   png_byte    sig[8];
   png_structp pngPtr  = NULL;
@@ -572,20 +575,20 @@ static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
   png_bytep   ch;
   int         ok = 0, row, col, color, bits;
   size_t      rowBytes;
-  _Bitmap *   bmp = NULL;
+  Bitmap_ *   bmp = NULL;
 
   // Verify the designed format is supported.
-  if (_colorFormat != PNG_COLOR_TYPE_GRAY &&
-      _colorFormat != PNG_COLOR_TYPE_RGBA) {
+  if (colorFormat != PNG_COLOR_TYPE_GRAY &&
+      colorFormat != PNG_COLOR_TYPE_RGBA) {
     return NULL;
   }
 
-  if (_bits != 8) {
+  if (channelBits != 8) {
     return NULL;
   }
 
   // Verify this is actually a PNG file.
-  png = fopen(_png, "r");
+  png = fopen(pngFile, "r");
 
   if (!png) {
     return NULL;
@@ -634,20 +637,20 @@ static _Bitmap *_allocateBitmap(const char *_png, int _colorFormat, int _bits) {
   png_read_update_info(pngPtr, pngInfo);
 
   // Verify the image format matches the desired format.
-  if (color != _colorFormat || bits != _bits) {
+  if (color != colorFormat || bits != channelBits) {
     goto cleanup;
   }
 
   // Attempt to allocate memory for the image.
   rowBytes = png_get_rowbytes(pngPtr, pngInfo);
 
-  rows = (png_bytep *)malloc(sizeof(png_bytep) * bmp->dim.b);
+  rows = malloc(sizeof(png_bytep) * bmp->dim.b);
 
   if (!rows) {
     goto cleanup;
   }
 
-  rows[0] = (png_byte *)malloc(rowBytes * bmp->dim.b);
+  rows[0] = malloc(rowBytes * bmp->dim.b);
 
   if (!rows[0]) {
     goto cleanup;
@@ -708,27 +711,27 @@ cleanup:
   free(rows);
 
   if (!ok) {
-    _freeBitmap(bmp);
+    freeBitmap_(bmp);
     bmp = NULL;
   }
 
   return bmp;
 }
 
-Bitmap allocateBitmap(const char *_png) {
+Bitmap allocateBitmap(const char *pngFile) {
   char path[4096];
-  return (Bitmap)_allocateBitmap(getPathForBitmap(_png, path, 4096),
+  return (Bitmap)allocateBitmap_(getPathForBitmap(pngFile, path, 4096),
                                  PNG_COLOR_TYPE_RGBA, 8);
 }
 
-void freeBitmap(Bitmap _bmp) { _freeBitmap((_Bitmap *)_bmp); }
+void freeBitmap(Bitmap bmp) { freeBitmap_((Bitmap_ *)bmp); }
 
-void drawBitmap(Surface _surface, const Bitmap _bitmap, int _x, int _y) {
-  _Surface *sfc = (_Surface *)_surface;
-  _Bitmap * bmp = (_Bitmap *)_bitmap;
+void drawBitmap(Surface surface, const Bitmap bitmap, int x, int y) {
+  Surface_ *sfc = (Surface_ *)surface;
+  Bitmap_ * bmp = (Bitmap_ *)bitmap;
   Compose   cmp;
 
-  if (!sfc || !bmp) {
+  if (!(sfc && bmp)) {
     return;
   }
 
@@ -739,8 +742,8 @@ void drawBitmap(Surface _surface, const Bitmap _bitmap, int _x, int _y) {
   cmp.source.b = bmp->dim.b;
 
   cmp.to = sfc;
-  cmp.x  = _x;
-  cmp.y  = _y;
+  cmp.x  = x;
+  cmp.y  = y;
 
   cmp.color = rgbWhite;
   cmp.bkgnd = rgbNull;
@@ -748,34 +751,34 @@ void drawBitmap(Surface _surface, const Bitmap _bitmap, int _x, int _y) {
   compose(&cmp);
 }
 
-void drawBitmapInBox(Surface _surface, const Bitmap _bitmap, int _l, int _t,
-                     int _r, int _b) {
-  _Bitmap *bmp = (_Bitmap *)_bitmap;
+void drawBitmapInBox(Surface surface, const Bitmap bitmap, int l, int t, int r,
+                     int b) {
+  Bitmap_ *bmp = (Bitmap_ *)bitmap;
 
   if (!bmp) {
     return;
   }
 
-  drawBitmap(_surface, _bitmap, _l + ((_r - _l) - bmp->dim.r) / 2,
-             _t + ((_b - _t) - bmp->dim.b) / 2);
+  drawBitmap(surface, bitmap, l + ((r - l) - bmp->dim.r) / 2,
+             t + ((b - t) - bmp->dim.b) / 2);
 }
 
 /**
- * @struct _Font
+ * @struct Font_
  * @brief  Private implementation of Font.
  */
 typedef struct {
-  _Bitmap *bmp;
+  Bitmap_ *bmp;
   int      cw, ch;
   RGBA     color, bkgnd;
-} _Font;
+} Font_;
 
-Font allocateFont(FontSize _size) {
+Font allocateFont(FontSize size) {
   char        path[4096];
   const char *f;
-  _Font *     font;
+  Font_ *     fnt;
 
-  switch (_size) {
+  switch (size) {
   case font_16pt:
     f = "sfmono16.png";
     break;
@@ -792,107 +795,107 @@ Font allocateFont(FontSize _size) {
     return NULL;
   }
 
-  font = (_Font *)malloc(sizeof(_Font));
+  fnt = malloc(sizeof(Font_));
 
-  if (!font) {
+  if (!fnt) {
     return NULL;
   }
 
-  font->bmp =
-      _allocateBitmap(getPathForFont(f, path, 4096), PNG_COLOR_TYPE_GRAY, 8);
+  fnt->bmp =
+      allocateBitmap_(getPathForFont(f, path, 4096), PNG_COLOR_TYPE_GRAY, 8);
 
   // The font character map must be 16 characters by 8 characters.
-  if (!font->bmp || font->bmp->dim.r % 16 != 0 || font->bmp->dim.b % 8 != 0) {
-    free(font);
+  if (!fnt->bmp || fnt->bmp->dim.r % 16 != 0 || fnt->bmp->dim.b % 8 != 0) {
+    free(fnt);
     return NULL;
   }
 
-  font->cw    = font->bmp->dim.r / 16;
-  font->ch    = font->bmp->dim.b / 8;
-  font->color = rgbNull;
-  font->bkgnd = rgbNull;
+  fnt->cw    = fnt->bmp->dim.r / 16;
+  fnt->ch    = fnt->bmp->dim.b / 8;
+  fnt->color = rgbNull;
+  fnt->bkgnd = rgbNull;
 
-  return (Font)font;
+  return (Font)fnt;
 }
 
-void freeFont(Font _font) {
-  _Font *font = (_Font *)_font;
+void freeFont(Font font) {
+  Font_ *fnt = (Font_ *)font;
 
-  if (!font) {
+  if (!fnt) {
     return;
   }
 
-  freeBitmap(font->bmp);
-  free(font);
+  freeBitmap(fnt->bmp);
+  free(fnt);
 }
 
-int getFontCharWidth(Font _font) {
-  _Font *font = (_Font *)_font;
+int getFontCharWidth(Font font) {
+  Font_ *fnt = (Font_ *)font;
 
-  if (!font) {
+  if (!fnt) {
     return 0;
   }
 
-  return font->cw;
+  return fnt->cw;
 }
 
-int getFontCharHeight(Font _font) {
-  _Font *font = (_Font *)_font;
+int getFontCharHeight(Font font) {
+  Font_ *fnt = (Font_ *)font;
 
-  if (!font) {
+  if (!fnt) {
     return 0;
   }
 
-  return font->ch;
+  return fnt->ch;
 }
 
-void setTextColor(Font _font, const RGBA *_color) {
-  _Font *font = (_Font *)_font;
+void setTextColor(Font font, const RGBA *color) {
+  Font_ *fnt = (Font_ *)font;
 
-  if (!font) {
+  if (!fnt) {
     return;
   }
 
-  font->color = *_color;
+  fnt->color = *color;
 }
 
-void setBackgroundColor(Font _font, const RGBA *_bkgnd) {
-  _Font *font = (_Font *)_font;
+void setBackgroundColor(Font font, const RGBA *bkgnd) {
+  Font_ *fnt = (Font_ *)font;
 
-  if (!font) {
+  if (!fnt) {
     return;
   }
 
-  font->bkgnd = *_bkgnd;
+  fnt->bkgnd = *bkgnd;
 }
 
-void drawText(Surface _surface, const Font _font, int _x, int _y,
-              const char *_str, size_t _len) {
-  _Surface *   sfc  = (_Surface *)_surface;
-  const _Font *font = (const _Font *)_font;
+void drawText(Surface surface, const Font font, int x, int y, const char *str,
+              size_t len) {
+  Surface_ *   sfc = (Surface_ *)surface;
+  const Font_ *fnt = (const Font_ *)font;
   Compose      cmp;
   char         c;
   size_t       i;
 
-  if (!sfc || !font) {
+  if (!(sfc && fnt)) {
     return;
   }
 
-  if (font->cw > sfc->dim.r || font->ch > sfc->dim.b) {
+  if (!(fnt->cw <= sfc->dim.r && fnt->ch <= sfc->dim.b)) {
     return;
   }
 
   // Setup the common compose paramters.
-  cmp.from  = font->bmp;
-  cmp.color = font->color;
-  cmp.bkgnd = font->bkgnd;
+  cmp.from  = fnt->bmp;
+  cmp.color = fnt->color;
+  cmp.bkgnd = fnt->bkgnd;
 
   cmp.to = sfc;
-  cmp.x  = _x;
-  cmp.y  = _y;
+  cmp.x  = x;
+  cmp.y  = y;
 
-  for (i = 0; i < _len; ++i) {
-    c = _str[i];
+  for (i = 0; i < len; ++i) {
+    c = str[i];
 
     // Null character if in the high 7-bits.
     if (c & 0x80) {
@@ -900,9 +903,9 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
     }
 
     // Attempt to wrap the text string if exceeding the surface width.
-    if (cmp.x + font->cw >= sfc->dim.r) {
-      cmp.x = _x;
-      cmp.y += font->ch;
+    if (cmp.x + fnt->cw >= sfc->dim.r) {
+      cmp.x = x;
+      cmp.y += fnt->ch;
     }
 
     // If exceeding the surface height, there is nothing left to do.
@@ -911,13 +914,13 @@ void drawText(Surface _surface, const Font _font, int _x, int _y,
     }
 
     // Compose the character on to the surface.
-    cmp.source.l = (c % 16) * font->cw;
-    cmp.source.t = (c / 16) * font->ch;
-    cmp.source.r = cmp.source.l + font->cw;
-    cmp.source.b = cmp.source.t + font->ch;
+    cmp.source.l = (c % 16) * fnt->cw;
+    cmp.source.t = (c / 16) * fnt->ch;
+    cmp.source.r = cmp.source.l + fnt->cw;
+    cmp.source.b = cmp.source.t + fnt->ch;
 
     compose(&cmp);
 
-    cmp.x += font->cw;
+    cmp.x += fnt->cw;
   }
 }
