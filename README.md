@@ -136,6 +136,14 @@ DMA channels. `piwx` currently only supports GPIO12 and GPIO18 (PWM0). The
 default options are the safest. Leave these options alone unless there is a
 compelling option to change them.
 
+`piwx` can log basic events to `<prefix>/var/piwx/piwx.log`. The logger supports
+four levels of output: `quiet` (default), `warning`, `info`, and `debug`. Each
+level of debug suppresses the levels above it, e.g. `warning` suppresses `info`
+and `debug` messages.
+
+    # Log warning and informational messages
+    loglevel=info;
+
 Running Automatically
 ---------------------
 
