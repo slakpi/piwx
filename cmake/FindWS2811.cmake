@@ -1,0 +1,5 @@
+find_library(WS2811_LIBRARIES NAMES ws2811)
+find_path(WS2811_INCLUDE_DIRS NAMES ws2811/ws2811.h)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(WS2811 DEFAULT_MSG WS2811_LIBRARIES WS2811_INCLUDE_DIRS)
