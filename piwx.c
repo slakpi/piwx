@@ -8,6 +8,7 @@
 #include "wx.h"
 #include <config.h>
 #include <getopt.h>
+#include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -435,16 +436,20 @@ static void drawCloudLayers(DrawResources *resources, WxStation *station) {
 }
 
 /**
- * @brief Draws the temperature, dewpoint, and visibility information.
+ * @brief Draws the temperature, dewpoint, visibility, and altimeter setting
+ *        information.
  * @param[in] resources The common drawing resources.
  * @param[in] station   The weather station.
  */
-static void drawTempDewPointVis(DrawResources *resources, WxStation *station) {
-  char buf[33];
+static void drawTempDewPointVisAlt(DrawResources *resources,
+                                   WxStation *    station) {
+  const double visibility = fmax(0.0, station->visibility);
+  char         buf[33];
 
   setTextColor(resources->font6, &rgbWhite);
 
-  snprintf(buf, COUNTOF(buf), "%dsm vis", station->visibility);
+  snprintf(buf, COUNTOF(buf), visibility < 2 ? "Vis %.1fsm" : "Vis %.0fsm",
+           visibility);
   drawText(resources->sfc, resources->font6, 172, 172, buf, strlen(buf));
 
   snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp,
@@ -471,7 +476,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
   setTextColor(resources->font8, &rgbWhite);
   setTextColor(resources->font6, &rgbWhite);
 
-  // Draw the screen layout.
   icon = allocateBitmap("separators.png");
 
   if (icon) {
@@ -480,7 +484,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
     icon = NULL;
   }
 
-  // Draw the local or ICAO airport identifier.
   str = station->localId;
 
   if (!str) {
@@ -489,7 +492,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
 
   drawText(resources->sfc, resources->font16, 0, 0, str, strlen(str));
 
-  // Draw the dominant weather phenomenon icon.
   icon = getWeatherIcon(station->wx);
 
   if (icon) {
@@ -498,7 +500,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
     icon = NULL;
   }
 
-  // Draw the flight category icon.
   icon = getFlightCategoryIcon(station->cat);
 
   if (icon) {
@@ -507,7 +508,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
     icon = NULL;
   }
 
-  // Draw the weather phenomena string.
   if (station->wxString) {
     len = strlen(station->wxString);
     w   = getFontCharWidth(resources->font8);
@@ -517,7 +517,6 @@ static void drawStation(DrawResources *resources, WxStation *station) {
              station->wxString, len);
   }
 
-  // Draw the wind sock icon.
   icon = getWindIcon(station->windDir);
 
   if (icon) {
@@ -526,14 +525,9 @@ static void drawStation(DrawResources *resources, WxStation *station) {
     icon = NULL;
   }
 
-  // Draw the wind information.
   drawWindText(resources, station);
-
-  // Draw the cloud layers.
   drawCloudLayers(resources, station);
-
-  // Draw temperature, dewpoint, and visibility.
-  drawTempDewPointVis(resources, station);
+  drawTempDewPointVisAlt(resources, station);
 
   // Update the screen.
   commitSurface(resources->sfc);

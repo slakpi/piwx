@@ -82,7 +82,8 @@ typedef struct WxStation_ {
   char *             wxString;
   SkyCondition *     layers;
   int                windDir, windSpeed, windGust;
-  int                visibility, vertVis;
+  double             visibility;
+  int                vertVis;
   double             temp, dewPoint;
   double             alt;
   FlightCategory     cat;
