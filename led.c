@@ -16,14 +16,20 @@
 #define STRIP_TYPE  WS2811_STRIP_GBR
 #define LED_COUNT   50
 
+#define COLOR(r, g, b) ((b << 16) | (r << 8) | g)
+#define COLOR_NONE  COLOR(0, 0, 0)
+#define COLOR_VFR   COLOR(0, 255, 0)
+#define COLOR_MVFR  COLOR(0, 0, 255)
+#define COLOR_IFR   COLOR(255, 0, 0)
+#define COLOR_LIFR  COLOR(255, 0, 255)
+#define COLOR_WIND  COLOR(255, 192, 0)
+
 /**
  * @brief   Translate weather to a WS2811 color value.
  * @param [in] cfg PiWx configuration.
  * @param [in] wx  Current weather station.
  */
 static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
-  char r = 0, g = 0, b = 0;
-
   // If a high-wind threshold has been set, check the speed and gust against
   // the threshold. If the wind exceeds the threshold use yellow if blink is
   // turned OFF or the blink state is zero. Otherwise, reset the blink state and
@@ -32,7 +38,7 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
     if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
       if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
         wx->blinkState = 1;
-        return (255 << 8) | 192;
+        return COLOR_WIND;
       } else {
         wx->blinkState = 0;
       }
@@ -41,23 +47,16 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
 
   switch (wx->cat) {
   case catVFR:
-    g = 255;
-    break;
+    return COLOR_VFR;
   case catMVFR:
-    b = 255;
-    break;
+    return COLOR_MVFR;
   case catIFR:
-    r = 255;
-    break;
+    return COLOR_IFR;
   case catLIFR:
-    r = 255;
-    b = 255;
-    break;
-  case catInvalid:
-    break; // No color.
+    return COLOR_LIFR;
+  default:
+    return COLOR_NONE;
   }
-
-  return (b << 16) | (r << 8) | g;
 }
 
 int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
