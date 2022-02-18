@@ -719,8 +719,7 @@ static void classifyDominantWeather(WxStation *station) {
   Intensity       intensity;
   SkyCondition *  s;
 
-  // Assume clear skies to start.
-  station->wx = (station->isNight ? wxClearNight : wxClearDay);
+  station->wx = wxInvalid;
 
   s = station->layers;
   h = INT_MAX;
