@@ -962,16 +962,14 @@ WxStation *queryWx(const char *stations, int *err) {
   res = curl_easy_perform(curlLib);
   curl_easy_cleanup(curlLib);
 
-  if (data.ctxt) {
-    xmlParseChunk(data.ctxt, NULL, 0, 1);
-    doc = data.ctxt->myDoc;
-    xmlFreeParserCtxt(data.ctxt);
+  if (res != CURLE_OK || !data.ctxt) {
+    *err = res;
+    return NULL;
   }
 
-  if (res != CURLE_OK) {
-    *err = res;
-    goto cleanup;
-  }
+  xmlParseChunk(data.ctxt, NULL, 0, 1);
+  doc = data.ctxt->myDoc;
+  xmlFreeParserCtxt(data.ctxt);
 
   hash = xmlHashCreate(tagLast);
   initHash(hash);
@@ -1050,6 +1048,10 @@ cleanup:
 void freeStations(WxStation *stations) {
   WxStation *   p;
   SkyCondition *s;
+
+  if (!stations) {
+    return;
+  }
 
   // Break the circular list.
   stations->prev->next = NULL;
