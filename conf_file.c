@@ -28,7 +28,7 @@ PiwxConfig *getPiwxConfig() {
     return NULL;
   }
 
-  memset(cfg, 0, sizeof(PiwxConfig));
+  memset(cfg, 0, sizeof(PiwxConfig)); // NOLINT -- Size known.
   cfg->installPrefix      = strdup(INSTALL_PREFIX);
   cfg->imageResources     = strdup(IMAGE_RESOURCES);
   cfg->fontResources      = strdup(FONT_RESOURCES);
@@ -91,7 +91,8 @@ void freePiwxConfig(PiwxConfig *cfg) {
  */
 static char *appendFileToPath(const char *prefix, const char *file, char *path,
                               size_t len) {
-  size_t pl = strlen(prefix), fl = strlen(file);
+  size_t pl = strlen(prefix);
+  size_t fl = strlen(file);
 
   // If the prefix does not already have a trailing backslash, add one to the
   // length to account for adding the backslash.
@@ -108,7 +109,7 @@ static char *appendFileToPath(const char *prefix, const char *file, char *path,
   // Make sure the prefix copies to the beginning of the output buffer.
   path[0] = 0;
 
-  strcat(path, prefix);
+  strcat(path, prefix); // NOLINT -- Size checked above.
 
   // If the first check above did not find a trailing backslash, it increased
   // the length by one. `pl - 1` would now point to the null terminator. If it
@@ -120,7 +121,7 @@ static char *appendFileToPath(const char *prefix, const char *file, char *path,
     path[pl]     = 0;
   }
 
-  strcat(path, file);
+  strcat(path, file); // NOLINT -- Size checked above.
 
   return path;
 }

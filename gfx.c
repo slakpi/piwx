@@ -282,6 +282,7 @@ void clearSurface(Surface surface) {
     return;
   }
 
+  // NOLINTNEXTLINE -- Surface_ is opaque and managed internally.
   memset(sfc->rows[0], 0, sizeof(RGBA) * sfc->dim.r * sfc->dim.b);
 }
 
