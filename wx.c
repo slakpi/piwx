@@ -4,6 +4,7 @@
 #include "wx.h"
 #include "util.h"
 #include "wxtype.h"
+#include <assert.h>
 #include <ctype.h>
 #include <curl/curl.h>
 #include <jansson.h>
@@ -18,6 +19,7 @@ typedef void *yyscan_t;
 
 #include "wx.lexer.h"
 
+#define MAX_STRING_BUF   (10 * 1024 * 1024)
 #define MAX_DATETIME_LEN 20
 
 /**
@@ -53,7 +55,7 @@ static char *trimLocalId(const char *id) {
  * @brief  Buffer to hold response data from cURL.
  */
 typedef struct {
-  char * str;
+  char  *str;
   size_t len, bufLen;
 } Response;
 
@@ -78,6 +80,7 @@ static void initResponse(Response *res) {
  */
 static void appendToResponse(Response *res, const char *str, size_t len) {
   size_t newBuf = res->bufLen;
+
   if (!res->str) {
     return;
   }
@@ -85,11 +88,12 @@ static void appendToResponse(Response *res, const char *str, size_t len) {
   while (1) {
     if (res->len + len < newBuf) {
       if (res->bufLen < newBuf) {
+        assert(newBuf <= MAX_STRING_BUF); // Keep the buffer size sane.
         res->str    = realloc(res->str, newBuf);
         res->bufLen = newBuf;
       }
 
-      memcpy(res->str + res->len, str, len);
+      memcpy(res->str + res->len, str, len); // NOLINT -- Size checked.
       res->len += len;
       res->str[res->len] = 0;
 
@@ -125,8 +129,10 @@ static void freeResponse(Response *res) {
  * @returns TRUE if successful, FALSE otherwise.
  */
 static boolean parseUTCDateTime(const char *str, struct tm *tm) {
-  sscanf(str, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday,
-         &tm->tm_hour, &tm->tm_min, &tm->tm_sec);
+  // TODO: This should probably be a lexer at some point.
+  // NOLINTNEXTLINE -- Not scanning to string buffers.
+  sscanf(str, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour,
+         &tm->tm_min, &tm->tm_sec);
 
   if (tm->tm_year < 1900) {
     return FALSE;
@@ -167,8 +173,7 @@ static boolean parseUTCDateTime(const char *str, struct tm *tm) {
  * @param[in] userdata User callback data, i.e. Response object.
  * @returns Bytes processed.
  */
-static size_t sunriseSunsetCallback(char *ptr, size_t size, size_t nmemb,
-                                    void *userdata) {
+static size_t sunriseSunsetCallback(char *ptr, size_t size, size_t nmemb, void *userdata) {
   Response *res   = (Response *)userdata;
   size_t    bytes = size * nmemb;
   appendToResponse(res, ptr, bytes);
@@ -186,11 +191,11 @@ static size_t sunriseSunsetCallback(char *ptr, size_t size, size_t nmemb,
  * @param[out] sunset  Sunset in UTC.
  * @returns TRUE if successful, FALSE otherwise.
  */
-static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date,
-                                      time_t *sunrise, time_t *sunset) {
-  CURL *       curlLib;
+static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, time_t *sunrise,
+                                      time_t *sunset) {
+  CURL        *curlLib;
   CURLcode     res;
-  json_t *     rootNode, *timesNode, *sunriseNode, *sunsetNode;
+  json_t      *rootNode, *timesNode, *sunriseNode, *sunsetNode;
   json_error_t err;
   char         tmp[257];
   Response     json;
@@ -206,6 +211,7 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date,
     return FALSE;
   }
 
+  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   snprintf(tmp, COUNTOF(tmp),
            "https://api.sunrise-sunset.org/json?"
            "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
@@ -251,13 +257,13 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date,
   // Copy the date/time strings into the temporary string buffer with an
   // explicit limit on the correct format ("YYYY-MM-DDTHH:MM:SS\0").
 
-  strncpy(tmp, json_string_value(sunriseNode), MAX_DATETIME_LEN);
+  strncpy_safe(tmp, json_string_value(sunriseNode), MAX_DATETIME_LEN);
 
   if (!parseUTCDateTime(tmp, &dtSunrise)) {
     goto cleanup;
   }
 
-  strncpy(tmp, json_string_value(sunsetNode), MAX_DATETIME_LEN);
+  strncpy_safe(tmp, json_string_value(sunsetNode), MAX_DATETIME_LEN);
 
   if (!parseUTCDateTime(tmp, &dtSunset)) {
     goto cleanup;
@@ -477,8 +483,7 @@ typedef struct {
  * @param[in] userdata User callback data, i.e. Response object.
  * @returns Bytes processed.
  */
-static size_t metarCallback(char *ptr, size_t size, size_t nmemb,
-                            void *userdata) {
+static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata) {
   METARCallbackData *data = (METARCallbackData *)userdata;
   size_t             res  = nmemb * size;
 
@@ -503,8 +508,7 @@ static size_t metarCallback(char *ptr, size_t size, size_t nmemb,
  * @param[in] hash The tag hash map.
  * @returns The flight category or catInvalid.
  */
-static FlightCategory getStationFlightCategory(xmlNodePtr      node,
-                                               xmlHashTablePtr hash) {
+static FlightCategory getStationFlightCategory(xmlNodePtr node, xmlHashTablePtr hash) {
   Tag tag = getTag(hash, node->content);
 
   switch (tag) {
@@ -556,14 +560,13 @@ static CloudCover getLayerCloudCover(xmlAttr *attr, xmlHashTablePtr hash) {
  * @param[in] station The station to receive the new layer.
  * @param[in] hash    The tag hash map.
  */
-static void addCloudLayer(xmlNodePtr node, WxStation *station,
-                          xmlHashTablePtr hash) {
-  xmlAttr *     a = node->properties;
+static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr hash) {
+  xmlAttr      *a = node->properties;
   SkyCondition *newLayer, *p;
   Tag           tag;
 
   newLayer = malloc(sizeof(SkyCondition));
-  memset(newLayer, 0, sizeof(SkyCondition));
+  memset(newLayer, 0, sizeof(SkyCondition)); // NOLINT -- Size known.
 
   // Get the layer information.
   while (a) {
@@ -574,8 +577,7 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station,
       newLayer->coverage = getLayerCloudCover(a, hash);
       break;
     case tagCloudBase:
-      newLayer->height =
-          (int)strtol((const char *)a->children->content, NULL, 10);
+      newLayer->height = (int)strtol((const char *)a->children->content, NULL, 10);
       break;
     default:
       break;
@@ -622,8 +624,7 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station,
  * @param[in] hash    The tag hash map.
  * @param[in] station The station object to receive the METAR information.
  */
-static void readStation(xmlNodePtr node, xmlHashTablePtr hash,
-                        WxStation *station) {
+static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *station) {
   Tag        tag;
   struct tm  obs;
   xmlNodePtr c = node->children;
@@ -699,12 +700,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash,
  * @enum Intensity
  * @brief Weather intensity value.
  */
-typedef enum {
-  intensityInvalid,
-  intensityLight,
-  intensityModerate,
-  intensityHeavy
-} Intensity;
+typedef enum { intensityInvalid, intensityLight, intensityModerate, intensityHeavy } Intensity;
 
 /**
  * @brief   Classifies the dominant weather phenomenon.
@@ -717,7 +713,7 @@ static void classifyDominantWeather(WxStation *station) {
   YY_BUFFER_STATE buf;
   int             c, h, descriptor;
   Intensity       intensity;
-  SkyCondition *  s;
+  SkyCondition   *s;
 
   station->wx = wxInvalid;
 
@@ -729,10 +725,8 @@ static void classifyDominantWeather(WxStation *station) {
     if (s->coverage < skyScattered && station->wx < wxClearDay) {
       station->wx = (station->isNight ? wxClearNight : wxClearDay);
     } else if (s->coverage < skyBroken && station->wx < wxScatteredOrFewDay) {
-      station->wx =
-          (station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay);
-    } else if (s->coverage < skyOvercast && s->height < h &&
-               station->wx < wxBrokenDay) {
+      station->wx = (station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay);
+    } else if (s->coverage < skyOvercast && s->height < h && station->wx < wxBrokenDay) {
       station->wx = (station->isNight ? wxBrokenNight : wxBrokenDay);
       h           = s->height;
     } else if (station->wx < wxOvercast && s->height < h) {
@@ -789,8 +783,7 @@ static void classifyDominantWeather(WxStation *station) {
       // If the currently known phenomenon is a lower priority than
       // Thunderstorms, update it with the appropriate light or moderate/heavy
       // Thunderstorm classification.
-      if (intensity < intensityModerate &&
-          station->wx < wxLightTstormsSqualls) {
+      if (intensity < intensityModerate && station->wx < wxLightTstormsSqualls) {
         station->wx = wxLightTstormsSqualls;
       } else if (station->wx < wxTstormsSqualls) {
         station->wx = wxTstormsSqualls;
@@ -815,8 +808,7 @@ static void classifyDominantWeather(WxStation *station) {
           station->wx = wxRain;
         }
       } else {
-        if (intensity < intensityModerate &&
-            station->wx < wxLightFreezingRain) {
+        if (intensity < intensityModerate && station->wx < wxLightFreezingRain) {
           station->wx = wxLightFreezingRain;
         } else if (station->wx < wxFreezingRain) {
           station->wx = wxFreezingRain;
@@ -864,8 +856,7 @@ static void classifyDominantWeather(WxStation *station) {
 
       break;
     case wxSQ: // Squalls
-      if (intensity < intensityModerate &&
-          station->wx < wxLightTstormsSqualls) {
+      if (intensity < intensityModerate && station->wx < wxLightTstormsSqualls) {
         station->wx = wxLightTstormsSqualls;
       } else if (station->wx < wxTstormsSqualls) {
         station->wx = wxTstormsSqualls;
@@ -892,8 +883,7 @@ static void classifyDominantWeather(WxStation *station) {
  * @param[in] hash     The hash table to use.
  * @returns The first instance of the specified tag or null.
  */
-static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag,
-                              xmlHashTablePtr hash) {
+static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag, xmlHashTablePtr hash) {
   xmlNodePtr p = children;
   Tag        curTag;
 
@@ -911,7 +901,7 @@ static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag,
 }
 
 WxStation *queryWx(const char *stations, int *err) {
-  CURL *            curlLib;
+  CURL             *curlLib;
   CURLcode          res;
   char              url[4096];
   METARCallbackData data;
@@ -919,7 +909,7 @@ WxStation *queryWx(const char *stations, int *err) {
   xmlNodePtr        p;
   xmlHashTablePtr   hash = NULL;
   Tag               tag;
-  WxStation *       start = NULL, *cur, *newStation;
+  WxStation        *start = NULL, *cur, *newStation;
   int               count, len;
   boolean           ok = FALSE;
 
@@ -928,15 +918,21 @@ WxStation *queryWx(const char *stations, int *err) {
   // Build the query string to look for reports within the last hour and a half.
   // It is possible some stations lag more than an hour, but typically not more
   // than an hour and a half.
-  strncpy(url,
-          "https://aviationweather.gov/adds/dataserver_current/httpparam?"
-          "dataSource=metars&"
-          "requestType=retrieve&"
-          "format=xml&"
-          "hoursBeforeNow=1.5&"
-          "mostRecentForEachStation=true&"
-          "stationString=",
-          COUNTOF(url));
+  count = strncpy_safe(url,
+                       "https://aviationweather.gov/adds/dataserver_current/httpparam?"
+                       "dataSource=metars&"
+                       "requestType=retrieve&"
+                       "format=xml&"
+                       "hoursBeforeNow=1.5&"
+                       "mostRecentForEachStation=true&"
+                       "stationString=",
+                       COUNTOF(url));
+
+  if (count >= COUNTOF(url)) {
+    // Buffer size is too small for the full query URL.
+    assert(0);
+    return NULL;
+  }
 
   count = COUNTOF(url) - strlen(url);
   len   = strlen(stations);
@@ -947,7 +943,8 @@ WxStation *queryWx(const char *stations, int *err) {
     return NULL;
   }
 
-  strcat(url, stations);
+  // NOLINTNEXTLINE -- strncat is sufficient; sizes checked above.
+  strncat(url, stations, COUNTOF(url));
 
   curlLib = curl_easy_init();
 
@@ -1000,7 +997,7 @@ WxStation *queryWx(const char *stations, int *err) {
     }
 
     newStation = (WxStation *)malloc(sizeof(WxStation));
-    memset(newStation, 0, sizeof(WxStation));
+    memset(newStation, 0, sizeof(WxStation)); // NOLINT -- Size known.
 
     // Add the station to the circular list.
     if (!start) {
@@ -1017,8 +1014,7 @@ WxStation *queryWx(const char *stations, int *err) {
 
     // Read the station and get the night status for classifying weather.
     readStation(p, hash, newStation);
-    newStation->isNight =
-        isNight(newStation->lat, newStation->lon, newStation->obsTime);
+    newStation->isNight    = isNight(newStation->lat, newStation->lon, newStation->obsTime);
     newStation->blinkState = 1;
 
     classifyDominantWeather(newStation);
@@ -1046,7 +1042,7 @@ cleanup:
 }
 
 void freeStations(WxStation *stations) {
-  WxStation *   p;
+  WxStation    *p;
   SkyCondition *s;
 
   if (!stations) {

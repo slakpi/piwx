@@ -72,15 +72,15 @@ typedef enum {
  * @brief  Weather station data entry.
  */
 typedef struct WxStation_ {
-  char *             id;
-  char *             localId;
-  char *             raw;
+  char              *id;
+  char              *localId;
+  char              *raw;
   time_t             obsTime;
   double             lat, lon;
   int                isNight;
   DominantWeather    wx;
-  char *             wxString;
-  SkyCondition *     layers;
+  char              *wxString;
+  SkyCondition      *layers;
   int                windDir, windSpeed, windGust;
   double             visibility;
   int                vertVis;
