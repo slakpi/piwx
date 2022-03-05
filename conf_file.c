@@ -20,7 +20,7 @@ typedef void *yyscan_t;
 #include <string.h>
 
 PiwxConfig *getPiwxConfig() {
-  FILE *      cfgFile;
+  FILE       *cfgFile;
   yyscan_t    scanner;
   PiwxConfig *cfg = malloc(sizeof(PiwxConfig));
 
@@ -89,8 +89,7 @@ void freePiwxConfig(PiwxConfig *cfg) {
  * @param[in] len    Length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-static char *appendFileToPath(const char *prefix, const char *file, char *path,
-                              size_t len) {
+static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len) {
   size_t pl = strlen(prefix);
   size_t fl = strlen(file);
 
