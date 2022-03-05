@@ -17,12 +17,12 @@
 #define LED_COUNT   50
 
 #define COLOR(r, g, b) ((b << 16) | (r << 8) | g)
-#define COLOR_NONE  COLOR(0, 0, 0)
-#define COLOR_VFR   COLOR(0, 255, 0)
-#define COLOR_MVFR  COLOR(0, 0, 255)
-#define COLOR_IFR   COLOR(255, 0, 0)
-#define COLOR_LIFR  COLOR(255, 0, 255)
-#define COLOR_WIND  COLOR(255, 192, 0)
+#define COLOR_NONE     COLOR(0, 0, 0)
+#define COLOR_VFR      COLOR(0, 255, 0)
+#define COLOR_MVFR     COLOR(0, 0, 255)
+#define COLOR_IFR      COLOR(255, 0, 0)
+#define COLOR_LIFR     COLOR(255, 0, 255)
+#define COLOR_WIND     COLOR(255, 192, 0)
 
 /**
  * @brief   Translate weather to a WS2811 color value.
@@ -60,11 +60,11 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
 }
 
 int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
-  WxStation *     p = wx;
+  WxStation      *p = wx;
   int             i;
   ws2811_return_t ret;
   ws2811_t        ledstring = {
-  // clang-format off
+      // clang-format off
     .freq   = TARGET_FREQ,
     .dmanum = DMA,
     .channel =
@@ -85,7 +85,7 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
             .brightness = 0,
           },
       },
-  // clang-format on
+      // clang-format on
   };
 
   // Expect the data pin and DMA channel values to be valid. Fail otherwise.
