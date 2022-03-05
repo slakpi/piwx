@@ -136,8 +136,7 @@ void drawBitmap(Surface surface, const Bitmap bmp, int x, int y);
  * @param[in] r       Right column of the rectangle.
  * @param[in] b       Bottom row of the rectangle.
  */
-void drawBitmapInBox(Surface surface, const Bitmap bmp, int l, int t, int r,
-                     int b);
+void drawBitmapInBox(Surface surface, const Bitmap bmp, int l, int t, int r, int b);
 
 /**
  * @typedef Font
@@ -212,7 +211,6 @@ void setBackgroundColor(Font font, const RGBA *bkgnd);
  * @param[in] str     The text string to draw.
  * @param[in] len     Length of the text string.
  */
-void drawText(Surface surface, const Font font, int x, int y, const char *str,
-              size_t len);
+void drawText(Surface surface, const Font font, int x, int y, const char *str, size_t len);
 
 #endif /* GFX_H */

@@ -36,7 +36,7 @@ typedef struct {
  */
 typedef struct {
   Rectangle dim;  // Dimensions of the PNG.
-  RGBA **   rows; // Row markers.
+  RGBA    **rows; // Row markers.
 } Bitmap_;
 
 /**
@@ -50,7 +50,7 @@ typedef Bitmap_ Surface_;
  * @brief  Configuration of a compose operation.
  */
 typedef struct {
-  Bitmap_ * from;   // Source bitmap.
+  Bitmap_  *from;   // Source bitmap.
   Rectangle source; // Source rectangle.
   Surface_ *to;     // Target surface.
   int       x, y;   // Top-left corner of output.
@@ -139,8 +139,7 @@ static void mix(const RGBA *fg, const RGBA *bg, RGBA *out) {
  *                   to @a a or @a b.
  * @returns TRUE if the intersection is non-empty, FALSE otherwise.
  */
-static boolean rectangleIntersection(const Rectangle *a, const Rectangle *b,
-                                     Rectangle *isect) {
+static boolean rectangleIntersection(const Rectangle *a, const Rectangle *b, Rectangle *isect) {
   Rectangle tmp;
 
   tmp.l = max(a->l, b->l);
@@ -193,7 +192,7 @@ static void compose(const Compose *cmp) {
   // Adjust the source rectangle. We know the rectangle above will be the same
   // size or smaller than the source rectangle and can only move in the +x and
   // +y directions.
-  source   = cmp->source;
+  source = cmp->source;
   source.l += (target.l - cmp->x);
   source.t += (target.t - cmp->y);
   source.r = source.l + target.r - target.l;
@@ -225,7 +224,7 @@ static void compose(const Compose *cmp) {
 
 static Bitmap_ *allocateEmptyBitmap(int w, int h) {
   Bitmap_ *bmp;
-  RGBA *   p;
+  RGBA    *p;
   int      y;
 
   if (!(w > 0 && h > 0)) {
@@ -293,7 +292,7 @@ void clearSurface(Surface surface) {
  */
 void ditherSurface(const Surface_ *sfc, u_int16_t *bitmap) {
   u_int16_t *q;
-  RGBA *     p, tmp;
+  RGBA      *p, tmp;
   size_t     i, px;
 
   if (!sfc) {
@@ -309,8 +308,8 @@ void ditherSurface(const Surface_ *sfc, u_int16_t *bitmap) {
   for (i = 0; i < px; ++i) {
     tmp = *p * ALPHA(*p);
 
-    *q = ((u_int16_t)(RED(tmp) * 0x1f) << 11) |
-         ((u_int16_t)(GREEN(tmp) * 0x3f) << 5) | (u_int16_t)(BLUE(tmp) * 0x1f);
+    *q = ((u_int16_t)(RED(tmp) * 0x1f) << 11) | ((u_int16_t)(GREEN(tmp) * 0x3f) << 5) |
+         (u_int16_t)(BLUE(tmp) * 0x1f);
 
     ++p;
     ++q;
@@ -318,14 +317,14 @@ void ditherSurface(const Surface_ *sfc, u_int16_t *bitmap) {
 }
 
 boolean writeSurfaceToPNG(const Surface surface, const char *file) {
-  Surface_ *  sfc     = (Surface_ *)surface;
-  FILE *      png     = NULL;
+  Surface_   *sfc     = (Surface_ *)surface;
+  FILE       *png     = NULL;
   png_structp pngPtr  = NULL;
   png_infop   pngInfo = NULL;
   size_t      rowBytes;
-  png_bytep * rows = NULL;
-  png_byte *  t;
-  RGBA *      s;
+  png_bytep  *rows = NULL;
+  png_byte   *t;
+  RGBA       *s;
   int         x, y;
   boolean     ok = FALSE;
 
@@ -360,9 +359,8 @@ boolean writeSurfaceToPNG(const Surface surface, const char *file) {
   }
 
   // Setup the PNG image header with the properties of the image.
-  png_set_IHDR(pngPtr, pngInfo, sfc->dim.r, sfc->dim.b, 8, PNG_COLOR_TYPE_RGBA,
-               PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-               PNG_FILTER_TYPE_DEFAULT);
+  png_set_IHDR(pngPtr, pngInfo, sfc->dim.r, sfc->dim.b, 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
+               PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
 
   png_write_info(pngPtr, pngInfo);
 
@@ -448,9 +446,9 @@ typedef struct {
 } BITMAPINFOHEADER;
 
 boolean writeSurfaceToBMP(const Surface surface, const char *file) {
-  Surface_ *       sfc = (Surface_ *)surface;
-  FILE *           bmp = NULL;
-  u_int16_t *      buf = NULL;
+  Surface_        *sfc = (Surface_ *)surface;
+  FILE            *bmp = NULL;
+  u_int16_t       *buf = NULL;
   BITMAPFILEHEADER hdr;
   BITMAPINFOHEADER info;
   size_t           px;
@@ -516,7 +514,7 @@ cleanup:
 boolean commitSurface(const Surface surface) {
   const Surface_ *sfc = (const Surface_ *)surface;
   int             fb;
-  u_int16_t *     buf = NULL;
+  u_int16_t      *buf = NULL;
   size_t          px;
   boolean         ok = FALSE;
 
@@ -566,21 +564,19 @@ cleanup:
  *          match the desired color format and bit depth or memory could not be
  *          allocated to hold the bitmap.
  */
-static Bitmap_ *allocateBitmap_(const char *pngFile, int colorFormat,
-                                int channelBits) {
-  FILE *      png = NULL;
+static Bitmap_ *allocateBitmap_(const char *pngFile, int colorFormat, int channelBits) {
+  FILE       *png = NULL;
   png_byte    sig[8];
   png_structp pngPtr  = NULL;
   png_infop   pngInfo = NULL;
-  png_bytep * rows    = NULL;
+  png_bytep  *rows    = NULL;
   png_bytep   ch;
   int         ok = 0, row, col, color, bits;
   size_t      rowBytes;
-  Bitmap_ *   bmp = NULL;
+  Bitmap_    *bmp = NULL;
 
   // Verify the designed format is supported.
-  if (colorFormat != PNG_COLOR_TYPE_GRAY &&
-      colorFormat != PNG_COLOR_TYPE_RGBA) {
+  if (colorFormat != PNG_COLOR_TYPE_GRAY && colorFormat != PNG_COLOR_TYPE_RGBA) {
     return NULL;
   }
 
@@ -721,15 +717,14 @@ cleanup:
 
 Bitmap allocateBitmap(const char *pngFile) {
   char path[4096];
-  return (Bitmap)allocateBitmap_(getPathForBitmap(pngFile, path, 4096),
-                                 PNG_COLOR_TYPE_RGBA, 8);
+  return (Bitmap)allocateBitmap_(getPathForBitmap(pngFile, path, 4096), PNG_COLOR_TYPE_RGBA, 8);
 }
 
 void freeBitmap(Bitmap bmp) { freeBitmap_((Bitmap_ *)bmp); }
 
 void drawBitmap(Surface surface, const Bitmap bitmap, int x, int y) {
   Surface_ *sfc = (Surface_ *)surface;
-  Bitmap_ * bmp = (Bitmap_ *)bitmap;
+  Bitmap_  *bmp = (Bitmap_ *)bitmap;
   Compose   cmp;
 
   if (!(sfc && bmp)) {
@@ -752,16 +747,14 @@ void drawBitmap(Surface surface, const Bitmap bitmap, int x, int y) {
   compose(&cmp);
 }
 
-void drawBitmapInBox(Surface surface, const Bitmap bitmap, int l, int t, int r,
-                     int b) {
+void drawBitmapInBox(Surface surface, const Bitmap bitmap, int l, int t, int r, int b) {
   Bitmap_ *bmp = (Bitmap_ *)bitmap;
 
   if (!bmp) {
     return;
   }
 
-  drawBitmap(surface, bitmap, l + ((r - l) - bmp->dim.r) / 2,
-             t + ((b - t) - bmp->dim.b) / 2);
+  drawBitmap(surface, bitmap, l + ((r - l) - bmp->dim.r) / 2, t + ((b - t) - bmp->dim.b) / 2);
 }
 
 /**
@@ -777,7 +770,7 @@ typedef struct {
 Font allocateFont(FontSize size) {
   char        path[4096];
   const char *f;
-  Font_ *     fnt;
+  Font_      *fnt;
 
   switch (size) {
   case font_16pt:
@@ -802,8 +795,7 @@ Font allocateFont(FontSize size) {
     return NULL;
   }
 
-  fnt->bmp =
-      allocateBitmap_(getPathForFont(f, path, 4096), PNG_COLOR_TYPE_GRAY, 8);
+  fnt->bmp = allocateBitmap_(getPathForFont(f, path, 4096), PNG_COLOR_TYPE_GRAY, 8);
 
   // The font character map must be 16 characters by 8 characters.
   if (!fnt->bmp || fnt->bmp->dim.r % 16 != 0 || fnt->bmp->dim.b % 8 != 0) {
@@ -870,9 +862,8 @@ void setBackgroundColor(Font font, const RGBA *bkgnd) {
   fnt->bkgnd = *bkgnd;
 }
 
-void drawText(Surface surface, const Font font, int x, int y, const char *str,
-              size_t len) {
-  Surface_ *   sfc = (Surface_ *)surface;
+void drawText(Surface surface, const Font font, int x, int y, const char *str, size_t len) {
+  Surface_    *sfc = (Surface_ *)surface;
   const Font_ *fnt = (const Font_ *)font;
   Compose      cmp;
   char         c;
