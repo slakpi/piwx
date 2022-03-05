@@ -123,10 +123,11 @@ static void layerToString(const SkyCondition *sky, char *buf, size_t len) {
     break;
   }
 
+  // Skip linting; snprintf is sufficient.
   if (cover) {
-    snprintf(buf, len, "%s %d", cover, sky->height);
+    snprintf(buf, len, "%s %d", cover, sky->height); // NOLINT
   } else {
-    snprintf(buf, len, "--- %d", sky->height);
+    snprintf(buf, len, "--- %d", sky->height); // NOLINT
   }
 }
 
@@ -156,8 +157,8 @@ static boolean allocateDrawResources(DrawResources *resources) {
   resources->dlIcon = allocateBitmap("downloading.png");
   resources->dlErr  = allocateBitmap("download_err.png");
 
-  if (!resources->sfc || !resources->font16 || !resources->font8 ||
-      !resources->font6 || !resources->dlIcon || !resources->dlErr) {
+  if (!resources->sfc || !resources->font16 || !resources->font8 || !resources->font6 ||
+      !resources->dlIcon || !resources->dlErr) {
     return FALSE;
   }
 
@@ -208,6 +209,7 @@ static void drawErrorScreen(DrawResources *resources, int err, int attempt) {
   clearSurface(resources->sfc);
 
   setTextColor(resources->font6, &rgbWhite);
+  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   len = snprintf(buf, COUNTOF(buf), "Error %d, Retry %d", err, attempt);
   drawText(resources->sfc, resources->font6, 0, 0, buf, len);
 
@@ -345,20 +347,23 @@ static void drawWindText(DrawResources *resources, WxStation *station) {
   setTextColor(resources->font6, &rgbWhite);
 
   if (station->windDir > 0) {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "%d\x01", station->windDir);
   } else {
     if (station->windSpeed == 0) {
-      strncpy(buf, "Calm", COUNTOF(buf));
+      // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+      strncpy_safe(buf, "Calm", COUNTOF(buf));
     } else {
-      strncpy(buf, "Var", COUNTOF(buf));
+      strncpy_safe(buf, "Var", COUNTOF(buf));
     }
   }
 
   drawText(resources->sfc, resources->font6, 84, 126, buf, strlen(buf));
 
   if (station->windSpeed == 0) {
-    strncpy(buf, "---", COUNTOF(buf));
+    strncpy_safe(buf, "---", COUNTOF(buf));
   } else {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "%dkt", station->windSpeed);
   }
 
@@ -367,8 +372,9 @@ static void drawWindText(DrawResources *resources, WxStation *station) {
   setTextColor(resources->font6, &rgbRed);
 
   if (station->windGust == 0) {
-    strncpy(buf, "---", COUNTOF(buf));
+    strncpy_safe(buf, "---", COUNTOF(buf));
   } else {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "%dkt", station->windGust);
   }
 
@@ -395,10 +401,11 @@ static void drawCloudLayers(DrawResources *resources, WxStation *station) {
 
   switch (sky->coverage) {
   case skyClear:
-    strncpy(buf, "Clear", COUNTOF(buf));
+    strncpy_safe(buf, "Clear", COUNTOF(buf));
     drawText(resources->sfc, resources->font6, 172, 126, buf, strlen(buf));
     break;
   case skyOvercastSurface:
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
     drawText(resources->sfc, resources->font6, 172, 126, buf, strlen(buf));
     break;
@@ -422,8 +429,7 @@ static void drawCloudLayers(DrawResources *resources, WxStation *station) {
     }
 
     layerToString(sky, buf, COUNTOF(buf));
-    drawText(resources->sfc, resources->font6, 172, sky->next ? 149 : 126, buf,
-             strlen(buf));
+    drawText(resources->sfc, resources->font6, 172, sky->next ? 149 : 126, buf, strlen(buf));
 
     // Draw the next highest layer if there is one.
     if (sky->next) {
@@ -441,21 +447,21 @@ static void drawCloudLayers(DrawResources *resources, WxStation *station) {
  * @param[in] resources The common drawing resources.
  * @param[in] station   The weather station.
  */
-static void drawTempDewPointVisAlt(DrawResources *resources,
-                                   WxStation *    station) {
+static void drawTempDewPointVisAlt(DrawResources *resources, WxStation *station) {
   const double visibility = fmax(0.0, station->visibility);
   char         buf[33];
 
   setTextColor(resources->font6, &rgbWhite);
 
-  snprintf(buf, COUNTOF(buf), visibility < 2 ? "Vis %.1fsm" : "Vis %.0fsm",
-           visibility);
+  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+  snprintf(buf, COUNTOF(buf), visibility < 2 ? "Vis %.1fsm" : "Vis %.0fsm", visibility);
   drawText(resources->sfc, resources->font6, 172, 172, buf, strlen(buf));
 
-  snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp,
-           station->dewPoint);
+  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+  snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp, station->dewPoint);
   drawText(resources->sfc, resources->font6, 0, 206, buf, strlen(buf));
 
+  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
   drawText(resources->sfc, resources->font6, 172, 206, buf, strlen(buf));
 }
@@ -467,7 +473,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources,
  */
 static void drawStation(DrawResources *resources, WxStation *station) {
   Bitmap icon = NULL;
-  char * str;
+  char  *str;
   int    w, x;
   size_t len;
 
@@ -513,8 +519,7 @@ static void drawStation(DrawResources *resources, WxStation *station) {
     w   = getFontCharWidth(resources->font8);
     x   = len * w;
     x   = (320 - x) / 2;
-    drawText(resources->sfc, resources->font8, x < 0 ? 0 : x, 81,
-             station->wxString, len);
+    drawText(resources->sfc, resources->font8, x < 0 ? 0 : x, 81, station->wxString, len);
   }
 
   icon = getWindIcon(station->windDir);
@@ -542,9 +547,9 @@ static void drawStation(DrawResources *resources, WxStation *station) {
  * @returns 0 if successful, non-zero otherwise.
  */
 static int go(boolean test, boolean verbose) {
-  PiwxConfig *  cfg = getPiwxConfig();
+  PiwxConfig   *cfg = getPiwxConfig();
   DrawResources drawRes;
-  WxStation *   wx = NULL, *curStation = NULL;
+  WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   boolean       first = TRUE, draw;
   int           i, err;
@@ -642,8 +647,7 @@ static int go(boolean test, boolean verbose) {
       }
 
       // If the blink timeout expired, update the LEDs.
-      if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 &&
-          now > nextBlink) {
+      if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 && now > nextBlink) {
 #if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
 #endif
