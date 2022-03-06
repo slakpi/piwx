@@ -37,6 +37,10 @@ static void writeLogV(LogLevel level, const char *fmt, va_list args) {
   time_t    now;
   struct tm nowTime;
 
+  if (!gLog) {
+    return;
+  }
+
   now = time(0);
   localtime_r(&now, &nowTime);
   strftime(logTime, 256, "%a, %d %b %Y %H:%M:%S %z ", &nowTime);
@@ -71,7 +75,7 @@ boolean openLog(LogLevel maxLevel) {
 void assertLog(boolean condition, const char *fmt, ...) {
   va_list args;
 
-  if (!gLog || condition) {
+  if (condition) {
     return;
   }
 
@@ -85,7 +89,7 @@ void assertLog(boolean condition, const char *fmt, ...) {
 void writeLog(LogLevel level, const char *fmt, ...) {
   va_list args;
 
-  if (!gLog || level > gMaxLevel) {
+  if (level > gMaxLevel) {
     return;
   }
 
