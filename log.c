@@ -1,4 +1,5 @@
 #include "log.h"
+#include <assert.h>
 #include <config.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -25,6 +26,28 @@ static const char *getLevelText(LogLevel level) {
   }
 }
 
+/**
+ * @brief Write a message at the specified log level. 
+ * @param[in] level The log level for the message.
+ * @param[in] fmt   The @a printf style format string.
+ * @param[in] ...   The format parameters.
+ */
+static void writeLogV(LogLevel level, const char *fmt, va_list args) {
+  char      logTime[256];
+  time_t    now;
+  struct tm nowTime;
+
+  now = time(0);
+  localtime_r(&now, &nowTime);
+  strftime(logTime, 256, "%a, %d %b %Y %H:%M:%S %z ", &nowTime);
+  fprintf(gLog, "[%s] %s\n   ", getLevelText(level), logTime);
+
+  vfprintf(gLog, fmt, args);
+
+  fprintf(gLog, "\n");
+  fflush(gLog);
+}
+
 boolean openLog(LogLevel maxLevel) {
   if (gLog) {
     closeLog();
@@ -45,27 +68,30 @@ boolean openLog(LogLevel maxLevel) {
   return TRUE;
 }
 
+void assertLog(boolean condition, const char *fmt, ...) {
+  va_list args;
+
+  if (!gLog || condition) {
+    return;
+  }
+
+  va_start(args, fmt);
+  writeLogV(LOG_WARNING, fmt, args);
+  va_end(args);
+
+  assert(0);
+}
+
 void writeLog(LogLevel level, const char *fmt, ...) {
-  char      logTime[256];
-  time_t    now;
-  struct tm nowTime;
-  va_list   args;
+  va_list args;
 
   if (!gLog || level > gMaxLevel) {
     return;
   }
 
-  now = time(0);
-  localtime_r(&now, &nowTime);
-  strftime(logTime, 256, "%a, %d %b %Y %H:%M:%S %z ", &nowTime);
-  fprintf(gLog, "[%s] %s\n   ", getLevelText(level), logTime);
-
   va_start(args, fmt);
-  vfprintf(gLog, fmt, args);
+  writeLogV(level, fmt, args);
   va_end(args);
-
-  fprintf(gLog, "\n");
-  fflush(gLog);
 }
 
 void closeLog() {

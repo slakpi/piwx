@@ -1,8 +1,9 @@
 /**
  * @file wx.c
  */
-#include "wx.h"
+#include "log.h"
 #include "util.h"
+#include "wx.h"
 #include "wxtype.h"
 #include <assert.h>
 #include <ctype.h>
@@ -88,7 +89,8 @@ static void appendToResponse(Response *res, const char *str, size_t len) {
   while (1) {
     if (res->len + len < newBuf) {
       if (res->bufLen < newBuf) {
-        assert(newBuf <= MAX_STRING_BUF); // Keep the buffer size sane.
+        // Keep the buffer size sane.
+        assertLog(newBuf <= MAX_STRING_BUF, "Exceeded max buffer size.");
         res->str    = realloc(res->str, newBuf);
         res->bufLen = newBuf;
       }
@@ -927,13 +929,8 @@ WxStation *queryWx(const char *stations, int *err) {
                        "mostRecentForEachStation=true&"
                        "stationString=",
                        COUNTOF(url));
-
-  if (count >= COUNTOF(url)) {
-    // Buffer size is too small for the full query URL.
-    assert(0);
-    return NULL;
-  }
-
+  
+  assertLog(count < COUNTOF(url), "Base URL is too large.");
   count = COUNTOF(url) - strlen(url);
   len   = strlen(stations);
 

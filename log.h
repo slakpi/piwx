@@ -27,10 +27,20 @@ typedef enum {
 boolean openLog(LogLevel maxLevel);
 
 /**
+ * @brief   If @a condition is not true, log the message and assert.
+ * @details @a assertLog overrides the max logging level and writes a warning
+ *          message if @a condition is false.
+ * @param[in] condition The condition to asssert.
+ * @param[in] fmt       The @a printf style format string.
+ * @param[in] ...       The format parameters.
+ */
+void assertLog(boolean condition, const char *fmt, ...);
+
+/**
  * @brief Write a message at the specified log level.
  * @param[in] level The log level for the message.
  * @param[in] fmt   The @a printf style format string.
- * @param[in] ...    The format parameters.
+ * @param[in] ...   The format parameters.
  */
 void writeLog(LogLevel level, const char *fmt, ...);
 
