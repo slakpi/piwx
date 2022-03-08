@@ -4,10 +4,11 @@
 
 typedef void* yyscan_t;
 
-#include "../conf_file.h"
-#include "../conf_param.h"
-#include "../log.h"
-#include "../util.h"
+#include "conf_file.h"
+#include "conf_param.h"
+#include "log.h"
+#include "util.h"
+
 #include "conf.parser.h"
 #include "conf.lexer.h"
 

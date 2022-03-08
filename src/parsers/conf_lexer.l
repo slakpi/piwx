@@ -7,11 +7,12 @@
 
 %{
 
-#include "../conf_file.h"
-#include "../conf_param.h"
-#include "../log.h"
-#include "conf.parser.h"
+#include "conf_file.h"
+#include "conf_param.h"
+#include "log.h"
 #include <string.h>
+
+#include "conf.parser.h"
 
 #define YYSTYPE CONF_STYPE
 

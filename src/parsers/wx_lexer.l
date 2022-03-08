@@ -5,9 +5,9 @@
 
 %{
 
+#include "wx.h"
+#include "wxtype.h"
 #include <string.h>
-#include "../wx.h"
-#include "../wxtype.h"
 
 %}
 
