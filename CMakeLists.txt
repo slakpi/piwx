@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.6)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/support/cmake/")
 
 project(piwx C)
 
@@ -110,7 +110,7 @@ endif ()
 # Setup the installation targets.
 #-------------------------------------------------------------------------------
 install(TARGETS piwx DESTINATION bin)
-install(DIRECTORY wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
-install(DIRECTORY fonts/ DESTINATION ${SHARE_PREFIX}fonts)
-install(FILES piwx.conf.example DESTINATION ${ETC_PREFIX})
+install(DIRECTORY share/wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
+install(DIRECTORY share/fonts/ DESTINATION ${SHARE_PREFIX}fonts)
+install(FILES etc/piwx.conf.example DESTINATION ${ETC_PREFIX})
 install(DIRECTORY DESTINATION ${VAR_PREFIX})
