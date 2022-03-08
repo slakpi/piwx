@@ -4,7 +4,7 @@
 #include "log.h"
 #include "util.h"
 #include "wx.h"
-#include "wxtype.h"
+#include "wx_type.h"
 #include <assert.h>
 #include <ctype.h>
 #include <curl/curl.h>

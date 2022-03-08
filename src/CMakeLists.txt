@@ -1,4 +1,19 @@
 #-------------------------------------------------------------------------------
+# Find packages.
+#-------------------------------------------------------------------------------
+find_package(CURL REQUIRED)
+find_package(Jansson REQUIRED)
+find_package(LibXml2 REQUIRED)
+find_package(PNG REQUIRED)
+find_package(Threads REQUIRED)
+find_package(SIMD REQUIRED)
+find_package(WiringPi REQUIRED)
+
+if (WITH_LED_SUPPORT)
+  find_package(WS2811 REQUIRED)
+endif ()
+
+#-------------------------------------------------------------------------------
 # Bring subdirectories into the project.
 #-------------------------------------------------------------------------------
 add_subdirectory(parsers)
@@ -16,29 +31,20 @@ endif ()
 # Setup the piwx compile options.
 #-------------------------------------------------------------------------------
 target_compile_options(piwx
-  PRIVATE -Wall -Werror=unused-function -Werror=unused-variable)
-
-if (SIMD_FOUND)
-  target_compile_options(piwx PRIVATE ${SIMD_C_FLAGS})
-endif ()
+  PRIVATE -Wall -Werror=unused-function -Werror=unused-variable ${SIMD_C_FLAGS})
 
 #-------------------------------------------------------------------------------
 # Setup the piwx include paths.
 #-------------------------------------------------------------------------------
-target_include_directories(piwx
-  PRIVATE ${PROJECT_BINARY_DIR} Parsers::Parsers ${LIBXML2_INCLUDE_DIR})
-
-if (WITH_LED_SUPPORT)
-  target_include_directories(piwx PRIVATE ${WS2811_INCLUDE_DIRS})
-endif ()
+target_include_directories(piwx PRIVATE ${PROJECT_BINARY_DIR})
 
 #-------------------------------------------------------------------------------
 # Setup the piwx linker options.
 #-------------------------------------------------------------------------------
 target_link_libraries(piwx
-  PRIVATE Parsers::Parsers ${CURL_LIBRARIES} ${LIBXML2_LIBRARIES} ${PNG_LIBRARIES}
-          ${JANSSON_LIBRARIES} ${WIRINGPI_LIBRARIES} Threads::Threads dl m)
+  PRIVATE Parsers::Parsers CURL::libcurl LibXml2::LibXml2 PNG::PNG Jansson::Jansson
+          WiringPi::WiringPi Threads::Threads dl m)
 
 if (WITH_LED_SUPPORT)
-  target_link_libraries(piwx PRIVATE ${WS2811_LIBRARIES})
+  target_link_libraries(piwx PRIVATE WS2811::WS2811)
 endif ()

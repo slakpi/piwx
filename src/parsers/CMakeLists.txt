@@ -38,8 +38,8 @@ target_include_directories(parsers
           ${LIBXML2_INCLUDE_DIR}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-target_compile_options(parsers PRIVATE
-  -Wno-unused-function -Wno-unused-variable)
+target_compile_options(parsers
+  PRIVATE -Wno-unused-function -Wno-unused-variable)
 
 #-------------------------------------------------------------------------------
 # Export the library.

@@ -26,7 +26,7 @@ flight planning action in any country.
 Building
 --------
 
-PiWx uses CMake 3.6 to build. The following dependencies must be installed:
+PiWx uses CMake 3.22 to build. The following dependencies must be installed:
 
   * Bison (https://www.gnu.org/software/bison/)
   * Flex (https://github.com/westes/flex)

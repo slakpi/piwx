@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/support/cmake/")
 
@@ -8,21 +8,6 @@ project(piwx C)
 # Script options.
 #-------------------------------------------------------------------------------
 option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
-
-#-------------------------------------------------------------------------------
-# Find packages and setup build variables.
-#-------------------------------------------------------------------------------
-find_package(CURL REQUIRED)
-find_package(Jansson REQUIRED)
-find_package(LibXml2 REQUIRED)
-find_package(PNG REQUIRED)
-find_package(Threads REQUIRED)
-find_package(SIMD REQUIRED)
-find_package(WiringPi REQUIRED)
-
-if (WITH_LED_SUPPORT)
-  find_package(WS2811 REQUIRED)
-endif ()
 
 #-------------------------------------------------------------------------------
 # Setup the install paths.
@@ -41,9 +26,17 @@ if (NOT DEFINED VAR_PREFIX)
   set(VAR_PREFIX var/piwx/)
 endif ()
 
+cmake_path(APPEND CMAKE_INSTALL_PREFIX ${SHARE_PREFIX} wxicons
+           OUTPUT_VARIABLE IMAGE_RESOURCES)
+cmake_path(APPEND CMAKE_INSTALL_PREFIX ${SHARE_PREFIX} fonts
+           OUTPUT_VARIABLE FONT_RESOURCES)
+cmake_path(APPEND CMAKE_INSTALL_PREFIX ${ETC_PREFIX} piwx.conf
+           OUTPUT_VARIABLE CONFIG_FILE)
+cmake_path(APPEND CMAKE_INSTALL_PREFIX ${VAR_PREFIX} piwx.log
+           OUTPUT_VARIABLE LOG_FILE)
+
 #-------------------------------------------------------------------------------
-# Get the current Git commit hash for the version information. Setup the
-# configuration header.
+# Get the current Git commit hash for the version information.
 #-------------------------------------------------------------------------------
 execute_process(
   COMMAND git rev-parse HEAD
@@ -51,12 +44,11 @@ execute_process(
   OUTPUT_VARIABLE GIT_COMMIT_HASH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
-set(IMAGE_RESOURCES ${CMAKE_INSTALL_PREFIX}/${SHARE_PREFIX}wxicons)
-set(FONT_RESOURCES ${CMAKE_INSTALL_PREFIX}/${SHARE_PREFIX}fonts)
-set(CONFIG_FILE ${CMAKE_INSTALL_PREFIX}/${ETC_PREFIX}piwx.conf)
-set(LOG_FILE ${CMAKE_INSTALL_PREFIX}/${VAR_PREFIX}piwx.log)
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
+
+#-------------------------------------------------------------------------------
+# Setup the configuration header.
+#-------------------------------------------------------------------------------
 configure_file(config.h.in config.h)
 
 #-------------------------------------------------------------------------------

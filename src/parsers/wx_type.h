@@ -1,8 +1,8 @@
 /**
- * @file wxtype.h
+ * @file wx_type.h
  */
-#ifndef WXTYPE_H
-#define WXTYPE_H
+#ifndef WX_TYPE_H
+#define WX_TYPE_H
 
 /**
  * @enum WxCode
