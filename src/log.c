@@ -1,3 +1,6 @@
+/**
+ * @file log.c
+ */
 #include "log.h"
 #include <assert.h>
 #include <config.h>
