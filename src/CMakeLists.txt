@@ -9,9 +9,10 @@ find_package(Threads REQUIRED)
 find_package(SIMD REQUIRED)
 find_package(WiringPi REQUIRED)
 
-if (WITH_LED_SUPPORT)
-  find_package(WS2811 REQUIRED)
-endif ()
+#-------------------------------------------------------------------------------
+# Setup the configuration header.
+#-------------------------------------------------------------------------------
+configure_file(config.h.in config.h)
 
 #-------------------------------------------------------------------------------
 # Bring subdirectories into the project.
@@ -36,7 +37,7 @@ target_compile_options(piwx
 #-------------------------------------------------------------------------------
 # Setup the piwx include paths.
 #-------------------------------------------------------------------------------
-target_include_directories(piwx PRIVATE ${PROJECT_BINARY_DIR})
+target_include_directories(piwx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 #-------------------------------------------------------------------------------
 # Setup the piwx linker options.

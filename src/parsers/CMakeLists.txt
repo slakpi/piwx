@@ -34,12 +34,10 @@ add_library(parsers
   STATIC ${BISON_ConfParser_OUTPUTS} ${FLEX_ConfLexer_OUTPUTS} ${FLEX_WxLexer_OUTPUTS})
 
 target_include_directories(parsers
-  PRIVATE ${PROJECT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}
-          ${LIBXML2_INCLUDE_DIR}
+  PRIVATE ${PROJECT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR}
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
-target_compile_options(parsers
-  PRIVATE -Wno-unused-function -Wno-unused-variable)
+target_compile_options(parsers PRIVATE -Wno-unused-function -Wno-unused-variable)
 
 #-------------------------------------------------------------------------------
 # Export the library.

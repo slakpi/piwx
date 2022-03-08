@@ -10,6 +10,13 @@ project(piwx C)
 option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
 
 #-------------------------------------------------------------------------------
+# Find packages.
+#-------------------------------------------------------------------------------
+if (WITH_LED_SUPPORT)
+  find_package(WS2811 REQUIRED)
+endif ()
+
+#-------------------------------------------------------------------------------
 # Setup the install paths.
 #-------------------------------------------------------------------------------
 set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
@@ -45,11 +52,6 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
-
-#-------------------------------------------------------------------------------
-# Setup the configuration header.
-#-------------------------------------------------------------------------------
-configure_file(config.h.in config.h)
 
 #-------------------------------------------------------------------------------
 # Bring subdirectories into the project.
