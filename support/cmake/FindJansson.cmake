@@ -2,4 +2,4 @@ find_library(JANSSON_LIBRARIES NAMES jansson)
 find_path(JANSSON_INCLUDE_DIRS NAMES jansson.h)
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(JANSSON DEFAULT_MSG JANSSON_LIBRARIES JANSSON_INCLUDE_DIRS)
+find_package_handle_standard_args(Jansson DEFAULT_MSG JANSSON_LIBRARIES JANSSON_INCLUDE_DIRS)
