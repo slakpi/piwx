@@ -148,8 +148,8 @@ Running Automatically
 ---------------------
 
 To run PiWx automatically on boot, refer to the sample service file in the
-repository. This file must be placed in `/lib/systemd/system` and renamed to
-`piwx.service`.
+repository under `support/systemd`. This file must be placed in
+`/lib/systemd/system` and renamed to `piwx.service`.
 
 Use `sudo systemctl start piwx.service` to test starting PiWx and use
 `sudo systemctl stop piwx.service` to stop it. To enable automatically starting
