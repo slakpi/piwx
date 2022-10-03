@@ -24,47 +24,14 @@
 #define COLOR_LIFR     COLOR(255, 0, 255)
 #define COLOR_WIND     COLOR(255, 192, 0)
 
-/**
- * @brief   Translate weather to a WS2811 color value.
- * @param [in] cfg PiWx configuration.
- * @param [in] wx  Current weather station.
- */
-static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
-  // If a high-wind threshold has been set, check the speed and gust against
-  // the threshold. If the wind exceeds the threshold use yellow if blink is
-  // turned OFF or the blink state is zero. Otherwise, reset the blink state and
-  // use the METAR color.
-  if (cfg->highWindSpeed > 0) {
-    if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
-      if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
-        wx->blinkState = 1;
-        return COLOR_WIND;
-      } else {
-        wx->blinkState = 0;
-      }
-    }
-  }
-
-  switch (wx->cat) {
-  case catVFR:
-    return COLOR_VFR;
-  case catMVFR:
-    return COLOR_MVFR;
-  case catIFR:
-    return COLOR_IFR;
-  case catLIFR:
-    return COLOR_LIFR;
-  default:
-    return COLOR_NONE;
-  }
-}
+static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx);
 
 int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
   WxStation      *p = wx;
   int             i;
   ws2811_return_t ret;
+  // clang-format off
   ws2811_t        ledstring = {
-      // clang-format off
     .freq   = TARGET_FREQ,
     .dmanum = DMA,
     .channel =
@@ -85,8 +52,8 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
             .brightness = 0,
           },
       },
-      // clang-format on
   };
+  // clang-format on
 
   // Expect the data pin and DMA channel values to be valid. Fail otherwise.
 
@@ -181,4 +148,39 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
   ws2811_fini(&ledstring);
 
   return (ret == WS2811_SUCCESS ? 0 : -1);
+}
+
+/**
+ * @brief   Translate weather to a WS2811 color value.
+ * @param [in] cfg PiWx configuration.
+ * @param [in] wx  Current weather station.
+ */
+static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
+  // If a high-wind threshold has been set, check the speed and gust against
+  // the threshold. If the wind exceeds the threshold use yellow if blink is
+  // turned OFF or the blink state is zero. Otherwise, reset the blink state and
+  // use the METAR color.
+  if (cfg->highWindSpeed > 0) {
+    if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
+      if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
+        wx->blinkState = 1;
+        return COLOR_WIND;
+      } else {
+        wx->blinkState = 0;
+      }
+    }
+  }
+
+  switch (wx->cat) {
+  case catVFR:
+    return COLOR_VFR;
+  case catMVFR:
+    return COLOR_MVFR;
+  case catIFR:
+    return COLOR_IFR;
+  case catLIFR:
+    return COLOR_LIFR;
+  default:
+    return COLOR_NONE;
+  }
 }

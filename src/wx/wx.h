@@ -45,12 +45,12 @@ typedef enum { catInvalid, catVFR, catMVFR, catIFR, catLIFR } FlightCategory;
  */
 typedef enum {
   wxInvalid,
-  wxClearDay, // Clear; no other weather.
-  wxClearNight,
-  wxScatteredOrFewDay, // Scattered or few; no other weather.
-  wxScatteredOrFewNight,
-  wxBrokenDay, // Broken; no other weather.
-  wxBrokenNight,
+  wxClearDay,            // Clear; no other weather.
+  wxClearNight,          //
+  wxScatteredOrFewDay,   // Scattered or few; no other weather.
+  wxScatteredOrFewNight, //
+  wxBrokenDay,           // Broken; no other weather.
+  wxBrokenNight,         //
   wxOvercast,            // Overcast; no other weather.
   wxLightMistHaze,       // BR, HZ
   wxLightDrizzleRain,    // VC/- DZ, RA
@@ -93,6 +93,12 @@ typedef struct WxStation_ {
 } WxStation;
 
 /**
+ * @brief Frees a list of weather stations.
+ * @param[in] stations The list of stations to free.
+ */
+void freeStations(WxStation *stations);
+
+/**
  * @brief   Query the weather source for a comma-separated list of stations.
  * @param[in]  stations The list of stations to query.
  * @param[out] err      Query error code.
@@ -100,11 +106,5 @@ typedef struct WxStation_ {
  *          or null if there is an error.
  */
 WxStation *queryWx(const char *stations, int *err);
-
-/**
- * @brief Frees a list of weather stations.
- * @param[in] stations The list of stations to free.
- */
-void freeStations(WxStation *stations);
 
 #endif /* WX_H */

@@ -6,12 +6,12 @@
 
 #include <stddef.h>
 
-#define TRUE  1
-#define FALSE 0
+#define TINY_VALUE 1e-15
+#define MAX_PATH   256
 
-#define COUNTOF(arr) (sizeof(arr) / sizeof(*(arr)))
-
-typedef int boolean;
+#define MEMBER_OFFSET(s, m) ((void *)&(((s *)0)->m))
+#define COUNTOF(arr)        (sizeof(arr) / sizeof(*(arr)))
+#define UNUSED(x)           ((void)(x))
 
 /**
  * @brief   Returns the minimum of two values.

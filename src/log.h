@@ -5,6 +5,7 @@
 #define LOG_H
 
 #include "util.h"
+#include <stdbool.h>
 
 /**
  * @enum  LogLevel
@@ -23,13 +24,6 @@ typedef enum {
 } LogLevel;
 
 /**
- * @brief Open the log.
- * @param[in] maxLevel The maximum level to output.
- * @returns TRUE if successful, FALSE otherwise.
- */
-boolean openLog(LogLevel maxLevel);
-
-/**
  * @brief   If @a condition is not true, log the message and assert.
  * @details @a assertLog overrides the max logging level and writes a warning
  *          message if @a condition is false.
@@ -37,7 +31,19 @@ boolean openLog(LogLevel maxLevel);
  * @param[in] fmt       The @a printf style format string.
  * @param[in] ...       The format parameters.
  */
-void assertLog(boolean condition, const char *fmt, ...);
+void assertLog(bool condition, const char *fmt, ...);
+
+/**
+ * @brief Close the log file.
+ */
+void closeLog();
+
+/**
+ * @brief Open the log.
+ * @param[in] maxLevel The maximum level to output.
+ * @returns True if successful, false otherwise.
+ */
+bool openLog(LogLevel maxLevel);
 
 /**
  * @brief Write a message at the specified log level.
@@ -46,10 +52,5 @@ void assertLog(boolean condition, const char *fmt, ...);
  * @param[in] ...   The format parameters.
  */
 void writeLog(LogLevel level, const char *fmt, ...);
-
-/**
- * @brief Close the log file.
- */
-void closeLog();
 
 #endif

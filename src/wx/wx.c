@@ -1,9 +1,9 @@
 /**
  * @file wx.c
  */
+#include "wx.h"
 #include "log.h"
 #include "util.h"
-#include "wx.h"
 #include "wx_type.h"
 #include <assert.h>
 #include <ctype.h>
@@ -11,6 +11,7 @@
 #include <jansson.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,7 @@ typedef void *yyscan_t;
 
 #include "wx.lexer.h"
 
+#define INIT_STRING_BUF  256
 #define MAX_STRING_BUF   (10 * 1024 * 1024)
 #define MAX_DATETIME_LEN 20
 
@@ -65,10 +67,10 @@ typedef struct {
  * @param[in] res The response buffer.
  */
 static void initResponse(Response *res) {
-  res->str    = (char *)malloc(sizeof(char) * 256);
+  res->str    = (char *)malloc(sizeof(char) * INIT_STRING_BUF);
   res->str[0] = 0;
   res->len    = 0;
-  res->bufLen = 256;
+  res->bufLen = INIT_STRING_BUF;
 }
 
 /**
@@ -128,43 +130,43 @@ static void freeResponse(Response *res) {
  *          day exceeds the number of days in the specified month.
  * @param[in] str The string to parse.
  * @param[in] tm  Receives the date time.
- * @returns TRUE if successful, FALSE otherwise.
+ * @returns True if successful, false otherwise.
  */
-static boolean parseUTCDateTime(const char *str, struct tm *tm) {
+static bool parseUTCDateTime(const char *str, struct tm *tm) {
   // TODO: This should probably be a lexer at some point.
   // NOLINTNEXTLINE -- Not scanning to string buffers.
   sscanf(str, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour,
          &tm->tm_min, &tm->tm_sec);
 
   if (tm->tm_year < 1900) {
-    return FALSE;
+    return false;
   }
 
   if (!(tm->tm_mon >= 1 && tm->tm_mon <= 12)) {
-    return FALSE;
+    return false;
   }
 
   if (!(tm->tm_mday >= 1 && tm->tm_mday <= 31)) {
-    return FALSE;
+    return false;
   }
 
   if (!(tm->tm_hour >= 0 && tm->tm_hour <= 23)) {
-    return FALSE;
+    return false;
   }
 
   if (!(tm->tm_min >= 0 && tm->tm_min <= 59)) {
-    return FALSE;
+    return false;
   }
 
   if (!(tm->tm_sec >= 0 && tm->tm_sec <= 59)) {
-    return FALSE;
+    return false;
   }
 
   tm->tm_year -= 1900;
   tm->tm_mon -= 1;
   tm->tm_isdst = 0;
 
-  return TRUE;
+  return true;
 }
 
 /**
@@ -191,10 +193,10 @@ static size_t sunriseSunsetCallback(char *ptr, size_t size, size_t nmemb, void *
  * @param[in]  date    Date to query.
  * @param[out] sunrise Sunrise in UTC.
  * @param[out] sunset  Sunset in UTC.
- * @returns TRUE if successful, FALSE otherwise.
+ * @returns True if successful, false otherwise.
  */
-static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, time_t *sunrise,
-                                      time_t *sunset) {
+static bool getSunriseSunsetForDay(double lat, double lon, struct tm *date, time_t *sunrise,
+                                   time_t *sunset) {
   CURL        *curlLib;
   CURLcode     res;
   json_t      *rootNode, *timesNode, *sunriseNode, *sunsetNode;
@@ -202,7 +204,7 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, t
   char         tmp[257];
   Response     json;
   struct tm    dtSunrise, dtSunset;
-  boolean      ok = FALSE;
+  bool         ok = false;
 
   *sunrise = 0;
   *sunset  = 0;
@@ -210,7 +212,7 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, t
   curlLib = curl_easy_init();
 
   if (!curlLib) {
-    return FALSE;
+    return false;
   }
 
   // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -228,14 +230,14 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, t
   curl_easy_cleanup(curlLib);
 
   if (res != CURLE_OK) {
-    return FALSE;
+    return false;
   }
 
   rootNode = json_loads(json.str, 0, &err);
   freeResponse(&json);
 
   if (!rootNode) {
-    return FALSE;
+    return false;
   }
 
   timesNode = json_object_get(rootNode, "results");
@@ -274,7 +276,7 @@ static boolean getSunriseSunsetForDay(double lat, double lon, struct tm *date, t
   *sunrise = timegm(&dtSunrise);
   *sunset  = timegm(&dtSunset);
 
-  ok = TRUE;
+  ok = true;
 
 cleanup:
   if (rootNode) {
@@ -297,9 +299,9 @@ cleanup:
  * @param[in] lat     Observation latitude.
  * @param[in] lon     Observation longitude.
  * @param[in] obsTime UTC observation time.
- * @returns FALSE if day or there is an error, TRUE if night.
+ * @returns True if night, false if day or there is an error.
  */
-static boolean isNight(double lat, double lon, time_t obsTime) {
+static bool isNight(double lat, double lon, time_t obsTime) {
   time_t    t = obsTime;
   time_t    sr, ss;
   struct tm date;
@@ -307,31 +309,31 @@ static boolean isNight(double lat, double lon, time_t obsTime) {
   gmtime_r(&t, &date);
 
   if (!getSunriseSunsetForDay(lat, lon, &date, &sr, &ss)) {
-    return 0;
+    return false;
   }
 
   // If the observation time is less than the sunrise date/time, check the
   // prior day. Otherwise, check the next day.
   if (obsTime < sr) {
     if (t < 86400) {
-      return 0; // Underflow
+      return false; // Underflow
     }
 
     t -= 86400;
   } else if (obsTime >= ss) {
     if (t + 86400 < t) {
-      return 0; // Overflow
+      return false; // Overflow
     }
 
     t += 86400;
   } else {
-    return 0; // Between sunrise and sunset; it's day time.
+    return false; // Between sunrise and sunset; it's day time.
   }
 
   gmtime_r(&t, &date);
 
   if (!getSunriseSunsetForDay(lat, lon, &date, &sr, &ss)) {
-    return 0;
+    return false;
   }
 
   // It's night time if greater than sunset on the previous day or less than
@@ -913,7 +915,7 @@ WxStation *queryWx(const char *stations, int *err) {
   Tag               tag;
   WxStation        *start = NULL, *cur, *newStation;
   int               count, len;
-  boolean           ok = FALSE;
+  bool              ok = false;
 
   *err = 0;
 
@@ -929,7 +931,7 @@ WxStation *queryWx(const char *stations, int *err) {
                        "mostRecentForEachStation=true&"
                        "stationString=",
                        COUNTOF(url));
-  
+
   assertLog(count < COUNTOF(url), "Base URL is too large.");
   count = COUNTOF(url) - strlen(url);
   len   = strlen(stations);
@@ -941,7 +943,7 @@ WxStation *queryWx(const char *stations, int *err) {
   }
 
   // NOLINTNEXTLINE -- strncat is sufficient; sizes checked above.
-  strncat(url, stations, COUNTOF(url));
+  strncat(url, stations, count);
 
   curlLib = curl_easy_init();
 
@@ -1019,7 +1021,7 @@ WxStation *queryWx(const char *stations, int *err) {
     p = p->next;
   }
 
-  ok = TRUE;
+  ok = true;
 
 cleanup:
   if (doc) {

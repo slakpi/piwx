@@ -13,11 +13,34 @@ typedef void *yyscan_t;
 #define YYSTYPE CONF_STYPE
 
 #include "conf.lexer.h"
+#include "config.h"
 #include "log.h"
-#include <config.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len);
+
+void freePiwxConfig(PiwxConfig *cfg) {
+  int i;
+
+  if (!cfg) {
+    return;
+  }
+
+  free(cfg->installPrefix);
+  free(cfg->imageResources);
+  free(cfg->fontResources);
+  free(cfg->configFile);
+  free(cfg->stationQuery);
+  free(cfg->nearestAirport);
+
+  for (i = 0; i < MAX_LEDS; ++i) {
+    free(cfg->ledAssignments[i]);
+  }
+
+  free(cfg);
+}
 
 PiwxConfig *getPiwxConfig() {
   FILE       *cfgFile;
@@ -58,25 +81,12 @@ PiwxConfig *getPiwxConfig() {
   return cfg;
 }
 
-void freePiwxConfig(PiwxConfig *cfg) {
-  int i;
+char *getPathForFont(const char *file, char *path, size_t len) {
+  return appendFileToPath(FONT_RESOURCES, file, path, len);
+}
 
-  if (!cfg) {
-    return;
-  }
-
-  free(cfg->installPrefix);
-  free(cfg->imageResources);
-  free(cfg->fontResources);
-  free(cfg->configFile);
-  free(cfg->stationQuery);
-  free(cfg->nearestAirport);
-
-  for (i = 0; i < MAX_LEDS; ++i) {
-    free(cfg->ledAssignments[i]);
-  }
-
-  free(cfg);
+char *getPathForIcon(const char *file, char *path, size_t len) {
+  return appendFileToPath(IMAGE_RESOURCES, file, path, len);
 }
 
 /**
@@ -123,12 +133,4 @@ static char *appendFileToPath(const char *prefix, const char *file, char *path, 
   strcat(path, file); // NOLINT -- Size checked above.
 
   return path;
-}
-
-char *getPathForBitmap(const char *file, char *path, size_t len) {
-  return appendFileToPath(IMAGE_RESOURCES, file, path, len);
-}
-
-char *getPathForFont(const char *file, char *path, size_t len) {
-  return appendFileToPath(FONT_RESOURCES, file, path, len);
 }

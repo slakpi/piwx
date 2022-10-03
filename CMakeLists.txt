@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/support/cmake/")
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 project(piwx C)
 
@@ -8,13 +10,6 @@ project(piwx C)
 # Script options.
 #-------------------------------------------------------------------------------
 option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
-
-#-------------------------------------------------------------------------------
-# Find packages.
-#-------------------------------------------------------------------------------
-if (WITH_LED_SUPPORT)
-  find_package(WS2811 REQUIRED)
-endif ()
 
 #-------------------------------------------------------------------------------
 # Setup the install paths.
@@ -47,11 +42,16 @@ cmake_path(APPEND CMAKE_INSTALL_PREFIX ${VAR_PREFIX} piwx.log
 #-------------------------------------------------------------------------------
 execute_process(
   COMMAND git rev-parse HEAD
-  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_COMMIT_HASH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
+
+#-------------------------------------------------------------------------------
+# Setup the global compile options.
+#-------------------------------------------------------------------------------
+add_compile_options(-Wall -Werror=unused-function -Werror=unused-variable)
 
 #-------------------------------------------------------------------------------
 # Bring subdirectories into the project.

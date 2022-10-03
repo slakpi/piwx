@@ -10,4 +10,4 @@
 #define LOG_FILE "${LOG_FILE}"
 #define GIT_COMMIT_HASH "${GIT_COMMIT_HASH}"
 
-#endif
+#endif /* CONFIG_H */

@@ -35,6 +35,12 @@ typedef struct {
 } PiwxConfig;
 
 /**
+ * @brief Free an allocated configuration struct.
+ * @param[in] cfg The configuration struct to free.
+ */
+void freePiwxConfig(PiwxConfig *cfg);
+
+/**
  * @brief   Load the piwx configuration.
  * @details Loads the piwx configuration from @a CONFIG_FILE or initializes the
  *          configuration structure with the piwx defaults if the file does not
@@ -43,23 +49,6 @@ typedef struct {
  *          memory for the structure.
  */
 PiwxConfig *getPiwxConfig();
-
-/**
- * @brief Free an allocated configuration struct.
- * @param[in] cfg The configuration struct to free.
- */
-void freePiwxConfig(PiwxConfig *cfg);
-
-/**
- * @brief   Load the fully-qualified path to the specified bitmap file.
- * @details Appends @a file to the @a IMAGE_RESOURCES path using @a path as
- *          an output buffer.
- * @param[in] file The bitmap file to append.
- * @param[in] path The buffer to hold the fully-qualified path.
- * @param[in] len  The length of @a path.
- * @returns The buffer pointer or NULL if the output buffer is too small.
- */
-char *getPathForBitmap(const char *file, char *path, size_t len);
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
@@ -71,5 +60,16 @@ char *getPathForBitmap(const char *file, char *path, size_t len);
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
 char *getPathForFont(const char *file, char *path, size_t len);
+
+/**
+ * @brief   Load the fully-qualified path to the specified bitmap file.
+ * @details Appends @a file to the @a IMAGE_RESOURCES path using @a path as
+ *          an output buffer.
+ * @param[in] file The bitmap file to append.
+ * @param[in] path The buffer to hold the fully-qualified path.
+ * @param[in] len  The length of @a path.
+ * @returns The buffer pointer or NULL if the output buffer is too small.
+ */
+char *getPathForIcon(const char *file, char *path, size_t len);
 
 #endif /* CONF_FILE_H */

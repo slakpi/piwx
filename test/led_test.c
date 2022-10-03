@@ -2,43 +2,41 @@
 #include <ws2811/ws2811.h>
 
 // defaults for cmdline options
-#define TARGET_FREQ             WS2811_TARGET_FREQ
-#define GPIO_PIN                18
-#define DMA                     10
+#define TARGET_FREQ WS2811_TARGET_FREQ
+#define GPIO_PIN    18
+#define DMA         10
 //#define STRIP_TYPE            WS2811_STRIP_RGB    // WS2812/SK6812RGB integrated chip+leds
-#define STRIP_TYPE              WS2811_STRIP_GBR    // WS2812/SK6812RGB integrated chip+leds
+#define STRIP_TYPE  WS2811_STRIP_GBR // WS2812/SK6812RGB integrated chip+leds
 //#define STRIP_TYPE            SK6812_STRIP_RGBW   // SK6812RGBW (NOT SK6812RGB)
 
-#define LED_COUNT               50
+#define LED_COUNT 50
 
-ws2811_t ledstring =
-{
-  .freq = TARGET_FREQ,
-  .dmanum = DMA,
-  .channel =
-  {
-    [0] =
-    {
-      .gpionum = GPIO_PIN,
-      .count = LED_COUNT,
-      .invert = 0,
-      .brightness = 255,
-      .strip_type = STRIP_TYPE,
-    },
-    [1] =
-    {
-      .gpionum = 0,
-      .count = 0,
-      .invert = 0,
-      .brightness = 0,
-    },
-  },
+ws2811_t ledstring = {
+    .freq   = TARGET_FREQ,
+    .dmanum = DMA,
+    .channel =
+        {
+            [0] =
+                {
+                    .gpionum    = GPIO_PIN,
+                    .count      = LED_COUNT,
+                    .invert     = 0,
+                    .brightness = 255,
+                    .strip_type = STRIP_TYPE,
+                },
+            [1] =
+                {
+                    .gpionum    = 0,
+                    .count      = 0,
+                    .invert     = 0,
+                    .brightness = 0,
+                },
+        },
 };
 
-int main()
-{
+int main() {
   ws2811_return_t ret;
-  int i;
+  int             i;
 
   ret = ws2811_init(&ledstring);
 
