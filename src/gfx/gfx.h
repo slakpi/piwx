@@ -25,6 +25,24 @@ typedef void *DrawResources;
 typedef enum { FONT_6PT, FONT_8PT, FONT_10PT, FONT_16PT, FONT_COUNT } Font;
 
 /**
+ * @struct CharInfo
+ * @brief  Font character information in pixels.
+ */
+typedef struct {
+  Vector2f cellSize;  // Cell dimensions
+  float    baseline;  // Baseline position from bottom of cell
+  float    capHeight; // Capital letter height
+  float    xHeight;   // Lowercase x height
+  float    leading;   // Line spacing
+} CharInfo;
+
+/**
+ * @enum  CharVertAlign
+ * @brief Vertical alignment of characters.
+ */
+typedef enum { VERT_ALIGN_BASELINE, VERT_ALIGN_CELL } CharVertAlign;
+
+/**
  * @enum  Icon
  * @brief Gfx icon image handles.
  */
@@ -148,9 +166,10 @@ void drawQuad(DrawResources resources, const Point2f *vertices, Color4f color);
  * @param[in] text       The text string.
  * @param[in] len        Length of the text string in characters.
  * @param[in] textColor  The character color.
+ * @param[in] valign     Character vertical alignment
  */
 void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text, size_t len,
-              Color4f textColor);
+              Color4f textColor, CharVertAlign valign);
 
 /**
  * @brief   Dumps the current drawing surface to a PNG image.
@@ -161,22 +180,20 @@ void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char
 bool dumpSurfaceToPng(DrawResources resources, const char *path);
 
 /**
- * @brief Get the character width and height for a font.
+ * @brief Get the character information for a font.
  * @param[in] resources The gfx context.
  * @param[in] font      The font to query.
- * @param[out] width    The character width in pixels. May be NULL.
- * @param[out] height   The character height in pixels. May be NULL.
+ * @param[out] info     The character information.
  */
-bool getFontInfo(DrawResources resources, Font font, float *charWidth, float *charHeight);
+bool getFontInfo(DrawResources resources, Font font, CharInfo *info);
 
 /**
  * @brief Get the width and height of an icon.
  * @param[in] resources The gfx context.
  * @param[in] icon      The icon to query.
- * @param[out] width    The icon width in pixels. May be NULL.
- * @param[out] height   The icon height in pixels. May be NULL.
+ * @param[out] size     The icon dimenisons in pixels.
  */
-bool getIconInfo(DrawResources resources, Icon icon, float *width, float *height);
+bool getIconInfo(DrawResources resources, Icon icon, Vector2f *size);
 
 /**
  * @brief Get error information from a gfx context.

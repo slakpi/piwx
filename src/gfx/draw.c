@@ -7,6 +7,7 @@
 #include "vec.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -14,8 +15,9 @@
 static void drawTriangles(const DrawResources_ *rsrc, const Vertex *vertices, size_t count,
                           Program program, GLuint texture);
 
-static bool initCharacter(const DrawResources_ *rsrc, Font font, char c, Color4f textColor,
-                          Point2f bottomLeft, CharacterRenderInfo *info, Vertex *vertices);
+static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const Color4f *textColor,
+                          const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
+                          Vertex *vertices);
 
 void drawIcon(DrawResources resources, Icon icon, Point2f center) {
   const DrawResources_ *rsrc   = resources;
@@ -34,20 +36,20 @@ void drawIcon(DrawResources resources, Icon icon, Point2f center) {
   tex = &rsrc->icons[icon];
 
   // Top-left
-  buf[0].pos.coord.x    = center.coord.x - (tex->width / 2.0f);
-  buf[0].pos.coord.y    = center.coord.y - (tex->height / 2.0f);
+  buf[0].pos.coord.x    = floorf(center.coord.x - (tex->texSize.v[0] / 2.0f));
+  buf[0].pos.coord.y    = floorf(center.coord.y - (tex->texSize.v[1] / 2.0f));
   buf[0].tex.texCoord.u = 0.0f;
   buf[0].tex.texCoord.v = 0.0f;
 
   // Top-right
-  buf[1].pos.coord.x    = center.coord.x + (tex->width / 2.0f);
+  buf[1].pos.coord.x    = buf[0].pos.coord.x + tex->texSize.v[0];
   buf[1].pos.coord.y    = buf[0].pos.coord.y;
   buf[1].tex.texCoord.u = 1.0f;
   buf[1].tex.texCoord.v = 0.0f;
 
   // Bottom-left
   buf[2].pos.coord.x    = buf[0].pos.coord.x;
-  buf[2].pos.coord.y    = center.coord.y + (tex->height / 2.0f);
+  buf[2].pos.coord.y    = buf[0].pos.coord.y + tex->texSize.v[1];
   buf[2].tex.texCoord.u = 0.0f;
   buf[2].tex.texCoord.v = 1.0f;
 
@@ -100,9 +102,9 @@ void drawQuad(DrawResources resources, const Point2f *vertices, Color4f color) {
 }
 
 void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text, size_t len,
-              Color4f textColor) {
+              Color4f textColor, CharVertAlign valign) {
   const DrawResources_ *rsrc   = resources;
-  CharacterRenderInfo   info   = {0};
+  CharInfo              info   = {0};
   Point2f               cur    = bottomLeft;
   Vertex                buf[4] = {0};
 
@@ -110,18 +112,18 @@ void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char
     return;
   }
 
-  if (font >= FONT_COUNT) {
+  if (!getFontInfo(resources, font, &info)) {
     return;
   }
 
   for (size_t i = 0; i < len; ++i) {
-    if (!initCharacter(rsrc, font, text[i], textColor, cur, &info, &buf[0])) {
+    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, &buf[0])) {
       continue;
     }
 
     drawTriangles(rsrc, &buf[0], 4, ALPHA_TEX_SHADER, rsrc->fonts[font].tex);
 
-    cur.coord.x += info.charWidth;
+    cur.coord.x += info.cellSize.v[0];
   }
 }
 
@@ -135,29 +137,32 @@ void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char
  * @param[out] info      The character's render information.
  * @param[out] vertices  The initialized vertices.
  */
-static bool initCharacter(const DrawResources_ *rsrc, Font font, char c, Color4f textColor,
-                          Point2f bottomLeft, CharacterRenderInfo *info, Vertex *vertices) {
-  if (!getCharacterRenderInfo(rsrc, font, c, info)) {
+static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const Color4f *textColor,
+                          const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
+                          Vertex *vertices) {
+  CharacterRenderInfo rndrInfo = {0};
+
+  if (!getCharacterRenderInfo(rsrc, font, c, bottomLeft, info, valign, &rndrInfo)) {
     return false;
   }
 
   // Top-left
-  vertices[0].pos.coord.x    = bottomLeft.coord.x;
-  vertices[0].pos.coord.y    = bottomLeft.coord.y - info->charHeight;
-  vertices[0].tex.texCoord.u = info->texTopLeft.texCoord.u;
-  vertices[0].tex.texCoord.v = info->texTopLeft.texCoord.v;
+  vertices[0].pos.coord.x    = rndrInfo.bottomLeft.coord.x;
+  vertices[0].pos.coord.y    = rndrInfo.bottomLeft.coord.y - info->cellSize.v[1];
+  vertices[0].tex.texCoord.u = rndrInfo.texTopLeft.texCoord.u;
+  vertices[0].tex.texCoord.v = rndrInfo.texTopLeft.texCoord.v;
 
   // Top-right
-  vertices[1].pos.coord.x    = bottomLeft.coord.x + info->charWidth;
+  vertices[1].pos.coord.x    = rndrInfo.bottomLeft.coord.x + info->cellSize.v[0];
   vertices[1].pos.coord.y    = vertices[0].pos.coord.y;
-  vertices[1].tex.texCoord.u = info->texBottomRight.texCoord.u;
+  vertices[1].tex.texCoord.u = rndrInfo.texBottomRight.texCoord.u;
   vertices[1].tex.texCoord.v = vertices[0].tex.texCoord.v;
 
   // Bottom-left
-  vertices[2].pos.coord.x    = bottomLeft.coord.x;
-  vertices[2].pos.coord.y    = bottomLeft.coord.y;
+  vertices[2].pos.coord.x    = rndrInfo.bottomLeft.coord.x;
+  vertices[2].pos.coord.y    = rndrInfo.bottomLeft.coord.y;
   vertices[2].tex.texCoord.u = vertices[0].tex.texCoord.u;
-  vertices[2].tex.texCoord.v = info->texBottomRight.texCoord.v;
+  vertices[2].tex.texCoord.v = rndrInfo.texBottomRight.texCoord.v;
 
   // Bottom-right
   vertices[3].pos.coord.x    = vertices[1].pos.coord.x;
@@ -165,7 +170,7 @@ static bool initCharacter(const DrawResources_ *rsrc, Font font, char c, Color4f
   vertices[3].tex.texCoord.u = vertices[1].tex.texCoord.u;
   vertices[3].tex.texCoord.v = vertices[2].tex.texCoord.v;
 
-  vectorSet4f(vertices[0].color.v, sizeof(Vertex), &textColor, 4);
+  vectorSet4f(vertices[0].color.v, sizeof(Vertex), textColor, 4);
 
   return true;
 }

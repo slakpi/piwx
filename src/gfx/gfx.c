@@ -42,6 +42,7 @@
 typedef struct {
   Font        font;
   const char *name;
+  CharInfo    info;
 } FontImage;
 
 /**
@@ -69,10 +70,11 @@ static const EGLint gPbufferAttribs[] = {
 
 static const EGLint gContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
-static const FontImage gFontTable[] = {{FONT_6PT, "sfmono6.png"},
-                                       {FONT_8PT, "sfmono8.png"},
-                                       {FONT_10PT, "sfmono10.png"},
-                                       {FONT_16PT, "sfmono16.png"}};
+static const FontImage gFontTable[] = {
+    {FONT_6PT, "sfmono6.png", {{{16.0f, 31.0f}}, 7.0f, 18.0f, 14.0f, 5.0f}},
+    {FONT_8PT, "sfmono8.png", {{{21.0f, 41.0f}}, 9.0f, 24.0f, 18.0f, 3.0f}},
+    {FONT_10PT, "sfmono10.png", {{{26.0f, 51.0f}}, 11.0f, 30.0f, 23.0f, 4.0f}},
+    {FONT_16PT, "sfmono16.png", {{{41.0f, 81.0f}}, 17.0f, 47.0f, 36.0f, 7.0f}}};
 
 static const IconImage gIconTable[] = {{ICON_CAT_IFR, "cat_ifr.png"},
                                        {ICON_CAT_LIFR, "cat_lifr.png"},
@@ -247,7 +249,8 @@ bool dumpSurfaceToPng(DrawResources resources, const char *path) {
 }
 
 bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
-                            CharacterRenderInfo *info) {
+                            const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
+                            CharacterRenderInfo *rndrInfo) {
   int            row, col;
   const Texture *tex = NULL;
 
@@ -267,12 +270,17 @@ bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
   col = c % FONT_COLS;
   tex = &rsrc->fonts[font];
 
-  info->charWidth                 = tex->width / FONT_COLS;
-  info->charHeight                = tex->height / FONT_ROWS;
-  info->texTopLeft.texCoord.u     = (col * info->charWidth) / tex->width;
-  info->texTopLeft.texCoord.v     = (row * info->charHeight) / tex->height;
-  info->texBottomRight.texCoord.u = ((col + 1) * info->charWidth) / tex->width;
-  info->texBottomRight.texCoord.v = ((row + 1) * info->charHeight) / tex->height;
+  rndrInfo->bottomLeft = *bottomLeft;
+
+  if (valign == VERT_ALIGN_BASELINE) {
+    rndrInfo->bottomLeft.coord.y += info->baseline;
+  }
+
+  rndrInfo->cellSize                  = info->cellSize;
+  rndrInfo->texTopLeft.texCoord.u     = (col * info->cellSize.v[0]) / tex->texSize.v[0];
+  rndrInfo->texTopLeft.texCoord.v     = (row * info->cellSize.v[1]) / tex->texSize.v[1];
+  rndrInfo->texBottomRight.texCoord.u = ((col + 1) * info->cellSize.v[0]) / tex->texSize.v[0];
+  rndrInfo->texBottomRight.texCoord.v = ((row + 1) * info->cellSize.v[1]) / tex->texSize.v[1];
 
   return true;
 }
@@ -350,26 +358,19 @@ void getEglError(DrawResources_ *rsrc, const char *file, long line) {
   strncpy_safe(rsrc->errorMsg, msg, COUNTOF(rsrc->errorMsg));
 }
 
-bool getFontInfo(DrawResources resources, Font font, float *width, float *height) {
-  DrawResources_     *rsrc = resources;
-  CharacterRenderInfo info = {0};
+bool getFontInfo(DrawResources resources, Font font, CharInfo *info) {
+  UNUSED(resources);
 
-  if (!getCharacterRenderInfo(rsrc, font, 0, &info)) {
+  if (font >= FONT_COUNT) {
     return false;
   }
 
-  if (width) {
-    *width = info.charWidth;
-  }
-
-  if (height) {
-    *height = info.charHeight;
-  }
+  *info = gFontTable[font].info;
 
   return true;
 }
 
-bool getIconInfo(DrawResources resources, Icon icon, float *width, float *height) {
+bool getIconInfo(DrawResources resources, Icon icon, Vector2f *size) {
   DrawResources_ *rsrc = resources;
 
   if (!rsrc) {
@@ -380,13 +381,7 @@ bool getIconInfo(DrawResources resources, Icon icon, float *width, float *height
     return false;
   }
 
-  if (width) {
-    *width = rsrc->icons[icon].width;
-  }
-
-  if (height) {
-    *height = rsrc->icons[icon].height;
-  }
+  *size = rsrc->icons[icon].texSize;
 
   return true;
 }
@@ -752,7 +747,8 @@ static bool loadFont(DrawResources_ *rsrc, const FontImage *entry, GLuint tex, T
     goto cleanup;
   }
 
-  // Validate the image dimensions and color type.
+  // Validate the image dimensions and color type. Don't worry about mismatching
+  // with the character info.
   if (png.width % FONT_COLS != 0 || png.height % FONT_ROWS != 0 || png.bits != 8 ||
       png.color != PNG_COLOR_TYPE_GRAY) {
     SET_ERROR(rsrc, -1, "Invalid font image.");
@@ -864,8 +860,8 @@ static void loadTexture(const Png *png, GLuint tex, GLenum format, Texture *text
                png->rows[0]);
   glGenerateMipmap(GL_TEXTURE_2D);
 
-  texture->width  = png->width;
-  texture->height = png->height;
+  texture->texSize.v[0] = png->width;
+  texture->texSize.v[1] = png->height;
 }
 
 /**

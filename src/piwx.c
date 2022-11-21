@@ -437,13 +437,17 @@ static void drawBackground(DrawResources resources) {
  * @param[in] station   The weather station information.
  */
 static void drawStationIdentifier(DrawResources resources, const WxStation *station) {
-  Point2f bottomLeft = {0};
+  CharInfo info       = {0};
+  Point2f  bottomLeft = {0};
 
-  if (!getFontInfo(resources, FONT_16PT, NULL, &bottomLeft.coord.y)) {
+  if (!getFontInfo(resources, FONT_16PT, &info)) {
     return;
   }
 
-  drawText(resources, FONT_16PT, bottomLeft, station->localId, strlen(station->localId), gWhite);
+  bottomLeft.coord.y = info.cellSize.v[1];
+
+  drawText(resources, FONT_16PT, bottomLeft, station->localId, strlen(station->localId), gWhite,
+           VERT_ALIGN_CELL);
 }
 
 /**
@@ -546,21 +550,21 @@ static Icon getWeatherIcon(DominantWeather wx) {
  */
 static void drawStationWxString(DrawResources resources, const WxStation *station) {
   Point2f  bottomLeft = {0};
-  Vector2f info       = {0};
+  CharInfo info       = {0};
   size_t   len        = 0;
 
   if (!station->wxString) {
     return;
   }
 
-  if (!getFontInfo(resources, FONT_8PT, &info.coord.x, &info.coord.y)) {
+  if (!getFontInfo(resources, FONT_8PT, &info)) {
     return;
   }
 
   len                = strlen(station->wxString);
-  bottomLeft.coord.x = (SCREEN_WIDTH - (info.coord.x * len)) / 2.0f;
-  bottomLeft.coord.y = gUpperDiv + info.coord.y;
-  drawText(resources, FONT_8PT, bottomLeft, station->wxString, len, gWhite);
+  bottomLeft.coord.x = (SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
+  bottomLeft.coord.y = gUpperDiv + info.cellSize.v[1];
+  drawText(resources, FONT_8PT, bottomLeft, station->wxString, len, gWhite, VERT_ALIGN_CELL);
 }
 
 /**
@@ -572,8 +576,8 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
  * @param[in] station   The weather station information.
  */
 static void drawCloudLayers(DrawResources *resources, const WxStation *station) {
-  Point2f       bottomLeft = {{172.0f, gLowerDiv + 4.0f}};
-  Vector2f      info       = {0};
+  Point2f       bottomLeft = {{172.0f, gLowerDiv + 10.0f}};
+  CharInfo      info       = {0};
   SkyCondition *sky        = station->layers;
   char          buf[33]    = {0};
 
@@ -581,21 +585,21 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
     return;
   }
 
-  if (!getFontInfo(resources, FONT_6PT, &info.coord.x, &info.coord.y)) {
+  if (!getFontInfo(resources, FONT_6PT, &info)) {
     return;
   }
 
-  bottomLeft.coord.y += info.coord.y;
+  bottomLeft.coord.y += info.capHeight;
 
   switch (sky->coverage) {
   case skyClear:
     strncpy_safe(buf, "Clear", COUNTOF(buf));
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   case skyOvercastSurface:
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   default:
     break;
@@ -622,12 +626,12 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
   // Draw the next highest layer if there is one.
   if (sky->next) {
     getCloudLayerText(sky->next, buf, COUNTOF(buf));
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
-    bottomLeft.coord.y += info.coord.y;
+    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+    bottomLeft.coord.y += info.capHeight + info.leading;
   }
 
   getCloudLayerText(sky, buf, COUNTOF(buf));
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 }
 
 /**
@@ -666,34 +670,34 @@ static void getCloudLayerText(const SkyCondition *sky, char *buf, size_t len) {
  */
 static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   char     buf[33]    = {0};
-  Point2f  bottomLeft = {{84.0f, gLowerDiv + 4.0f}};
-  Vector2f fontInfo   = {0};
+  Point2f  bottomLeft = {{84.0f, gLowerDiv + 10.0f}};
+  CharInfo fontInfo   = {0};
   Vector2f iconInfo   = {0};
   Icon     icon       = getWindIcon(station->windDir);
 
-  if (!getFontInfo(resources, FONT_6PT, &fontInfo.coord.x, &fontInfo.coord.y)) {
+  if (!getFontInfo(resources, FONT_6PT, &fontInfo)) {
     return;
   }
 
-  if (!getIconInfo(resources, icon, &iconInfo.coord.x, &iconInfo.coord.y)) {
+  if (!getIconInfo(resources, icon, &iconInfo)) {
     return;
   }
 
   iconInfo.coord.x = 10.0f + (iconInfo.coord.x / 2.0f);
-  iconInfo.coord.y = 132.0f + (iconInfo.coord.y / 2.0f);
+  iconInfo.coord.y = bottomLeft.coord.y + (iconInfo.coord.y / 2.0f);
   drawIcon(resources, icon, iconInfo);
 
   getWindDirectionText(station, buf, COUNTOF(buf));
-  bottomLeft.coord.y += fontInfo.coord.y;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  bottomLeft.coord.y += fontInfo.capHeight;
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   getWindSpeedText(station, false, buf, COUNTOF(buf));
-  bottomLeft.coord.y += 23.0f;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   getWindSpeedText(station, true, buf, COUNTOF(buf));
-  bottomLeft.coord.y += 23.0f;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gRed);
+  bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gRed, VERT_ALIGN_BASELINE);
 }
 
 /**
@@ -769,7 +773,8 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
  * @param[in]  len     Length of @a buf.
  */
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len) {
-  int speed = (gust ? station->windGust : station->windSpeed);
+  // int speed = (gust ? station->windGust : station->windSpeed);
+  int speed = 25;
 
   if (speed == 0) {
     strncpy_safe(buf, "---", len);
@@ -787,28 +792,28 @@ static void getWindSpeedText(const WxStation *station, bool gust, char *buf, siz
  */
 static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *station) {
   const double visibility = fmax(0.0, station->visibility);
-  Vector2f     info       = {0};
+  CharInfo     info       = {0};
   Point2f      bottomLeft = {0};
   char         buf[33]    = {0};
 
-  if (!getFontInfo(resources, FONT_6PT, &info.coord.x, &info.coord.y)) {
+  if (!getFontInfo(resources, FONT_6PT, &info)) {
     return;
   }
 
   // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   snprintf(buf, COUNTOF(buf), visibility < 2 ? "Vis %.1fsm" : "Vis %.0fsm", visibility);
   bottomLeft.coord.x = 172.0f;
-  bottomLeft.coord.y = 172.0f + info.coord.y;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  bottomLeft.coord.y = gLowerDiv + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp, station->dewPoint);
   bottomLeft.coord.x = 0.0f;
-  bottomLeft.coord.y = 206.0f + info.coord.y;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  bottomLeft.coord.y += info.cellSize.v[1];
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
   snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
   bottomLeft.coord.x = 172.0f;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite);
+  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 }

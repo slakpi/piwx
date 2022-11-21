@@ -41,8 +41,8 @@ typedef struct {
  * @brief  Wrapper for a GL texture.
  */
 typedef struct {
-  GLuint tex;           // OpenGL texture handle
-  float  width, height; // Texture dimensions
+  GLuint   tex;     // OpenGL texture handle
+  Vector2f texSize; // Texture dimensions in pixels
 } Texture;
 
 /**
@@ -50,7 +50,8 @@ typedef struct {
  * @brief  Character render information.
  */
 typedef struct {
-  float       charWidth, charHeight;
+  Point2f     bottomLeft;
+  Vector2f    cellSize;
   TexCoords2f texTopLeft;
   TexCoords2f texBottomRight;
 } CharacterRenderInfo;
@@ -114,7 +115,8 @@ typedef struct {
 /**
  */
 bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
-                            CharacterRenderInfo *info);
+                            const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
+                            CharacterRenderInfo *rndrInfo);
 
 /**
  * @brief Get information about the last EGL error.
