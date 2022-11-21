@@ -50,10 +50,10 @@ typedef struct {
  * @brief  Character render information.
  */
 typedef struct {
-  Point2f     bottomLeft;
-  Vector2f    cellSize;
-  TexCoords2f texTopLeft;
-  TexCoords2f texBottomRight;
+  Point2f     bottomLeft;     // The output coordinates
+  Vector2f    cellSize;       // Cell size of the character in pixels
+  TexCoords2f texTopLeft;     // Top-left texture coordinates in texels
+  TexCoords2f texBottomRight; // Bottom-right texture coordinates in texels
 } CharacterRenderInfo;
 
 /**
@@ -113,6 +113,16 @@ typedef struct {
 } DrawResources_;
 
 /**
+ * @brief   Calculate the rendering information for a character.
+ * @details Given @a font, @a getCharacterRenderInfo computes the texture
+ *          coordinates for @a c, then computes adjusted output coordinates
+ *          given @a bottomLeft and @a valign.
+ * @param[in] rsrc       The gfx context.
+ * @param[in] font       The font to use.
+ * @param[in] c          The character to render.
+ * @param[in] bottomLeft The desired coordinates.
+ * @param[in] valign     The vertical alignment of @a bottomLeft.
+ * @param[out] rndrInfo  The character render info.
  */
 bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
                             const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,

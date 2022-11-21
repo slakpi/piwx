@@ -270,8 +270,11 @@ bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
   col = c % FONT_COLS;
   tex = &rsrc->fonts[font];
 
+  // Default to cell alignment.
   rndrInfo->bottomLeft = *bottomLeft;
 
+  // If using baseline alignment, move the coordinates down to place the
+  // character baseline at the coordinates rather than the cell edge.
   if (valign == VERT_ALIGN_BASELINE) {
     rndrInfo->bottomLeft.coord.y += info->baseline;
   }

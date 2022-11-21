@@ -773,8 +773,7 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
  * @param[in]  len     Length of @a buf.
  */
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len) {
-  // int speed = (gust ? station->windGust : station->windSpeed);
-  int speed = 25;
+  int speed = (gust ? station->windGust : station->windSpeed);
 
   if (speed == 0) {
     strncpy_safe(buf, "---", len);
