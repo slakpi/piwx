@@ -1001,6 +1001,7 @@ bool ditherPng(const Png *png, uint16_t **bmp, size_t *bytes) {
  * @param[in] p Pointer to the four color components.
  * @returns The RGB565 value.
  */
+#if defined __ARM_NEON
 static uint16_t ditherPixel_NEON(const uint8_t *p) {
   uint32x2_t z    = {0, 0};
   // [ r8, g8, b8, a8 ] => { rgba32, 0 }
@@ -1021,3 +1022,4 @@ static uint16_t ditherPixel_NEON(const uint8_t *p) {
   return (u_int16_t)(((cv[0] >> 3) & 0x1f) << 11) | (u_int16_t)(((cv[1] >> 2) & 0x3f) << 5) |
          (u_int16_t)((cv[2] >> 3) & 0x1f);
 }
+#endif
