@@ -12,7 +12,6 @@ find_package(PNG REQUIRED)
 find_package(Python3 REQUIRED)
 find_package(SIMD REQUIRED)
 find_package(Threads REQUIRED)
-find_package(WiringPi REQUIRED)
 if (WITH_LED_SUPPORT)
   find_package(WS2811 REQUIRED)
 endif ()
@@ -36,7 +35,7 @@ endif ()
 #-------------------------------------------------------------------------------
 # Setup the piwx linker options.
 #-------------------------------------------------------------------------------
-target_link_libraries(piwx PRIVATE Piwx::Conf_File Piwx::Gfx Piwx::Wx WiringPi::WiringPi m)
+target_link_libraries(piwx PRIVATE Piwx::Conf_File Piwx::Gfx Piwx::Wx m)
 
 if (WITH_LED_SUPPORT)
   target_link_libraries(piwx PRIVATE WS2811::WS2811)

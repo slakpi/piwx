@@ -20,7 +20,6 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-#include <wiringPi.h>
 
 #define BUTTONS  4
 #define BUTTON_1 0x1
@@ -33,7 +32,7 @@ static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
 static const Color4f gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
 static const float   gUpperDiv     = 81.0f;
 static const float   gLowerDiv     = 122.0f;
-static const int     gButtonPins[] = {17, 22, 23, 27};
+// static const int     gButtonPins[] = {17, 22, 23, 27};
 static const char   *gShortArgs    = "stVv";
 // clang-format off
 static const struct option gLongArgs[] = {
@@ -181,7 +180,7 @@ static int go(bool test, bool verbose) {
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   bool          first = true, draw = false;
-  int           i, err;
+  int           err;
   unsigned int  b, bl = 0, bc;
   DrawResources resources;
 
@@ -196,13 +195,14 @@ static int go(bool test, bool verbose) {
   openLog(cfg->logLevel);
   writeLog(LOG_INFO, "Starting up.");
 
+  // TODO: Replace
   // Ignore the return value. WiringPi always returns 0.
-  (void)wiringPiSetupGpio();
+  // (void)wiringPiSetupGpio();
 
-  for (i = 0; i < BUTTONS; ++i) {
-    pinMode(gButtonPins[i], INPUT);
-    pullUpDnControl(gButtonPins[i], PUD_UP);
-  }
+  // for (i = 0; i < BUTTONS; ++i) {
+  //   pinMode(gButtonPins[i], INPUT);
+  //   pullUpDnControl(gButtonPins[i], PUD_UP);
+  // }
 
   if (!initGraphics(&resources)) {
     writeLog(LOG_WARNING, "Failed to initialize graphics.");
@@ -351,15 +351,18 @@ static void printConfiguration(const PiwxConfig *config) {
  * @returns Bitmask of pressed buttons.
  */
 static unsigned int scanButtons() {
-  int          i;
-  unsigned int buttons = 0;
+  // int          i;
+  // unsigned int buttons = 0;
 
-  for (i = 0; i < BUTTONS; ++i) {
-    if (digitalRead(gButtonPins[i]) == LOW)
-      buttons |= (1 << i);
-  }
+  // TODO: Replace
+  // for (i = 0; i < BUTTONS; ++i) {
+  //   if (digitalRead(gButtonPins[i]) == LOW)
+  //     buttons |= (1 << i);
+  // }
 
-  return buttons;
+  // return buttons;
+
+  return 0;
 }
 
 /**
