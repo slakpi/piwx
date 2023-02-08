@@ -12,6 +12,7 @@
 #include "wx.h"
 #include <getopt.h>
 #include <math.h>
+#include <pigpio.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -21,19 +22,18 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BUTTONS  4
 #define BUTTON_1 0x1
 #define BUTTON_2 0x2
 #define BUTTON_3 0x4
 #define BUTTON_4 0x8
 
-static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
-static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
-static const Color4f gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
-static const float   gUpperDiv     = 81.0f;
-static const float   gLowerDiv     = 122.0f;
-// static const int     gButtonPins[] = {17, 22, 23, 27};
-static const char   *gShortArgs    = "stVv";
+static const Color4f gClearColor = {{1.0f, 1.0f, 1.0f, 0.0f}};
+static const Color4f gWhite      = {{1.0f, 1.0f, 1.0f, 1.0f}};
+static const Color4f gRed        = {{1.0f, 0.0f, 0.0f, 1.0f}};
+static const float   gUpperDiv   = 81.0f;
+static const float   gLowerDiv   = 122.0f;
+static const int     gButtonPins[] = {17, 22, 23, 27};
+static const char   *gShortArgs  = "stVv";
 // clang-format off
 static const struct option gLongArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
@@ -86,6 +86,8 @@ static void printConfiguration(const PiwxConfig *config);
 
 static unsigned int scanButtons();
 
+static int setupGpio();
+
 static void signalHandler(int signo);
 
 /**
@@ -117,9 +119,6 @@ int main(int argc, char *argv[]) {
 
   // If running in standalone mode, setup the signal handlers and run.
   if (standAlone) {
-    signal(SIGINT, signalHandler);
-    signal(SIGTERM, signalHandler);
-    signal(SIGHUP, signalHandler);
     return go(test, verbose);
   }
 
@@ -145,10 +144,6 @@ int main(int argc, char *argv[]) {
   close(STDIN_FILENO);
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
-
-  signal(SIGINT, signalHandler);
-  signal(SIGTERM, signalHandler);
-  signal(SIGHUP, signalHandler);
 
   return go(0, 0);
 }
@@ -180,7 +175,7 @@ static int go(bool test, bool verbose) {
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   bool          first = true, draw = false;
-  int           err;
+  int           i, err, ret = -1;
   unsigned int  b, bl = 0, bc;
   DrawResources resources;
 
@@ -195,19 +190,19 @@ static int go(bool test, bool verbose) {
   openLog(cfg->logLevel);
   writeLog(LOG_INFO, "Starting up.");
 
-  // TODO: Replace
-  // Ignore the return value. WiringPi always returns 0.
-  // (void)wiringPiSetupGpio();
-
-  // for (i = 0; i < BUTTONS; ++i) {
-  //   pinMode(gButtonPins[i], INPUT);
-  //   pullUpDnControl(gButtonPins[i], PUD_UP);
-  // }
+  if (setupGpio() < 0) {
+    writeLog(LOG_WARNING, "Failed to initialize pigpio.\n");
+    goto cleanup;
+  }
 
   if (!initGraphics(&resources)) {
     writeLog(LOG_WARNING, "Failed to initialize graphics.");
-    closeLog();
-    return -1;
+    goto cleanup;
+  }
+
+  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
+    gpioSetMode(gButtonPins[i], PI_INPUT);
+    gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
   }
 
   do {
@@ -303,6 +298,9 @@ static int go(bool test, bool verbose) {
     }
   } while (gRun);
 
+  ret = 0;
+
+cleanup:
   writeLog(LOG_INFO, "Shutting down.");
 
   if (!test) {
@@ -315,9 +313,10 @@ static int go(bool test, bool verbose) {
 #endif
 
   cleanupGraphics(&resources);
+  gpioTerminate();
   closeLog();
 
-  return 0;
+  return ret;
 }
 
 /**
@@ -347,22 +346,37 @@ static void printConfiguration(const PiwxConfig *config) {
 }
 
 /**
+ * @brief   Initializes the pigpio library and sets up signal handling.
+ * @returns The result of @a gpioInitialise.
+ */
+static int setupGpio() {
+  int ret = gpioInitialise();
+
+  if (ret < 0) {
+    return ret;
+  }
+
+  gpioSetSignalFunc(SIGINT, signalHandler);
+  gpioSetSignalFunc(SIGTERM, signalHandler);
+  gpioSetSignalFunc(SIGHUP, signalHandler);
+
+  return ret;
+}
+
+/**
  * @brief Scans the buttons on the PiTFT.
  * @returns Bitmask of pressed buttons.
  */
 static unsigned int scanButtons() {
-  // int          i;
-  // unsigned int buttons = 0;
+  int          i;
+  unsigned int buttons = 0;
 
-  // TODO: Replace
-  // for (i = 0; i < BUTTONS; ++i) {
-  //   if (digitalRead(gButtonPins[i]) == LOW)
-  //     buttons |= (1 << i);
-  // }
+  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
+    if (gpioRead(gButtonPins[i]) == 0)
+      buttons |= (1 << i);
+  }
 
-  // return buttons;
-
-  return 0;
+  return buttons;
 }
 
 /**

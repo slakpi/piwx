@@ -28,10 +28,10 @@ Building
 
 PiWx uses CMake 3.22 to build. The following dependencies must be installed:
 
+  * pigpio (https://abyz.me.uk/rpi/pigpio/)
   * Bison (https://www.gnu.org/software/bison/)
   * Flex (https://github.com/westes/flex)
   * LibXml2 (http://www.xmlsoft.org/)
-  * WiringPi (http://wiringpi.com/)
   * libcURL (https://curl.haxx.se/libcurl/)
   * libpng (http://www.libpng.org/pub/png/libpng.html)
   * jansson (http://www.digip.org/jansson/)

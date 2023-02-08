@@ -3,6 +3,7 @@ add_compile_options($<IF:$<CONFIG:Debug>,-D_DEBUG,-DNDEBUG>)
 #-------------------------------------------------------------------------------
 # Find packages.
 #-------------------------------------------------------------------------------
+find_package(PiGPIO REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(CURL REQUIRED)
@@ -10,7 +11,6 @@ find_package(Jansson REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Python3 REQUIRED)
-find_package(SIMD REQUIRED)
 find_package(Threads REQUIRED)
 if (WITH_LED_SUPPORT)
   find_package(WS2811 REQUIRED)
@@ -35,7 +35,7 @@ endif ()
 #-------------------------------------------------------------------------------
 # Setup the piwx linker options.
 #-------------------------------------------------------------------------------
-target_link_libraries(piwx PRIVATE Piwx::Conf_File Piwx::Gfx Piwx::Wx m)
+target_link_libraries(piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Gfx Piwx::Wx m)
 
 if (WITH_LED_SUPPORT)
   target_link_libraries(piwx PRIVATE WS2811::WS2811)
