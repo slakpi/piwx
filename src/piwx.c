@@ -168,14 +168,14 @@ static void signalHandler(int signo) {
  *          update to a PNG file before exiting.
  * @param[in] test    Run a test.
  * @param[in] verbose Output extra debug information.
- * @returns 0 if successful, non-zero otherwise.
+ * @returns true if successful, false otherwise.
  */
-static int go(bool test, bool verbose) {
+static bool go(bool test, bool verbose) {
   PiwxConfig   *cfg = getPiwxConfig();
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
-  bool          first = true, draw = false;
-  int           i, err, ret = -1;
+  bool          first = true, draw = false, ret = false;
+  int           i, err;
   unsigned int  b, bl = 0, bc;
   DrawResources resources;
 
@@ -198,11 +198,6 @@ static int go(bool test, bool verbose) {
   if (!initGraphics(&resources)) {
     writeLog(LOG_WARNING, "Failed to initialize graphics.");
     goto cleanup;
-  }
-
-  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
-    gpioSetMode(gButtonPins[i], PI_INPUT);
-    gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
   }
 
   do {
@@ -298,7 +293,7 @@ static int go(bool test, bool verbose) {
     }
   } while (gRun);
 
-  ret = 0;
+  ret = true;
 
 cleanup:
   writeLog(LOG_INFO, "Shutting down.");
@@ -351,6 +346,7 @@ static void printConfiguration(const PiwxConfig *config) {
  */
 static int setupGpio() {
   int ret = gpioInitialise();
+  int i;
 
   if (ret < 0) {
     return ret;
@@ -359,6 +355,11 @@ static int setupGpio() {
   gpioSetSignalFunc(SIGINT, signalHandler);
   gpioSetSignalFunc(SIGTERM, signalHandler);
   gpioSetSignalFunc(SIGHUP, signalHandler);
+
+  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
+    gpioSetMode(gButtonPins[i], PI_INPUT);
+    gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
+  }
 
   return ret;
 }
