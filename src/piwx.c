@@ -27,13 +27,13 @@
 #define BUTTON_3 0x4
 #define BUTTON_4 0x8
 
-static const Color4f gClearColor = {{1.0f, 1.0f, 1.0f, 0.0f}};
-static const Color4f gWhite      = {{1.0f, 1.0f, 1.0f, 1.0f}};
-static const Color4f gRed        = {{1.0f, 0.0f, 0.0f, 1.0f}};
-static const float   gUpperDiv   = 81.0f;
-static const float   gLowerDiv   = 122.0f;
+static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
+static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
+static const Color4f gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
+static const float   gUpperDiv     = 81.0f;
+static const float   gLowerDiv     = 122.0f;
 static const int     gButtonPins[] = {17, 22, 23, 27};
-static const char   *gShortArgs  = "stVv";
+static const char   *gShortArgs    = "stVv";
 // clang-format off
 static const struct option gLongArgs[] = {
   { "stand-alone", no_argument,       0, 's' },
