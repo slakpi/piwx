@@ -80,7 +80,7 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len);
 
-static int go(bool test, bool verbose);
+static bool go(bool test, bool verbose);
 
 static void printConfiguration(const PiwxConfig *config);
 
@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 
   // If running in standalone mode, setup the signal handlers and run.
   if (standAlone) {
-    return go(test, verbose);
+    return (go(test, verbose) ? 0 : -1);
   }
 
   // If not running in standalone mode, fork the process and setup as a daemon.
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
   close(STDOUT_FILENO);
   close(STDERR_FILENO);
 
-  return go(0, 0);
+  return (go(0, 0) ? 0 : -1);
 }
 
 /**
@@ -175,7 +175,7 @@ static bool go(bool test, bool verbose) {
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
   bool          first = true, draw = false, ret = false;
-  int           i, err;
+  int           err;
   unsigned int  b, bl = 0, bc;
   DrawResources resources;
 
