@@ -5,16 +5,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static const Point2f rectVerts[] = {{0.0f, 0.0f}, {160.0f, 0.0f}, {0.0f, 120.f}, {160.0f, 120.0f}};
-static const Point2f line1Verts[] = {{0.0f, 0.0f}, {160.0f, 120.0f}};
-static const Point2f line2Verts[] = {{0.0f, 120.0f}, {160.0f, 0.0f}};
-static const Point2f line3Verts[] = {{240.0f, 0.0f}, {240.0f, 120.0f}};
-static const Point2f line4Verts[] = {{160.0f, 60.0f}, {320.0f, 60.0f}};
-static const Point2f textLoc = {0.0f, 240.0f};
-static const Color4f rectColor = {1.0f, 0.0f, 0.0f, 0.5f};
-static const Color4f lineColor = {0.0f, 0.0f, 1.0f, 0.5f};
-static const Color4f textColor = {1.0f, 0.0f, 0.0f, 1.0f};
-static const Color4f clearColor = {0.0f, 1.0f, 0.0f, 0.25f};
+static const Point2f rectVerts[] = {
+    {{0.0f, 0.0f}}, {{160.0f, 0.0f}}, {{0.0f, 120.f}}, {{160.0f, 120.0f}}};
+static const Point2f line1Verts[] = {{{0.0f, 0.0f}}, {{160.0f, 120.0f}}};
+static const Point2f line2Verts[] = {{{0.0f, 120.0f}}, {{160.0f, 0.0f}}};
+static const Point2f line3Verts[] = {{{240.0f, 0.0f}}, {{240.0f, 120.0f}}};
+static const Point2f line4Verts[] = {{{160.0f, 60.0f}}, {{320.0f, 60.0f}}};
+static const Point2f textLoc      = {{0.0f, 240.0f}};
+static const Color4f rectColor    = {{1.0f, 0.0f, 0.0f, 0.5f}};
+static const Color4f lineColor    = {{0.0f, 0.0f, 1.0f, 0.5f}};
+static const Color4f textColor    = {{1.0f, 0.0f, 0.0f, 1.0f}};
+static const Color4f clearColor   = {{0.0f, 1.0f, 0.0f, 0.25f}};
 
 int main() {
   DrawResources rsrc     = NULL;
