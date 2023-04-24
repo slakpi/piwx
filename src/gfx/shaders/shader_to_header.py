@@ -14,7 +14,7 @@ def main(args):
   in_file = open(args[1], "r")
   out_file = open(args[2], "w")
 
-  out_file.write("#ifndef " + header_guard + "\n")
+  out_file.write("#if !defined " + header_guard + "\n")
   out_file.write("#define " + header_guard + "\n\n")
   out_file.write("#define " + constant + " \\\n")
 
