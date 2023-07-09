@@ -1,14 +1,14 @@
 /**
  * @file wx.c
  */
-#include "wx.h"
+#include "geo.h"
 #include "log.h"
 #include "util.h"
+#include "wx.h"
 #include "wx_type.h"
 #include <assert.h>
 #include <ctype.h>
 #include <curl/curl.h>
-#include <jansson.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <stdbool.h>
@@ -21,8 +21,6 @@ typedef void *yyscan_t;
 
 #include "wx.lexer.h"
 
-#define INIT_STRING_BUF  256
-#define MAX_STRING_BUF   (10 * 1024 * 1024)
 #define MAX_DATETIME_LEN 20
 
 /**
@@ -51,76 +49,6 @@ static char *trimLocalId(const char *id) {
   }
 
   return strdup(p);
-}
-
-/**
- * @struct Response
- * @brief  Buffer to hold response data from cURL.
- */
-typedef struct {
-  char  *str;
-  size_t len, bufLen;
-} Response;
-
-/**
- * @brief Initialize a response buffer.
- * @param[in] res The response buffer.
- */
-static void initResponse(Response *res) {
-  res->str    = (char *)malloc(sizeof(char) * INIT_STRING_BUF);
-  res->str[0] = 0;
-  res->len    = 0;
-  res->bufLen = INIT_STRING_BUF;
-}
-
-/**
- * @brief   Appends new data from cURL to a response buffer.
- * @details If there is not enough room left in the buffer, the function will
- *          increase the buffer size by 1.5x.
- * @param[in] res Response buffer to receive the new data.
- * @param[in] str cURL data.
- * @param[in] len Length of the cURL data.
- */
-static void appendToResponse(Response *res, const char *str, size_t len) {
-  size_t newBuf = res->bufLen;
-
-  if (!res->str) {
-    return;
-  }
-
-  while (1) {
-    if (res->len + len < newBuf) {
-      if (res->bufLen < newBuf) {
-        // Keep the buffer size sane.
-        assertLog(newBuf <= MAX_STRING_BUF, "Exceeded max buffer size.");
-        res->str    = realloc(res->str, newBuf);
-        res->bufLen = newBuf;
-      }
-
-      memcpy(res->str + res->len, str, len); // NOLINT -- Size checked.
-      res->len += len;
-      res->str[res->len] = 0;
-
-      return;
-    }
-
-    newBuf = (size_t)(newBuf * 1.5) + 1;
-
-    if (newBuf < res->bufLen) {
-      return;
-    }
-  }
-}
-
-/**
- * @brief Free a response buffer.
- * @param[in] res The response buffer to free.
- */
-static void freeResponse(Response *res) {
-  free(res->str);
-  res->str    = NULL;
-  res->len    = 0;
-  res->bufLen = 0;
 }
 
 /**
@@ -170,123 +98,6 @@ static bool parseUTCDateTime(const char *str, struct tm *tm) {
 }
 
 /**
- * @brief   cURL data callback for the sunrise/sunset API.
- * @param[in] ptr      Data received.
- * @param[in] size     Size of a data item.
- * @param[in] nmemb    Data items received.
- * @param[in] userdata User callback data, i.e. Response object.
- * @returns Bytes processed.
- */
-static size_t sunriseSunsetCallback(char *ptr, size_t size, size_t nmemb, void *userdata) {
-  Response *res   = (Response *)userdata;
-  size_t    bytes = size * nmemb;
-  appendToResponse(res, ptr, bytes);
-  return bytes;
-}
-
-/**
- * @brief   Queries the sunrise/sunset API.
- * @details Note that the function returns the Civil Twilight range rather than
- *          the Sunrise and Sunset range.
- * @param[in]  lat     Latitude to query.
- * @param[in]  lon     Longitude to query.
- * @param[in]  date    Date to query.
- * @param[out] sunrise Sunrise in UTC.
- * @param[out] sunset  Sunset in UTC.
- * @returns True if successful, false otherwise.
- */
-static bool getSunriseSunsetForDay(double lat, double lon, struct tm *date, time_t *sunrise,
-                                   time_t *sunset) {
-  CURL        *curlLib;
-  CURLcode     res;
-  json_t      *rootNode, *timesNode, *sunriseNode, *sunsetNode;
-  json_error_t err;
-  char         tmp[257];
-  Response     json;
-  struct tm    dtSunrise, dtSunset;
-  bool         ok = false;
-
-  *sunrise = 0;
-  *sunset  = 0;
-
-  curlLib = curl_easy_init();
-
-  if (!curlLib) {
-    return false;
-  }
-
-  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-  snprintf(tmp, COUNTOF(tmp),
-           "https://api.sunrise-sunset.org/json?"
-           "lat=%f&lng=%f&formatted=0&date=%d-%d-%d",
-           lat, lon, date->tm_year + 1900, date->tm_mon + 1, date->tm_mday);
-
-  initResponse(&json);
-
-  curl_easy_setopt(curlLib, CURLOPT_URL, tmp);
-  curl_easy_setopt(curlLib, CURLOPT_WRITEFUNCTION, sunriseSunsetCallback);
-  curl_easy_setopt(curlLib, CURLOPT_WRITEDATA, &json);
-  res = curl_easy_perform(curlLib);
-  curl_easy_cleanup(curlLib);
-
-  if (res != CURLE_OK) {
-    return false;
-  }
-
-  rootNode = json_loads(json.str, 0, &err);
-  freeResponse(&json);
-
-  if (!rootNode) {
-    return false;
-  }
-
-  timesNode = json_object_get(rootNode, "results");
-
-  if (!json_is_object(timesNode)) {
-    goto cleanup;
-  }
-
-  sunriseNode = json_object_get(timesNode, "civil_twilight_begin");
-
-  if (!json_is_string(sunriseNode)) {
-    goto cleanup;
-  }
-
-  sunsetNode = json_object_get(timesNode, "civil_twilight_end");
-
-  if (!json_is_string(sunsetNode)) {
-    goto cleanup;
-  }
-
-  // Copy the date/time strings into the temporary string buffer with an
-  // explicit limit on the correct format ("YYYY-MM-DDTHH:MM:SS\0").
-
-  strncpy_safe(tmp, json_string_value(sunriseNode), MAX_DATETIME_LEN);
-
-  if (!parseUTCDateTime(tmp, &dtSunrise)) {
-    goto cleanup;
-  }
-
-  strncpy_safe(tmp, json_string_value(sunsetNode), MAX_DATETIME_LEN);
-
-  if (!parseUTCDateTime(tmp, &dtSunset)) {
-    goto cleanup;
-  }
-
-  *sunrise = timegm(&dtSunrise);
-  *sunset  = timegm(&dtSunset);
-
-  ok = true;
-
-cleanup:
-  if (rootNode) {
-    json_decref(rootNode);
-  }
-
-  return ok;
-}
-
-/**
  * @brief   Checks if the given observation time is night at the given location.
  * @details Consider a report issued at 1753L on July 31 in the US Pacific
  *          Daylight time zone. The UTC date/time is 0053Z on Aug 1, so the
@@ -308,7 +119,7 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!getSunriseSunsetForDay(lat, lon, &date, &sr, &ss)) {
+  if (!calcSunTransitTimes(lat, lon, &date, &sr, &ss)) {
     return false;
   }
 
@@ -332,7 +143,7 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!getSunriseSunsetForDay(lat, lon, &date, &sr, &ss)) {
+  if (!calcSunTransitTimes(lat, lon, &date, &sr, &ss)) {
     return false;
   }
 

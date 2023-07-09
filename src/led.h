@@ -1,7 +1,7 @@
 /**
  * @file led.h
  */
-#ifndef LED_H
+#if !defined LED_H
 #define LED_H
 
 #include "conf_file.h"

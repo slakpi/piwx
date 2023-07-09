@@ -7,7 +7,6 @@ find_package(PiGPIO REQUIRED)
 find_package(BISON REQUIRED)
 find_package(FLEX REQUIRED)
 find_package(CURL REQUIRED)
-find_package(Jansson REQUIRED)
 find_package(LibXml2 REQUIRED)
 find_package(PNG REQUIRED)
 find_package(Python3 REQUIRED)
@@ -20,6 +19,7 @@ endif ()
 # Bring subdirectories into the project.
 #-------------------------------------------------------------------------------
 add_subdirectory(conf_file)
+add_subdirectory(geo)
 add_subdirectory(gfx)
 add_subdirectory(wx)
 
@@ -35,7 +35,7 @@ endif ()
 #-------------------------------------------------------------------------------
 # Setup the piwx linker options.
 #-------------------------------------------------------------------------------
-target_link_libraries(piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Gfx Piwx::Wx m)
+target_link_libraries(piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Geo Piwx::Gfx Piwx::Wx m)
 
 if (WITH_LED_SUPPORT)
   target_link_libraries(piwx PRIVATE WS2811::WS2811)

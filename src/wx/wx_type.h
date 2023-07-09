@@ -1,7 +1,7 @@
 /**
  * @file wx_type.h
  */
-#ifndef WX_TYPE_H
+#if !defined WX_TYPE_H
 #define WX_TYPE_H
 
 /**

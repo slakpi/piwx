@@ -1,7 +1,7 @@
 /**
  * @file img.h
  */
-#ifndef IMG_H
+#if !defined IMG_H
 #define IMG_H
 
 #include <png.h>

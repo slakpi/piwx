@@ -56,7 +56,7 @@ bool allocPng(Png *png, png_byte bits, png_byte color, png_uint_32 width, png_ui
     png->rows[row] = png->rows[row - 1] + rowBytes;
   }
 
-#ifdef _DEBUG
+#if defined _DEBUG
   memset(png->rows[0], 255, rowBytes * png->height); // NOLINT -- Size known.
 #endif
 

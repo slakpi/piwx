@@ -24,7 +24,7 @@ def main(args):
     if not line:
       break
     
-    line = re.sub("^(.*)$", "  \"\\1\" \\\\", line)
+    line = re.sub("^(.*)$", "  \"\\1\\\\n\" \\\\", line)
     out_file.write(line)
 
   out_file.write("\n\n")

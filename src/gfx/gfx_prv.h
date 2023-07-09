@@ -1,7 +1,7 @@
 /**
  * @file  gfx_prv.h
  */
-#ifndef GFX_PRV_H
+#if !defined GFX_PRV_H
 #define GFX_PRV_H
 
 #include "gfx.h"

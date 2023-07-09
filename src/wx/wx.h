@@ -1,7 +1,7 @@
 /**
  * @file wx.h
  */
-#ifndef WX_H
+#if !defined WX_H
 #define WX_H
 
 #include <time.h>

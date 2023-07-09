@@ -1,7 +1,7 @@
 /**
  * @file util.h
  */
-#ifndef UTIL_H
+#if !defined UTIL_H
 #define UTIL_H
 
 #include <stddef.h>

@@ -1,7 +1,7 @@
 /**
  * @file vec.h
  */
-#ifndef VEC_H
+#if !defined VEC_H
 #define VEC_H
 
 #include <stddef.h>

@@ -13,6 +13,7 @@ function(add_shader target shader_file)
     COMMAND ${Python3_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/shaders/shader_to_header.py"
                                   "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${shader_file}"
                                   "${CMAKE_CURRENT_BINARY_DIR}/${shader_file}.h"
+    DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/shaders/${shader_file}"
     COMMENT "Creating header for ${shader_file}...")
   target_sources(${target} PRIVATE "${CMAKE_CURRENT_BINARY_DIR}/${shader_file}.h")
 endfunction()

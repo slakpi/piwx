@@ -1,7 +1,7 @@
 /**
  * @file gfx.h
  */
-#ifndef GFX_H
+#if !defined GFX_H
 #define GFX_H
 
 #include "vec.h"

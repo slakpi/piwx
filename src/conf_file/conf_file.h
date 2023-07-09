@@ -1,7 +1,7 @@
 /**
  * @file conf_file.h
  */
-#ifndef CONF_FILE_H
+#if !defined CONF_FILE_H
 #define CONF_FILE_H
 
 #include "log.h"
