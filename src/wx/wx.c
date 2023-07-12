@@ -1,10 +1,10 @@
 /**
  * @file wx.c
  */
+#include "wx.h"
 #include "geo.h"
 #include "log.h"
 #include "util.h"
-#include "wx.h"
 #include "wx_type.h"
 #include <assert.h>
 #include <ctype.h>
@@ -119,7 +119,8 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, &date, &sr, &ss)) {
+  if (!calcSunTransitTimes(lat, lon, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday, &sr,
+                           &ss)) {
     return false;
   }
 
@@ -143,7 +144,8 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, &date, &sr, &ss)) {
+  if (!calcSunTransitTimes(lat, lon, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday, &sr,
+                           &ss)) {
     return false;
   }
 

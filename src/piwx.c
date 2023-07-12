@@ -33,10 +33,9 @@ static const Color4f gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
 static const float   gUpperDiv     = 81.0f;
 static const float   gLowerDiv     = 122.0f;
 static const int     gButtonPins[] = {17, 22, 23, 27};
-static const char   *gShortArgs    = "stVv";
+static const char   *gShortArgs    = "tVv";
 // clang-format off
 static const struct option gLongArgs[] = {
-  { "stand-alone", no_argument,       0, 's' },
   { "test",        no_argument,       0, 't' },
   { "verbose",     no_argument,       0, 'V' },
   { "version",     no_argument,       0, 'v' },
@@ -94,19 +93,14 @@ static void signalHandler(int signo);
  * @brief The C-program entry point we all know and love.
  */
 int main(int argc, char *argv[]) {
-  pid_t pid, sid;
-  int   c;
-  bool  test = false, standAlone = false, verbose = false;
+  int  c;
+  bool test = false, verbose = false;
 
   // Parse the command line parameters.
   while ((c = getopt_long(argc, argv, gShortArgs, gLongArgs, 0)) != -1) {
     switch (c) {
-    case 's':
-      standAlone = true;
-      break;
     case 't':
-      standAlone = true;
-      test       = true;
+      test = true;
       break;
     case 'V':
       verbose = true;
@@ -117,35 +111,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  // If running in standalone mode, setup the signal handlers and run.
-  if (standAlone) {
-    return (go(test, verbose) ? 0 : -1);
-  }
-
-  // If not running in standalone mode, fork the process and setup as a daemon.
-  pid = fork();
-
-  if (pid < 0) {
-    return -1; // Failed to fork.
-  }
-
-  if (pid > 0) {
-    return 0; // Exit the parent process.
-  }
-
-  umask(0);
-
-  sid = setsid();
-
-  if (sid < 0) {
-    return -1;
-  }
-
-  close(STDIN_FILENO);
-  close(STDOUT_FILENO);
-  close(STDERR_FILENO);
-
-  return (go(0, 0) ? 0 : -1);
+  return go(test, verbose) ? 0 : -1;
 }
 
 /**
