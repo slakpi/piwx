@@ -1,16 +1,18 @@
 /**
  * @file sun.c
+ * @see https://github.com/buelowp/sunset/blob/master/src/sunset.cpp
  */
 #include "geo.h"
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define PI                 3.1415926536
 #define RAD_TO_DEG         (180.0 / PI)
 #define DEG_TO_RAD         (PI / 180.0)
 #define SUNSET_OFFICIAL    90.833
-#define SUNSET_NAUTICAL    102.0
 #define SUNSET_CIVIL       96.0
+#define SUNSET_NAUTICAL    102.0
 #define SUNSET_ASTONOMICAL 108.0
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
@@ -48,9 +50,6 @@ static time_t calcTime(int year, int month, int day, double minutes);
 
 static double calcTimeJulianCentury(double jd);
 
-/**
- * \see https://github.com/buelowp/sunset/blob/master/src/sunset.cpp
- */
 bool calcSunTransitTimes(double lat, double lon, int year, int month, int day, time_t *sunrise,
                          time_t *sunset) {
   double jd = calcJD(year, month, day);
@@ -71,6 +70,38 @@ bool calcSunTransitTimes(double lat, double lon, int year, int month, int day, t
   return true;
 }
 
+/**
+ * @brief   Calculate the Julian day of the given date.
+ * @param[in] y The year.
+ * @param[in] m The month.
+ * @param[in] d The day.
+ * @returns The Julian day.
+ */
+static double calcJD(int y, int m, int d) {
+  double A;
+  double B;
+
+  if (m <= 2) {
+    y -= 1;
+    m += 12;
+  }
+
+  A = floor(y / 100);
+  B = 2.0 - A + floor(A / 4);
+  return floor(365.25 * (y + 4716)) + floor(30.6001 * (m + 1)) + d + B - 1524.5;
+}
+
+/**
+ * @brief   Calculates the UTC sunset or sunrise time at a given location.
+ * @param[in]  lat     Latitude of the location (+N/-S) in degrees.
+ * @param[in]  lon     Longitude of the location (+E/-W) in degrees.
+ * @param[in]  jd      Julian day of transit.
+ * @param[in]  offset  Transit offset (official, civil, nautical, astronomical)
+ *                     in degrees.
+ * @param[in]  sunrise True if sunrise, false if sunset.
+ * @param[out] absTime UTC time (UNIX time).
+ * @returns True if able to calculate the transit time.
+ */
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime) {
   double t = calcTimeJulianCentury(jd);
@@ -121,19 +152,28 @@ static bool calcAbsTime(double lat, double lon, double jd, double offset, bool s
   return true;
 }
 
-static time_t calcTime(int year, int month, int day, double minutes) {
-  struct tm t = {
-      .tm_year = year - 1900,
-      .tm_mon  = month - 1,
-      .tm_mday = day,
-      .tm_hour = (int)(minutes / 60.),
-      .tm_min  = (int)fmod(minutes, 60.0),
-      .tm_sec  = (int)(fmod(minutes, 1.0) * 60),
-  };
+/**
+ * @brief   Calculate the Julian century from a Julian day.
+ * @param[in] jd The Julian day.
+ * @returns The Julian century.
+ */
+static double calcTimeJulianCentury(double jd) { return (jd - 2451545.0) / 36525.0; }
 
-  return mktime(&t);
-}
+/**
+ * @brief   Calculate the Julian day from a Julian century.
+ * @param[in] t The Julian century.
+ * @returns The Julian day.
+ */
+static double calcJDFromJulianCentury(double t) { return t * 36525.0 + 2451545.0; }
 
+/**
+ * @brief   Calculate the solar equation of time.
+ * @details The solar equation of time is the difference between noon and solar
+ *          noon at a given point in time.
+ * @param[in] t      The Julian century.
+ * @param[out] Etime The equation of time.
+ * @returns True if able to calculate the equation of time, false otherwise.
+ */
 static bool calcEquationOfTime(double t, double *Etime) {
   double epsilon = calcObliquityCorrection(t);
   double e       = calcEccentricityEarthOrbit(t);
@@ -164,40 +204,13 @@ static bool calcEquationOfTime(double t, double *Etime) {
   return true;
 }
 
-static double calcMeanObliquityOfEcliptic(double t) {
-  double seconds = 21.448 - t * (46.8150 + t * (0.00059 - t * (0.001813)));
-  return 23.0 + (26.0 + (seconds / 60.0)) / 60.0;
-}
-
-static bool calcGeomMeanLonSun(double t, double *lon) {
-  double L;
-
-  if (isnan(t)) {
-    return false;
-  }
-
-  L    = 280.46646 + t * (36000.76983 + t * 0.0003032);
-  *lon = fmod(L, 360.0);
-
-  return true;
-}
-
-static double calcObliquityCorrection(double t) {
-  double e0    = calcMeanObliquityOfEcliptic(t);
-  double omega = 125.04 - t * 1934.136;
-  return e0 + 0.00256 * cos(omega * DEG_TO_RAD);
-}
-
-static double calcEccentricityEarthOrbit(double t) {
-  return 0.016708634 - t * (0.000042037 + t * 0.0000001267);
-}
-
-static double calcGeomMeanAnomalySun(double t) {
-  return 357.52911 + t * (35999.05029 - t * 0.0001537);
-}
-
-static double calcTimeJulianCentury(double jd) { return (jd - 2451545.0) / 36525.0; }
-
+/**
+ * @brief   Calculate the Sun's declination relative to the equator at a given
+ *          point in time.
+ * @param[in]  t    The Jualian century.
+ * @param[out] decl The declination in degrees.
+ * @returns True if able to calculate the declination, false otherwise.
+ */
 static bool calcSunDeclination(double t, double *decl) {
   double e = calcObliquityCorrection(t);
   double lambda;
@@ -213,6 +226,128 @@ static bool calcSunDeclination(double t, double *decl) {
   return true;
 }
 
+/**
+ * @brief   Calculate the corrected obliquity of the ecliptic.
+ * @details See https://en.wikipedia.org/wiki/Axial_tilt.
+ * @param[in] t The Julian century.
+ * @returns The corrected obliquity of the ecliptic.
+ */
+static double calcObliquityCorrection(double t) {
+  double e0    = calcMeanObliquityOfEcliptic(t);
+  double omega = 125.04 - t * 1934.136;
+  return e0 + 0.00256 * cos(omega * DEG_TO_RAD);
+}
+
+/**
+ * @brief   Calculate the solar hour angle for sunrise.
+ * @details See https://en.wikipedia.org/wiki/Hour_angle. Converts the transit
+ *          offset relative to the location to a solar hour angle relative to
+ *          solar noon.
+ * @param[in] lat      The latitude of the location in degrees.
+ * @param[in] solarDec The solar declination in degrees.
+ * @param[in] offset   Transit offset (official, civil, nautical, astronomical)
+ *                     in degrees.
+ * @returns The sunrise hour angle in radians.
+ */
+static double calcHourAngleSunrise(double lat, double solarDec, double offset) {
+  double latRad = lat * DEG_TO_RAD;
+  double sdRad  = solarDec * DEG_TO_RAD;
+  double HA =
+      (acos(cos(offset * DEG_TO_RAD) / (cos(latRad) * cos(sdRad)) - tan(latRad) * tan(sdRad)));
+  return HA;
+}
+
+/**
+ * @brief   Calculate the solar hour angle for sunset.
+ * @details See @a calcHourAngleSunrise.
+ * @param[in] lat      The latitude of the location in degrees.
+ * @param[in] solarDec The solar declination in degrees.
+ * @param[in] offset   Transit offset (official, civil, nautical, astronomical)
+ *                     in degrees.
+ * @returns The sunset hour angle in radians.
+ */
+static double calcHourAngleSunset(double lat, double solarDec, double offset) {
+  return -calcHourAngleSunrise(lat, solarDec, offset);
+}
+
+/**
+ * @brief   Convert the offset from midnight to a date.
+ * @param[in] year    Year of transit.
+ * @param[in] month   Month of transit.
+ * @param[in] day     Day of transit.
+ * @param[in] minutes Offset from midnight in minutes.
+ * @returns The UTC date/time of the transit (UNIX time).
+ */
+static time_t calcTime(int year, int month, int day, double minutes) {
+  struct tm t = {
+      .tm_year = year - 1900,
+      .tm_mon  = month - 1,
+      .tm_mday = day,
+      .tm_hour = (int)(minutes / 60.),
+      .tm_min  = (int)fmod(minutes, 60.0),
+      .tm_sec  = (int)(fmod(minutes, 1.0) * 60),
+  };
+
+  return timegm(&t);
+}
+
+/**
+ * @brief  Calculate the angle between Earth's orbit and its equator.
+ * @param[in] t The Julian century.
+ * @return The mean obliquity of the ecliptic.
+ */
+static double calcMeanObliquityOfEcliptic(double t) {
+  double seconds = 21.448 - t * (46.8150 + t * (0.00059 - t * (0.001813)));
+  return 23.0 + (26.0 + (seconds / 60.0)) / 60.0;
+}
+
+/**
+ * @brief   Calculate the eccentricity of Earth's orbit at a given point in
+ *          time.
+ * @param[in] t The Julian century.
+ * @returns The eccentricity.
+ */
+static double calcEccentricityEarthOrbit(double t) {
+  return 0.016708634 - t * (0.000042037 + t * 0.0000001267);
+}
+
+/**
+ * @brief   Calculate the mean anomaly of Earth's orbit around the Sun at a
+ *          given point in time.
+ * @param[in] t The Julian century.
+ * @returns The mean anomaly.
+ */
+static double calcGeomMeanAnomalySun(double t) {
+  return 357.52911 + t * (35999.05029 - t * 0.0001537);
+}
+
+/**
+ * @brief   Calculate the geometric mean longitude of the Sun.
+ * @param[in]  t   The Julian century.
+ * @param[out] lon The geometric mean longitude of the Sun.
+ * @returns True if able to calculate the geometric mean longitude, false
+ *          otherwise.
+ */
+static bool calcGeomMeanLonSun(double t, double *lon) {
+  double L;
+
+  if (isnan(t)) {
+    return false;
+  }
+
+  L    = 280.46646 + t * (36000.76983 + t * 0.0003032);
+  *lon = fmod(L, 360.0);
+
+  return true;
+}
+
+/**
+ * @brief   Calculate the apparent longitude of the Sun.
+ * @details See https://en.wikipedia.org/wiki/Apparent_longitude.
+ * @param[in]  t   The Julian century.
+ * @param[out] lon The apparent longitude of the Sun.
+ * @returns True if able to calculate the apparent longitude, false otherwise.
+ */
 static bool calcSunApparentLon(double t, double *decl) {
   double omega = 125.04 - 1934.136 * t;
   double o;
@@ -226,6 +361,12 @@ static bool calcSunApparentLon(double t, double *decl) {
   return true;
 }
 
+/**
+ * @brief   Calculate the true longitude of the Sun.
+ * @param[in]  t   The Julian century.
+ * @param[out] lon The true longitude of the Sun.
+ * @returns True if able to calculate the true longitude, false otherwise.
+ */
 static bool calcSunTrueLon(double t, double *lon) {
   double c = calcSunEqOfCenter(t);
   double l0;
@@ -239,6 +380,13 @@ static bool calcSunTrueLon(double t, double *lon) {
   return true;
 }
 
+/**
+ * @brief   Calculate the equation of center for the Sun.
+ * @details See https://en.wikipedia.org/wiki/Equation_of_the_center.
+ * @param[in] t The Julian century.
+ * @returns The angular difference between the Sun's actual center and the ideal
+ *          center with uniform motion in radians.
+ */
 static double calcSunEqOfCenter(double t) {
   double m     = calcGeomMeanAnomalySun(t);
   double mrad  = m * DEG_TO_RAD;
@@ -250,31 +398,3 @@ static double calcSunEqOfCenter(double t) {
 
   return C;
 }
-
-static double calcHourAngleSunrise(double lat, double solarDec, double offset) {
-  double latRad = lat * DEG_TO_RAD;
-  double sdRad  = solarDec * DEG_TO_RAD;
-  double HA =
-      (acos(cos(offset * DEG_TO_RAD) / (cos(latRad) * cos(sdRad)) - tan(latRad) * tan(sdRad)));
-  return HA;
-}
-
-static double calcHourAngleSunset(double lat, double solarDec, double offset) {
-  return -calcHourAngleSunrise(lat, solarDec, offset);
-}
-
-static double calcJD(int y, int m, int d) {
-  double A;
-  double B;
-
-  if (m <= 2) {
-    y -= 1;
-    m += 12;
-  }
-
-  A = floor(y / 100);
-  B = 2.0 - A + floor(A / 4);
-  return floor(365.25 * (y + 4716)) + floor(30.6001 * (m + 1)) + d + B - 1524.5;
-}
-
-static double calcJDFromJulianCentury(double t) { return t * 36525.0 + 2451545.0; }

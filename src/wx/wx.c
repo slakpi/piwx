@@ -106,10 +106,12 @@ static bool parseUTCDateTime(const char *str, struct tm *tm) {
  *          @a isNight would indicate night time despite it being day time PDT.
  *
  *          @a isNight checks the previous and next days as necessary to make a
- *          determination without knowing the station's local time zone.
+ *          determination without knowing the station's local time zone. This is
+ *          possible since @a calcSunTransitTimes returns the transit times in
+ *          UNIX time rather than an offset from midnight.
  * @param[in] lat     Observation latitude.
  * @param[in] lon     Observation longitude.
- * @param[in] obsTime UTC observation time.
+ * @param[in] obsTime UTC observation time (UNIX time).
  * @returns True if night, false if day or there is an error.
  */
 static bool isNight(double lat, double lon, time_t obsTime) {

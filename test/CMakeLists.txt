@@ -15,3 +15,11 @@ if (WITH_LED_SUPPORT)
   add_executable(led_test led_test.c)
   target_link_libraries(led_test WS2811::WS2811)
 endif ()
+
+#-------------------------------------------------------------------------------
+# Geo test.
+#-------------------------------------------------------------------------------
+add_executable(geo_test geo_test.c "${PROJECT_SOURCE_DIR}/src/util.c")
+target_include_directories(geo_test PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_link_libraries(geo_test PRIVATE Piwx::Conf_File Piwx::Geo m)
+target_compile_options(geo_test PRIVATE ${SIMD_C_FLAGS})
