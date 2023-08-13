@@ -121,8 +121,8 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday, &sr,
-                           &ss)) {
+  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
+                           date.tm_mday, &sr, &ss)) {
     return false;
   }
 
@@ -146,8 +146,8 @@ static bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday, &sr,
-                           &ss)) {
+  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
+                           date.tm_mday, &sr, &ss)) {
     return false;
   }
 

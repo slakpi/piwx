@@ -7,13 +7,9 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define PI                 3.1415926536
-#define RAD_TO_DEG         (180.0 / PI)
-#define DEG_TO_RAD         (PI / 180.0)
-#define SUNSET_OFFICIAL    90.833
-#define SUNSET_CIVIL       96.0
-#define SUNSET_NAUTICAL    102.0
-#define SUNSET_ASTONOMICAL 108.0
+#define PI         3.1415926536
+#define RAD_TO_DEG (180.0 / PI)
+#define DEG_TO_RAD (PI / 180.0)
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime);
@@ -50,22 +46,22 @@ static time_t calcTime(int year, int month, int day, double minutes);
 
 static double calcTimeJulianCentury(double jd);
 
-bool calcSunTransitTimes(double lat, double lon, int year, int month, int day, time_t *sunrise,
-                         time_t *sunset) {
+bool calcSunTransitTimes(double lat, double lon, double offset, int year, int month, int day,
+                         time_t *start, time_t *end) {
   double jd = calcJD(year, month, day);
   double absTime;
 
-  if (!calcAbsTime(lat, lon, jd, SUNSET_CIVIL, true, &absTime)) {
+  if (!calcAbsTime(lat, lon, jd, offset, true, &absTime)) {
     return false;
   }
 
-  *sunrise = calcTime(year, month, day, absTime);
+  *start = calcTime(year, month, day, absTime);
 
-  if (!calcAbsTime(lat, lon, jd, SUNSET_CIVIL, false, &absTime)) {
+  if (!calcAbsTime(lat, lon, jd, offset, false, &absTime)) {
     return false;
   }
 
-  *sunset = calcTime(year, month, day, absTime);
+  *end = calcTime(year, month, day, absTime);
 
   return true;
 }
