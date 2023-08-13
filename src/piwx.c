@@ -143,7 +143,7 @@ static bool go(bool test, bool verbose) {
   bool          first = true, draw = false, ret = false;
   int           err;
   unsigned int  b, bl = 0, bc;
-  DrawResources resources;
+  DrawResources resources = INVALID_RESOURCES;
 
   if (verbose) {
     printConfiguration(cfg);
