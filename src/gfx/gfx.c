@@ -1019,7 +1019,7 @@ static uint16_t ditherPixel_NEON(const uint8_t *p) {
   cv = cv * av;
   cv = vshrq_n_u32(cv, 16);
 
-  return (u_int16_t)(((cv[0] >> 3) & 0x1f) << 11) | (u_int16_t)(((cv[1] >> 2) & 0x3f) << 5) |
-         (u_int16_t)((cv[2] >> 3) & 0x1f);
+  return (uint16_t)(((cv[0] >> 3) & 0x1f) << 11) | (uint16_t)(((cv[1] >> 2) & 0x3f) << 5) |
+         (uint16_t)((cv[2] >> 3) & 0x1f);
 }
 #endif
