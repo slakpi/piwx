@@ -9,8 +9,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define SCREEN_WIDTH  320.0f
-#define SCREEN_HEIGHT 240.0f
+#define SCREEN_WIDTH      320.0f
+#define SCREEN_HEIGHT     240.0f
 #define INVALID_RESOURCES NULL
 
 /**

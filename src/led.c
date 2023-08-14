@@ -17,7 +17,7 @@
 #define STRIP_TYPE  WS2811_STRIP_GBR
 #define LED_COUNT   50
 
-#define WS2811_COLOR(c) (((c).b << 16) | ((c).r << 8) | (c).g)
+#define WS2811_COLOR(c)      (((c).b << 16) | ((c).r << 8) | (c).g)
 #define MIX_BRIGHTNESS(c, b) ((((uint32_t)(c) << 8) * (b)) >> 16)
 
 // clang-format off
@@ -35,9 +35,9 @@ typedef struct {
   uint8_t b;
 } Color;
 
-static const Color gColorVFR = COLOR_VFR;
+static const Color gColorVFR  = COLOR_VFR;
 static const Color gColorMVFR = COLOR_MVFR;
-static const Color gColorIFR = COLOR_IFR;
+static const Color gColorIFR  = COLOR_IFR;
 static const Color gColorLIFR = COLOR_LIFR;
 static const Color gColorWind = COLOR_WIND;
 
@@ -144,8 +144,8 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
  * @param [in] wx  Current weather station.
  */
 static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
-  Color color = COLOR_NONE;
-  int brightness = wx->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
+  Color color      = COLOR_NONE;
+  int   brightness = wx->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
 
   switch (wx->cat) {
   case catVFR:
@@ -172,7 +172,7 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
     if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
       if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
         wx->blinkState = 1;
-        color = gColorWind;
+        color          = gColorWind;
       } else {
         wx->blinkState = 0;
       }
