@@ -22,7 +22,6 @@ typedef struct {
   char    *fontResources;            // Compile-time font resources path
   char    *configFile;               // Compile-time config file path
   char    *stationQuery;             // List of weather stations to query
-  char    *nearestAirport;           // Nearest airport for LED dimming
   int      cycleTime;                // Airport display cycle time in sec.
   int      highWindSpeed;            // High wind threshold in knots
   int      highWindBlink;            // High wind blink rate in sec.

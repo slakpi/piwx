@@ -75,11 +75,6 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
-"nearestairport" {
-  yylval->p.param = confNearestAirport;
-  return TOKEN_PARAM;
-}
-
 "cycletime" {
   yylval->p.param = confCycleTime;
   return TOKEN_PARAM;

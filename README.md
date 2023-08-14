@@ -8,14 +8,12 @@ Adafruit 320x240 PiTFT framebuffer display. While PiWx is hard-coded to work
 with the PiTFT, it should not be difficult to modify it for any display that
 uses a framebuffer device.
 
-For more information about the PiTFT: https://www.adafruit.com/product/2298.
+For more information about the PiTFT: <https://www.adafruit.com/product/2298>.
 
 The amazing weather icons are from the Weather Underground Icons project:
-https://github.com/manifestinteractive/weather-underground-icons
+<https://github.com/manifestinteractive/weather-underground-icons>
 
 The font used is San Francisco Monospace (SF Mono) from Xcode.
-
-Special thanks to https://sunrise-sunset.org for their sunrise/sunset data API.
 
 NOTICE
 ------
@@ -28,14 +26,13 @@ Building
 
 PiWx uses CMake 3.22 to build. The following dependencies must be installed:
 
-  * pigpio (https://abyz.me.uk/rpi/pigpio/)
-  * Bison (https://www.gnu.org/software/bison/)
-  * Flex (https://github.com/westes/flex)
-  * LibXml2 (http://www.xmlsoft.org/)
-  * libcURL (https://curl.haxx.se/libcurl/)
-  * libpng (http://www.libpng.org/pub/png/libpng.html)
-  * jansson (http://www.digip.org/jansson/)
-  * ws2811 [optional] (https://github.com/jgarff/rpi_ws281x.git)
+* pigpio (<https://abyz.me.uk/rpi/pigpio/>)
+* Bison (<https://www.gnu.org/software/bison/>)
+* Flex (<https://github.com/westes/flex>)
+* LibXml2 (<http://www.xmlsoft.org/>)
+* libcURL (<https://curl.haxx.se/libcurl/>)
+* libpng (<http://www.libpng.org/pub/png/libpng.html>)
+* ws2811 [optional] (<https://github.com/jgarff/rpi_ws281x.git>)
 
 After cloning the repository, use the following commands to perform a simple
 build:
@@ -85,16 +82,15 @@ where 0 or `off` is off and 255 is full intensity.
     # Set LED brightness
     brightness=64;
 
-PiWx downloads sunrise / sunset information with weather data. This allows
-automatically dimming the LEDs at night using two options:
+PiWx calculates sunrise / sunset information for each airport in the station
+list. This allows automatically dimming the LEDs at night with the night
+brightness option:
 
-    # Set nearest airport
-    nearestairport="KHIO";
     # Set night brightness
     nightbrightness=8;
 
-When PiWx determines that it is night at the specified nearest airport, it will
-switch to using the specified night brightness level.
+When PiWx determines that it is night at an airport, it will switch to using the
+specified night brightness level.
 
 Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),

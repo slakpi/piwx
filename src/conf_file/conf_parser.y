@@ -51,9 +51,6 @@ assignment
     case confStations:
       cfg->stationQuery = $3;
       break;
-    case confNearestAirport:
-      cfg->nearestAirport = $3;
-      break;
     case confLED:
       if ($1.n < 1 || $1.n > MAX_LEDS) {
         break;

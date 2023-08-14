@@ -290,7 +290,6 @@ static void printConfiguration(const PiwxConfig *config) {
   printf("Image Resources: %s\n", config->imageResources);
   printf("Font Resources: %s\n", config->fontResources);
   printf("Station Query: %s\n", config->stationQuery);
-  printf("Nearest Airport: %s\n", config->nearestAirport);
   printf("Cycle Time: %d\n", config->cycleTime);
   printf("High-Wind Speed: %d\n", config->highWindSpeed);
   printf("LED Brightness: %d\n", config->ledBrightness);

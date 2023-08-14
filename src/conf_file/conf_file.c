@@ -33,7 +33,6 @@ void freePiwxConfig(PiwxConfig *cfg) {
   free(cfg->fontResources);
   free(cfg->configFile);
   free(cfg->stationQuery);
-  free(cfg->nearestAirport);
 
   for (i = 0; i < MAX_LEDS; ++i) {
     free(cfg->ledAssignments[i]);

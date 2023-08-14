@@ -3,6 +3,7 @@
  */
 #include "led.h"
 #include "util.h"
+#include <stdint.h>
 #include <string.h>
 #include <ws2811/ws2811.h>
 
@@ -16,13 +17,29 @@
 #define STRIP_TYPE  WS2811_STRIP_GBR
 #define LED_COUNT   50
 
-#define COLOR(r, g, b) ((b << 16) | (r << 8) | g)
-#define COLOR_NONE     COLOR(0, 0, 0)
-#define COLOR_VFR      COLOR(0, 255, 0)
-#define COLOR_MVFR     COLOR(0, 0, 255)
-#define COLOR_IFR      COLOR(255, 0, 0)
-#define COLOR_LIFR     COLOR(255, 0, 255)
-#define COLOR_WIND     COLOR(255, 192, 0)
+#define WS2811_COLOR(c) (((c).b << 16) | ((c).r << 8) | (c).g)
+#define MIX_BRIGHTNESS(c, b) ((((uint32_t)(c) << 8) * (b)) >> 16)
+
+// clang-format off
+#define COLOR_NONE {0, 0, 0}
+#define COLOR_VFR  {0, 255, 0}
+#define COLOR_MVFR {0, 0, 255}
+#define COLOR_IFR  {255, 0, 0}
+#define COLOR_LIFR {255, 0, 255}
+#define COLOR_WIND {255, 192, 0}
+// clang-format on
+
+typedef struct {
+  uint8_t r;
+  uint8_t g;
+  uint8_t b;
+} Color;
+
+static const Color gColorVFR = COLOR_VFR;
+static const Color gColorMVFR = COLOR_MVFR;
+static const Color gColorIFR = COLOR_IFR;
+static const Color gColorLIFR = COLOR_LIFR;
+static const Color gColorWind = COLOR_WIND;
 
 static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx);
 
@@ -41,6 +58,8 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
             .gpionum    = GPIO_PIN,
             .count      = LED_COUNT,
             .invert     = 0,
+            // Use full brightness. Each light will control its own brightness
+            // by scaling the color.
             .brightness = 255,
             .strip_type = STRIP_TYPE,
           },
@@ -87,37 +106,6 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
     return -1;
   }
 
-  ledstring.channel[0].brightness = cfg->ledBrightness;
-
-  // If the user has selected a nearest airport, scan the weather list for that
-  // airport and check if the night brightness level should be used instead.
-  if (cfg->nearestAirport) {
-    while (p) {
-      i = p->isNight;
-
-      if (strcmp(cfg->nearestAirport, p->localId) != 0) {
-        if (strcmp(cfg->nearestAirport, p->id) != 0) {
-          i = 0;
-        }
-      }
-
-      if (i == 1) {
-        ledstring.channel[0].brightness = cfg->ledNightBrightness;
-        break;
-      }
-
-      p = p->next;
-
-      // Circular list.
-      if (p == wx) {
-        break;
-      }
-    }
-
-    // Reset the pointer.
-    p = wx;
-  }
-
   // Assign the lights according to the configuration.
   while (p) {
     for (i = 0; i < MAX_LEDS; ++i) {
@@ -156,6 +144,26 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
  * @param [in] wx  Current weather station.
  */
 static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
+  Color color = COLOR_NONE;
+  int brightness = wx->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
+
+  switch (wx->cat) {
+  case catVFR:
+    color = gColorVFR;
+    break;
+  case catMVFR:
+    color = gColorMVFR;
+    break;
+  case catIFR:
+    color = gColorIFR;
+    break;
+  case catLIFR:
+    color = gColorLIFR;
+    break;
+  default:
+    break;
+  }
+
   // If a high-wind threshold has been set, check the speed and gust against
   // the threshold. If the wind exceeds the threshold use yellow if blink is
   // turned OFF or the blink state is zero. Otherwise, reset the blink state and
@@ -164,23 +172,16 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
     if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
       if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
         wx->blinkState = 1;
-        return COLOR_WIND;
+        color = gColorWind;
       } else {
         wx->blinkState = 0;
       }
     }
   }
 
-  switch (wx->cat) {
-  case catVFR:
-    return COLOR_VFR;
-  case catMVFR:
-    return COLOR_MVFR;
-  case catIFR:
-    return COLOR_IFR;
-  case catLIFR:
-    return COLOR_LIFR;
-  default:
-    return COLOR_NONE;
-  }
+  color.r = MIX_BRIGHTNESS(color.r, brightness);
+  color.g = MIX_BRIGHTNESS(color.g, brightness);
+  color.b = MIX_BRIGHTNESS(color.b, brightness);
+
+  return WS2811_COLOR(color);
 }
