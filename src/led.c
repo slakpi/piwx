@@ -3,6 +3,7 @@
  */
 #include "led.h"
 #include "util.h"
+#include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
 #include <ws2811/ws2811.h>
@@ -170,11 +171,11 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
   // use the METAR color.
   if (cfg->highWindSpeed > 0) {
     if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
-      if (wx->blinkState == 0 || cfg->highWindBlink == 0) {
-        wx->blinkState = 1;
+      if (!wx->blinkState || cfg->highWindBlink == 0) {
+        wx->blinkState = true;
         color          = gColorWind;
       } else {
-        wx->blinkState = 0;
+        wx->blinkState = false;
       }
     }
   }

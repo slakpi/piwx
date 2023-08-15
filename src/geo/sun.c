@@ -7,9 +7,10 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define PI         3.1415926536
-#define RAD_TO_DEG (180.0 / PI)
-#define DEG_TO_RAD (PI / 180.0)
+#define PI          3.1415926536
+#define RAD_TO_DEG  (180.0 / PI)
+#define DEG_TO_RAD  (PI / 180.0)
+#define SEC_PER_DAY 86400
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime);
@@ -64,6 +65,57 @@ bool calcSunTransitTimes(double lat, double lon, double offset, int year, int mo
   *end = calcTime(year, month, day, absTime);
 
   return true;
+}
+
+bool isNight(double lat, double lon, time_t obsTime) {
+  time_t    t = obsTime;
+  time_t    sr, ss;
+  struct tm date;
+
+  // Consider a report issued at 1753L on July 31 in the US Pacific Daylight
+  // time zone. The UTC date/time is 0053Z on Aug 1, so `calcSunTransitTimes()`
+  // will calculate the sunrise/sunset for Aug 1, not July 31. Using the Aug 1
+  // data, 0053Z will be less than the sunrise time and `isNight()` would
+  // indicate night time despite it being day time PDT.
+  //
+  // `isNight()` checks the previous or next day as necessary to make a
+  // determination without knowing the station's local time zone.
+
+  gmtime_r(&t, &date);
+
+  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
+                           date.tm_mday, &sr, &ss)) {
+    return false;
+  }
+
+  // If the observation time is less than the sunrise date/time, check the
+  // prior day. Otherwise, check the next day.
+  if (obsTime < sr) {
+    if (t < SEC_PER_DAY) {
+      return false; // Underflow
+    }
+
+    t -= SEC_PER_DAY;
+  } else if (obsTime >= ss) {
+    if (t + SEC_PER_DAY < t) {
+      return false; // Overflow
+    }
+
+    t += SEC_PER_DAY;
+  } else {
+    return false; // Between sunrise and sunset; it's day time.
+  }
+
+  gmtime_r(&t, &date);
+
+  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
+                           date.tm_mday, &sr, &ss)) {
+    return false;
+  }
+
+  // It's night time if greater than sunset on the previous day or less than
+  // sunrise on the next day.
+  return (obsTime >= ss || obsTime < sr);
 }
 
 /**

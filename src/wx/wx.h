@@ -4,6 +4,7 @@
 #if !defined WX_H
 #define WX_H
 
+#include <stdbool.h>
 #include <time.h>
 
 /**
@@ -77,7 +78,7 @@ typedef struct WxStation_ {
   char              *raw;
   time_t             obsTime;
   double             lat, lon;
-  int                isNight;
+  bool               isNight;
   DominantWeather    wx;
   char              *wxString;
   SkyCondition      *layers;
@@ -87,7 +88,7 @@ typedef struct WxStation_ {
   double             temp, dewPoint;
   double             alt;
   FlightCategory     cat;
-  int                blinkState;
+  bool               blinkState;
   struct WxStation_ *next;
   struct WxStation_ *prev;
 } WxStation;

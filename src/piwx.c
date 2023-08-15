@@ -22,10 +22,15 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BUTTON_1 0x1
-#define BUTTON_2 0x2
-#define BUTTON_3 0x4
-#define BUTTON_4 0x8
+#define BUTTON_1               0x1
+#define BUTTON_2               0x2
+#define BUTTON_3               0x4
+#define BUTTON_4               0x8
+#define WX_UPDATE_INTERVAL_SEC 1200
+#define WX_RETRY_INTERVAL_SEC  300
+#define SLEEP_INTERVAL_USEC    50000
+#define BLINK_DELAY_SEC        10
+#define BLINK_INTERVAL_SEC     1
 
 static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
 static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
@@ -43,7 +48,7 @@ static const struct option gLongArgs[] = {
 };
 // clang-format on
 
-static int gRun = 1;
+static bool gRun = true;
 
 static void drawBackground(DrawResources resources);
 
@@ -123,7 +128,7 @@ static void signalHandler(int signo) {
   case SIGINT:
   case SIGTERM:
   case SIGHUP:
-    gRun = 0;
+    gRun = false;
     break;
   }
 }
@@ -198,9 +203,9 @@ static bool go(bool test, bool verbose) {
       curStation = wx;
       first      = false;
       draw       = (wx != NULL);
-      nextUpdate = ((now / 1200) + 1) * 1200;
+      nextUpdate = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
       nextWx     = now + 1;
-      nextBlink  = 10;
+      nextBlink  = BLINK_DELAY_SEC;
 
       if (wx) {
 #if defined WITH_LED_SUPPORT
@@ -212,8 +217,9 @@ static bool go(bool test, bool verbose) {
         updateLEDs(cfg, NULL);
 #endif
 
-        // Try again in 5 minutes.
-        nextUpdate = now + 300;
+        // Try again at the retry interval rather than on the update interval
+        // boundary.
+        nextUpdate = now + WX_RETRY_INTERVAL_SEC;
 
         if (test) {
           break;
@@ -241,13 +247,13 @@ static bool go(bool test, bool verbose) {
 #if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
 #endif
-        nextBlink = now + 1;
+        nextBlink = now + BLINK_INTERVAL_SEC;
       }
     }
 
     // Nothing to do, sleep.
     if (!draw) {
-      usleep(50000);
+      usleep(SLEEP_INTERVAL_USEC);
       continue;
     }
 

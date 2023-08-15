@@ -98,65 +98,6 @@ static bool parseUTCDateTime(const char *str, struct tm *tm) {
 }
 
 /**
- * @brief   Checks if the given observation time is night at the given location.
- * @details Consider a report issued at 1753L on July 31 in the US Pacific
- *          Daylight time zone. The UTC date/time is 0053Z on Aug 1, so the
- *          query will return the sunrise/sunset for Aug 1, not July 31. Using
- *          the Aug 1 data, 0053Z will be less than the sunrise time and
- *          @a isNight would indicate night time despite it being day time PDT.
- *
- *          @a isNight checks the previous and next days as necessary to make a
- *          determination without knowing the station's local time zone. This is
- *          possible since @a calcSunTransitTimes returns the transit times in
- *          UNIX time rather than an offset from midnight.
- * @param[in] lat     Observation latitude.
- * @param[in] lon     Observation longitude.
- * @param[in] obsTime UTC observation time (UNIX time).
- * @returns True if night, false if day or there is an error.
- */
-static bool isNight(double lat, double lon, time_t obsTime) {
-  time_t    t = obsTime;
-  time_t    sr, ss;
-  struct tm date;
-
-  gmtime_r(&t, &date);
-
-  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
-                           date.tm_mday, &sr, &ss)) {
-    return false;
-  }
-
-  // If the observation time is less than the sunrise date/time, check the
-  // prior day. Otherwise, check the next day.
-  if (obsTime < sr) {
-    if (t < 86400) {
-      return false; // Underflow
-    }
-
-    t -= 86400;
-  } else if (obsTime >= ss) {
-    if (t + 86400 < t) {
-      return false; // Overflow
-    }
-
-    t += 86400;
-  } else {
-    return false; // Between sunrise and sunset; it's day time.
-  }
-
-  gmtime_r(&t, &date);
-
-  if (!calcSunTransitTimes(lat, lon, DAY_OFFICIAL, date.tm_year + 1900, date.tm_mon + 1,
-                           date.tm_mday, &sr, &ss)) {
-    return false;
-  }
-
-  // It's night time if greater than sunset on the previous day or less than
-  // sunrise on the next day.
-  return (obsTime >= ss || obsTime < sr);
-}
-
-/**
  * @enum  Tag
  * @brief METAR XML tag ID.
  */
@@ -829,7 +770,7 @@ WxStation *queryWx(const char *stations, int *err) {
     // Read the station and get the night status for classifying weather.
     readStation(p, hash, newStation);
     newStation->isNight    = isNight(newStation->lat, newStation->lon, newStation->obsTime);
-    newStation->blinkState = 1;
+    newStation->blinkState = true;
 
     classifyDominantWeather(newStation);
 

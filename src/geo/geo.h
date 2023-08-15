@@ -27,4 +27,13 @@
 bool calcSunTransitTimes(double lat, double lon, double offset, int year, int month, int day,
                          time_t *start, time_t *end);
 
+/**
+ * @brief   Checks if the given observation time is night at the given location.
+ * @param[in] lat     Observation latitude.
+ * @param[in] lon     Observation longitude.
+ * @param[in] obsTime UTC observation time (UNIX time).
+ * @returns True if night, false if day or there is an error.
+ */
+bool isNight(double lat, double lon, time_t obsTime);
+
 #endif
