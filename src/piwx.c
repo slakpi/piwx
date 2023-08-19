@@ -22,14 +22,20 @@
 #include <time.h>
 #include <unistd.h>
 
-#define BUTTON_1               0x1
-#define BUTTON_2               0x2
-#define BUTTON_3               0x4
-#define BUTTON_4               0x8
+#define BUTTON_1 0x1
+#define BUTTON_2 0x2
+#define BUTTON_3 0x4
+#define BUTTON_4 0x8
+
+#define NO_UPDATE    0x0
+#define UPDATE_BLINK 0x1
+#define UPDATE_NIGHT 0x2
+
 #define WX_UPDATE_INTERVAL_SEC 1200
 #define WX_RETRY_INTERVAL_SEC  300
 #define SLEEP_INTERVAL_USEC    50000
 #define BLINK_INTERVAL_SEC     1
+#define NIGHT_INTERVAL_SEC     120
 
 static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
 static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
@@ -93,9 +99,9 @@ static int setupGpio();
 
 static void signalHandler(int signo);
 
-static bool updateStation(const PiwxConfig *cfg, WxStation *station);
+static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t update, time_t now);
 
-static bool updateStations(const PiwxConfig *cfg, WxStation *stations);
+static bool updateStations(const PiwxConfig *cfg, WxStation *stations, uint32_t update, time_t now);
 
 /**
  * @brief The C-program entry point we all know and love.
@@ -147,7 +153,7 @@ static void signalHandler(int signo) {
 static bool go(bool test, bool verbose) {
   PiwxConfig   *cfg = getPiwxConfig();
   WxStation    *wx = NULL, *curStation = NULL;
-  time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0;
+  time_t        nextUpdate = 0, nextBlink = 0, nextDayNight = 0, nextWx = 0;
   bool          first = true, ret = false;
   DrawResources resources = INVALID_RESOURCES;
 
@@ -176,7 +182,8 @@ static bool go(bool test, bool verbose) {
     bool         draw = false;
     unsigned int b, bl = 0, bc;
     int          err;
-    time_t       now = time(NULL);
+    time_t       now    = time(NULL);
+    int          update = NO_UPDATE;
 
     // Scan the buttons. Mask off any buttons that were pressed on the last scan
     // and are either still pressed or were released.
@@ -199,13 +206,14 @@ static bool go(bool test, bool verbose) {
 
       drawDownloadScreen(resources, !test);
 
-      wx         = queryWx(cfg->stationQuery, &err);
-      curStation = wx;
-      first      = false;
-      draw       = (wx != NULL);
-      nextUpdate = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
-      nextWx     = now + cfg->cycleTime;
-      nextBlink  = now + BLINK_INTERVAL_SEC;
+      wx           = queryWx(cfg->stationQuery, &err);
+      curStation   = wx;
+      first        = false;
+      draw         = (wx != NULL);
+      nextUpdate   = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
+      nextWx       = now + cfg->cycleTime;
+      nextBlink    = now + BLINK_INTERVAL_SEC;
+      nextDayNight = now + NIGHT_INTERVAL_SEC;
 
       if (wx) {
 #if defined WITH_LED_SUPPORT
@@ -244,13 +252,19 @@ static bool go(bool test, bool verbose) {
 
       // If the blink timeout expired, update the LEDs.
       if (now > nextBlink) {
-        if (updateStations(cfg, wx)) {
-#if defined WITH_LED_SUPPORT
-          updateLEDs(cfg, wx);
-#endif
-        }
-
+        update |= UPDATE_BLINK;
         nextBlink = now + BLINK_INTERVAL_SEC;
+      }
+
+      if (now > nextDayNight) {
+        update |= UPDATE_NIGHT;
+        nextDayNight = now + NIGHT_INTERVAL_SEC;
+      }
+
+      if (updateStations(cfg, wx, update, now)) {
+#if defined WITH_LED_SUPPORT
+        updateLEDs(cfg, wx);
+#endif
       }
     }
 
@@ -814,14 +828,17 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
  * @brief   Perform periodic updates of weather station display state.
  * @param[in] cfg      PiWx configuration.
  * @param[in] stations List of weather stations.
+ * @param[in] update  The state items to update.
+ * @param[in] now     The new observation time.
  * @returns True if the LED string needs to be updated.
  */
-static bool updateStations(const PiwxConfig *cfg, WxStation *stations) {
+static bool updateStations(const PiwxConfig *cfg, WxStation *stations, uint32_t update,
+                           time_t now) {
   WxStation *p          = stations;
   bool       updateLEDs = false;
 
   while (true) {
-    updateLEDs |= updateStation(cfg, p);
+    updateLEDs |= updateStation(cfg, p, update, now);
 
     p = p->next;
 
@@ -838,14 +855,23 @@ static bool updateStations(const PiwxConfig *cfg, WxStation *stations) {
  * @brief   Update the display state of a station.
  * @param[in] cfg     PiWx configuration.
  * @param[in] station The weather station to update.
+ * @param[in] update  The state items to update.
+ * @param[in] now     The new observation time.
  * @returns True if the station's LED needs to be updated.
  */
-static bool updateStation(const PiwxConfig *cfg, WxStation *station) {
+static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t update, time_t now) {
   bool updateLED = false;
 
-  if (cfg->highWindSpeed > 0 && max(station->windSpeed, station->windGust) >= cfg->highWindSpeed) {
+  if (update & UPDATE_NIGHT) {
+    bool wasNight = station->isNight;
+    updateDayNightState(station, now);
+    updateLED |= (wasNight != station->isNight);
+  }
+
+  if ((update & UPDATE_BLINK) && cfg->highWindSpeed > 0) {
     bool wasOn          = station->blinkState;
-    station->blinkState = (!station->blinkState) || (cfg->highWindBlink == 0);
+    bool exceeds        = max(station->windSpeed, station->windGust) >= cfg->highWindSpeed;
+    station->blinkState = exceeds && ((!station->blinkState) || (cfg->highWindBlink == 0));
     updateLED |= (wasOn != station->blinkState);
   }
 

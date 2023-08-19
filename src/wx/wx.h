@@ -108,4 +108,11 @@ void freeStations(WxStation *stations);
  */
 WxStation *queryWx(const char *stations, int *err);
 
+/**
+ * @brief Updates the @a isNight flag and icon for the new observation time.
+ * @param[in] station The weather station to update.
+ * @param[in] now     The new observation time.
+ */
+void updateDayNightState(WxStation *station, time_t now);
+
 #endif /* WX_H */

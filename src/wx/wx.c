@@ -325,6 +325,28 @@ cleanup:
   return start;
 }
 
+void updateDayNightState(WxStation *station, time_t now) {
+  station->isNight = isNight(station->lat, station->lon, now);
+
+  // Update icons that have day/night variants.
+  switch (station->wx) {
+  case wxClearDay:
+  case wxClearNight:
+    station->wx = station->isNight ? wxClearNight : wxClearDay;
+    break;
+  case wxScatteredOrFewDay:
+  case wxScatteredOrFewNight:
+    station->wx = station->isNight ? wxScatteredOrFewNight : wxScatteredOrFewDay;
+    break;
+  case wxBrokenDay:
+  case wxBrokenNight:
+    station->wx = station->isNight ? wxBrokenNight : wxBrokenNight;
+    break;
+  default:
+    break;
+  }
+}
+
 /**
  * @brief   Trims a local airport ID for display.
  * @details Non-ICAO airport IDs include numbers and are three characters long,
