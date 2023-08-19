@@ -22,8 +22,6 @@ typedef void *yyscan_t;
 static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len);
 
 void freePiwxConfig(PiwxConfig *cfg) {
-  int i;
-
   if (!cfg) {
     return;
   }
@@ -34,7 +32,7 @@ void freePiwxConfig(PiwxConfig *cfg) {
   free(cfg->configFile);
   free(cfg->stationQuery);
 
-  for (i = 0; i < MAX_LEDS; ++i) {
+  for (int i = 0; i < MAX_LEDS; ++i) {
     free(cfg->ledAssignments[i]);
   }
 

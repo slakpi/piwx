@@ -36,7 +36,6 @@ ws2811_t ledstring = {
 
 int main() {
   ws2811_return_t ret;
-  int             i;
 
   ret = ws2811_init(&ledstring);
 
@@ -46,7 +45,7 @@ int main() {
   }
 
   // BRG
-  for (i = 0; i < LED_COUNT; ++i) {
+  for (int i = 0; i < LED_COUNT; ++i) {
     switch (i % 4) {
     case 0:
       ledstring.channel[0].leds[i] = 0x000020; // VFR

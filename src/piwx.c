@@ -314,8 +314,6 @@ cleanup:
  * @param[in] config The PiWx configuration to print.
  */
 static void printConfiguration(const PiwxConfig *config) {
-  int i;
-
   printf("Image Resources: %s\n", config->imageResources);
   printf("Font Resources: %s\n", config->fontResources);
   printf("Station Query: %s\n", config->stationQuery);
@@ -327,7 +325,7 @@ static void printConfiguration(const PiwxConfig *config) {
   printf("LED DMA Channel: %d\n", config->ledDMAChannel);
   printf("Log Level: %d\n", config->logLevel);
 
-  for (i = 0; i < MAX_LEDS; ++i) {
+  for (int i = 0; i < MAX_LEDS; ++i) {
     if (config->ledAssignments[i]) {
       printf("LED %d = %s\n", i + 1, config->ledAssignments[i]);
     }
@@ -366,10 +364,9 @@ static int setupGpio() {
  * @returns Bitmask of pressed buttons.
  */
 static unsigned int scanButtons() {
-  int          i;
   unsigned int buttons = 0;
 
-  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
+  for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
     if (gpioRead(gButtonPins[i]) == 0)
       buttons |= (1 << i);
   }

@@ -15,8 +15,7 @@ static bool validateColor(png_byte color);
 
 bool allocPng(Png *png, png_byte bits, png_byte color, png_uint_32 width, png_uint_32 height,
               size_t align) {
-  size_t      rowBytes;
-  png_uint_32 row;
+  size_t rowBytes;
 
   if (!png) {
     return false;
@@ -52,7 +51,7 @@ bool allocPng(Png *png, png_byte bits, png_byte color, png_uint_32 width, png_ui
   }
 
   // Setup the row index pointers.
-  for (row = 1; row < png->height; ++row) {
+  for (png_uint_32 row = 1; row < png->height; ++row) {
     png->rows[row] = png->rows[row - 1] + rowBytes;
   }
 

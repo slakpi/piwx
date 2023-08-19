@@ -46,7 +46,6 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, const WxStation *station);
 
 int updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
   const WxStation *p = stations;
-  int              i;
   ws2811_return_t  ret;
   // clang-format off
   ws2811_t        ledstring = {
@@ -109,7 +108,7 @@ int updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
 
   // Assign the lights according to the configuration.
   while (p) {
-    for (i = 0; i < MAX_LEDS; ++i) {
+    for (int i = 0; i < MAX_LEDS; ++i) {
       if (!cfg->ledAssignments[i]) {
         continue;
       }

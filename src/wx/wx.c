@@ -358,14 +358,14 @@ void updateDayNightState(WxStation *station, time_t now) {
  * @returns A duplicate of either the original ID or the shortened non-ICAO ID.
  */
 static char *trimLocalId(const char *id) {
-  size_t      i, len = strlen(id);
-  const char *p = id;
+  size_t      len = strlen(id);
+  const char *p   = id;
 
   if (len < 1) {
     return NULL;
   }
 
-  for (i = 0; i < len; ++i) {
+  for (int i = 0; i < len; ++i) {
     if (isdigit(id[i])) {
       p = id + 1;
       break;
