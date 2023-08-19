@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
       verbose = true;
       break;
     case 'v':
-      printf("piwx (%s)\n", GIT_COMMIT_HASH);
+      printf("piwx %s (%s)\n", RELEASE, GIT_COMMIT_HASH);
       return 0;
     }
   }

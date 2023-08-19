@@ -41,12 +41,13 @@ cmake_path(APPEND CMAKE_INSTALL_PREFIX ${VAR_PREFIX} piwx.log
 # Get the current Git commit hash for the version information.
 #-------------------------------------------------------------------------------
 execute_process(
-  COMMAND git rev-parse HEAD
+  COMMAND git rev-parse --short HEAD
   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
   OUTPUT_VARIABLE GIT_COMMIT_HASH
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
+set(RELEASE "R35-dev")
 
 #-------------------------------------------------------------------------------
 # Setup the global compile options.
