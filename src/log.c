@@ -107,7 +107,7 @@ static void writeLogV(LogLevel level, const char *fmt, va_list args) {
     return;
   }
 
-  now = time(0);
+  now = time(NULL);
   localtime_r(&now, &nowTime);
   strftime(logTime, COUNTOF(logTime), "%a, %d %b %Y %H:%M:%S %z ", &nowTime);
   fprintf(gLog, "[%s] %s\n   ", getLevelText(level), logTime);

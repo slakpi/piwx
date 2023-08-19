@@ -199,7 +199,7 @@ WxStation *queryWx(const char *stations, int *err) {
   Tag               tag;
   WxStation        *start = NULL, *cur, *newStation;
   int               count, len;
-  bool              ok = false;
+  bool              ok  = false;
   time_t            now = time(NULL);
 
   *err = 0;
@@ -299,7 +299,7 @@ WxStation *queryWx(const char *stations, int *err) {
     // Read the stations.
     readStation(p, hash, newStation);
     newStation->isNight    = isNight(newStation->lat, newStation->lon, now);
-    newStation->blinkState = true;
+    newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
 

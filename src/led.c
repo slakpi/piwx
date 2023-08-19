@@ -42,12 +42,12 @@ static const Color gColorIFR  = COLOR_IFR;
 static const Color gColorLIFR = COLOR_LIFR;
 static const Color gColorWind = COLOR_WIND;
 
-static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx);
+static ws2811_led_t getColor(const PiwxConfig *cfg, const WxStation *station);
 
-int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
-  WxStation      *p = wx;
-  int             i;
-  ws2811_return_t ret;
+int updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
+  const WxStation *p = stations;
+  int              i;
+  ws2811_return_t  ret;
   // clang-format off
   ws2811_t        ledstring = {
     .freq   = TARGET_FREQ,
@@ -125,7 +125,7 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
     p = p->next;
 
     // Circular list.
-    if (p == wx) {
+    if (p == stations) {
       break;
     }
   }
@@ -141,14 +141,14 @@ int updateLEDs(const PiwxConfig *cfg, WxStation *wx) {
 
 /**
  * @brief   Translate weather to a WS2811 color value.
- * @param [in] cfg PiWx configuration.
- * @param [in] wx  Current weather station.
+ * @param[in] cfg PiWx configuration.
+ * @param[in] wx  Current weather station.
  */
-static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
+static ws2811_led_t getColor(const PiwxConfig *cfg, const WxStation *station) {
   Color color      = COLOR_NONE;
-  int   brightness = wx->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
+  int   brightness = station->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
 
-  switch (wx->cat) {
+  switch (station->cat) {
   case catVFR:
     color = gColorVFR;
     break;
@@ -165,19 +165,8 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, WxStation *wx) {
     break;
   }
 
-  // If a high-wind threshold has been set, check the speed and gust against
-  // the threshold. If the wind exceeds the threshold use yellow if blink is
-  // turned OFF or the blink state is zero. Otherwise, reset the blink state and
-  // use the METAR color.
-  if (cfg->highWindSpeed > 0) {
-    if (max(wx->windSpeed, wx->windGust) >= cfg->highWindSpeed) {
-      if (!wx->blinkState || cfg->highWindBlink == 0) {
-        wx->blinkState = true;
-        color          = gColorWind;
-      } else {
-        wx->blinkState = false;
-      }
-    }
+  if (station->blinkState) {
+    color = gColorWind;
   }
 
   color.r = MIX_BRIGHTNESS(color.r, brightness);

@@ -29,7 +29,6 @@
 #define WX_UPDATE_INTERVAL_SEC 1200
 #define WX_RETRY_INTERVAL_SEC  300
 #define SLEEP_INTERVAL_USEC    50000
-#define BLINK_DELAY_SEC        10
 #define BLINK_INTERVAL_SEC     1
 
 static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
@@ -94,6 +93,10 @@ static int setupGpio();
 
 static void signalHandler(int signo);
 
+static bool updateStation(const PiwxConfig *cfg, WxStation *station);
+
+static bool updateStations(const PiwxConfig *cfg, WxStation *stations);
+
 /**
  * @brief The C-program entry point we all know and love.
  */
@@ -144,10 +147,8 @@ static void signalHandler(int signo) {
 static bool go(bool test, bool verbose) {
   PiwxConfig   *cfg = getPiwxConfig();
   WxStation    *wx = NULL, *curStation = NULL;
-  time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0, now;
-  bool          first = true, draw = false, ret = false;
-  int           err;
-  unsigned int  b, bl = 0, bc;
+  time_t        nextUpdate = 0, nextBlink = 0, nextWx = 0;
+  bool          first = true, ret = false;
   DrawResources resources = INVALID_RESOURCES;
 
   if (verbose) {
@@ -172,15 +173,16 @@ static bool go(bool test, bool verbose) {
   }
 
   do {
-    draw = false;
+    bool         draw = false;
+    unsigned int b, bl = 0, bc;
+    int          err;
+    time_t       now = time(NULL);
 
     // Scan the buttons. Mask off any buttons that were pressed on the last scan
     // and are either still pressed or were released.
     b  = scanButtons();
     bc = (~bl) & b;
     bl = b;
-
-    now = time(0);
 
     // If this is the first run, the update time has expired, or someone pressed
     // the refresh button, then requery the weather data.
@@ -193,9 +195,7 @@ static bool go(bool test, bool verbose) {
         writeLog(LOG_DEBUG, "Update button pressed.");
       }
 
-      if (wx) {
-        freeStations(wx);
-      }
+      freeStations(wx);
 
       drawDownloadScreen(resources, !test);
 
@@ -204,8 +204,8 @@ static bool go(bool test, bool verbose) {
       first      = false;
       draw       = (wx != NULL);
       nextUpdate = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
-      nextWx     = now + 1;
-      nextBlink  = BLINK_DELAY_SEC;
+      nextWx     = now + cfg->cycleTime;
+      nextBlink  = now + BLINK_INTERVAL_SEC;
 
       if (wx) {
 #if defined WITH_LED_SUPPORT
@@ -243,10 +243,13 @@ static bool go(bool test, bool verbose) {
       }
 
       // If the blink timeout expired, update the LEDs.
-      if (cfg->highWindSpeed > 0 && cfg->highWindBlink != 0 && now > nextBlink) {
+      if (now > nextBlink) {
+        if (updateStations(cfg, wx)) {
 #if defined WITH_LED_SUPPORT
-        updateLEDs(cfg, wx);
+          updateLEDs(cfg, wx);
 #endif
+        }
+
         nextBlink = now + BLINK_INTERVAL_SEC;
       }
     }
@@ -280,6 +283,7 @@ cleanup:
 #endif
 
   cleanupGraphics(&resources);
+  freeStations(wx);
   gpioTerminate();
   closeLog();
 
@@ -804,4 +808,46 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
   bottomLeft.coord.x = 172.0f;
   drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+}
+
+/**
+ * @brief   Perform periodic updates of weather station display state.
+ * @param[in] cfg      PiWx configuration.
+ * @param[in] stations List of weather stations.
+ * @returns True if the LED string needs to be updated.
+ */
+static bool updateStations(const PiwxConfig *cfg, WxStation *stations) {
+  WxStation *p          = stations;
+  bool       updateLEDs = false;
+
+  while (true) {
+    updateLEDs |= updateStation(cfg, p);
+
+    p = p->next;
+
+    // Circular list.
+    if (p == stations) {
+      break;
+    }
+  }
+
+  return updateLEDs;
+}
+
+/**
+ * @brief   Update the display state of a station.
+ * @param[in] cfg     PiWx configuration.
+ * @param[in] station The weather station to update.
+ * @returns True if the station's LED needs to be updated.
+ */
+static bool updateStation(const PiwxConfig *cfg, WxStation *station) {
+  bool updateLED = false;
+
+  if (cfg->highWindSpeed > 0 && max(station->windSpeed, station->windGust) >= cfg->highWindSpeed) {
+    bool wasOn          = station->blinkState;
+    station->blinkState = (!station->blinkState) || (cfg->highWindBlink == 0);
+    updateLED |= (wasOn != station->blinkState);
+  }
+
+  return updateLED;
 }
