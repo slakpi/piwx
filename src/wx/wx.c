@@ -150,6 +150,8 @@ static void hashDealloc(void *payload, xmlChar *name);
 
 static void initHash(xmlHashTablePtr hash);
 
+static WxStation *makeNewStation();
+
 static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 static bool parseUTCDateTime(const char *str, struct tm *tm);
@@ -197,7 +199,7 @@ WxStation *queryWx(const char *stations, int *err) {
   xmlNodePtr        p;
   xmlHashTablePtr   hash = NULL;
   Tag               tag;
-  WxStation        *start = NULL, *cur, *newStation;
+  WxStation        *start = NULL, *cur;
   int               count, len;
   bool              ok  = false;
   time_t            now = time(NULL);
@@ -273,6 +275,8 @@ WxStation *queryWx(const char *stations, int *err) {
   p = p->children;
 
   while (p) {
+    WxStation *newStation;
+
     tag = getTag(hash, p->name);
 
     if (tag != tagMETAR) {
@@ -280,8 +284,11 @@ WxStation *queryWx(const char *stations, int *err) {
       continue;
     }
 
-    newStation = (WxStation *)malloc(sizeof(WxStation));
-    memset(newStation, 0, sizeof(WxStation)); // NOLINT -- Size known.
+    newStation = makeNewStation();
+
+    if (!newStation) {
+      break;
+    }
 
     // Add the station to the circular list.
     if (!start) {
@@ -453,6 +460,31 @@ static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag) {
   }
 
   return (Tag)p;
+}
+
+/**
+ * @brief   Allocate a new station and initialize it with invalid values.
+ * @returns The new station.
+ */
+static WxStation *makeNewStation() {
+  WxStation *station = malloc(sizeof(WxStation));
+
+  if (!station) {
+    return NULL;
+  }
+
+  memset(station, 0, sizeof(*station)); // NOLINT -- Size known.
+
+  station->windDir    = -1;
+  station->windGust   = -1;
+  station->windSpeed  = -1;
+  station->visibility = -1;
+  station->alt        = -1;
+  station->cat        = catInvalid;
+  station->vertVis    = -1;
+  station->wx         = wxInvalid;
+
+  return station;
 }
 
 /**
@@ -636,10 +668,12 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       station->lon = strtod((char *)c->children->content, NULL);
       break;
     case tagTemp:
-      station->temp = strtod((char *)c->children->content, NULL);
+      station->hasTemp = true;
+      station->temp    = strtod((char *)c->children->content, NULL);
       break;
     case tagDewpoint:
-      station->dewPoint = strtod((char *)c->children->content, NULL);
+      station->hasDewPoint = true;
+      station->dewPoint    = strtod((char *)c->children->content, NULL);
       break;
     case tagWindDir:
       station->windDir = atoi((char *)c->children->content);

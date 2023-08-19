@@ -85,6 +85,7 @@ typedef struct WxStation_ {
   int                windDir, windSpeed, windGust;
   double             visibility;
   int                vertVis;
+  bool               hasTemp, hasDewPoint;
   double             temp, dewPoint;
   double             alt;
   FlightCategory     cat;

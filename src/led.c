@@ -28,6 +28,7 @@
 #define COLOR_IFR  {255, 0, 0}
 #define COLOR_LIFR {255, 0, 255}
 #define COLOR_WIND {255, 192, 0}
+#define COLOR_UNK  {64, 64, 64}
 // clang-format on
 
 typedef struct {
@@ -41,6 +42,7 @@ static const Color gColorMVFR = COLOR_MVFR;
 static const Color gColorIFR  = COLOR_IFR;
 static const Color gColorLIFR = COLOR_LIFR;
 static const Color gColorWind = COLOR_WIND;
+static const Color gColorUnk  = COLOR_UNK;
 
 static ws2811_led_t getColor(const PiwxConfig *cfg, const WxStation *station);
 
@@ -161,6 +163,7 @@ static ws2811_led_t getColor(const PiwxConfig *cfg, const WxStation *station) {
     color = gColorLIFR;
     break;
   default:
+    color = gColorUnk;
     break;
   }
 

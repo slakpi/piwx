@@ -476,7 +476,7 @@ static void drawStationFlightCategory(DrawResources resources, const WxStation *
 /**
  * @brief   Get the icon handle for a flight category.
  * @param[in] cat The flight category.
- * @returns An icon handle or ICON_COUNT if the category is invalid.
+ * @returns An icon handle.
  */
 static Icon getFlightCategoryIcon(FlightCategory cat) {
   switch (cat) {
@@ -489,7 +489,7 @@ static Icon getFlightCategoryIcon(FlightCategory cat) {
   case catVFR:
     return ICON_CAT_VFR;
   default:
-    return ICON_COUNT; // Invalid
+    return ICON_CAT_UNK;
   }
 }
 
@@ -609,8 +609,13 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
     drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   case skyOvercastSurface:
-    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-    snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
+    if (station->vertVis < 0) {
+      strncpy_safe(buf, "VV ---", COUNTOF(buf));
+    } else {
+      // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+      snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
+    }
+
     drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   default:
@@ -718,6 +723,10 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
  * @returns An icon handle or ICON_COUNT if the direction is invalid.
  */
 static Icon getWindIcon(int direction) {
+  if (direction < 0) {
+    return ICON_WX_WIND_UNK;
+  }
+
   switch ((direction + 15) / 30 * 30) {
   case 0:
     // If the explicit wind direction is zero, this means winds calm. However,
@@ -767,13 +776,16 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
   if (station->windDir > 0) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, len, "%d\x01", station->windDir);
-  } else {
-    if (station->windSpeed == 0) {
-      // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+  } else if (station->windDir == 0) {
+    if (station->windSpeed > 0) {
+      strncpy_safe(buf, "Var", len);
+    } else if (station->windSpeed == 0) {
       strncpy_safe(buf, "Calm", len);
     } else {
-      strncpy_safe(buf, "Var", len);
+      strncpy_safe(buf, "---", len);
     }
+  } else {
+    strncpy_safe(buf, "---", len);
   }
 }
 
@@ -787,7 +799,7 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len) {
   int speed = (gust ? station->windGust : station->windSpeed);
 
-  if (speed == 0) {
+  if (speed <= 0) {
     strncpy_safe(buf, "---", len);
   } else {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -802,7 +814,6 @@ static void getWindSpeedText(const WxStation *station, bool gust, char *buf, siz
  * @param[in] station   The weather station information.
  */
 static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *station) {
-  const double visibility = fmax(0.0, station->visibility);
   CharInfo     info       = {0};
   Point2f      bottomLeft = {0};
   char         buf[33]    = {0};
@@ -811,20 +822,44 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
     return;
   }
 
-  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-  snprintf(buf, COUNTOF(buf), visibility < 2 ? "Vis %.1fsm" : "Vis %.0fsm", visibility);
+  if (station->visibility < 0) {
+    strncpy_safe(buf, "---", COUNTOF(buf));
+  } else if (station->visibility < 2) {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "Vis %.1fsm", station->visibility);
+  } else {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "Vis %.0fsm", station->visibility);
+  }
+
   bottomLeft.coord.x = 172.0f;
   bottomLeft.coord.y = gLowerDiv + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
   drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
-  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-  snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp, station->dewPoint);
+  if (station->hasTemp && station->hasDewPoint) {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "%.0f\x01/%.0f\x01\x43", station->temp, station->dewPoint);
+  } else if (station->hasTemp) {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "%.0f\x01\x43/---", station->temp);
+  } else if (station->hasDewPoint) {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "---/%.0f\x01\x43", station->dewPoint);
+  } else {
+    strncpy_safe(buf, "---/---", COUNTOF(buf));
+  }
+
   bottomLeft.coord.x = 0.0f;
   bottomLeft.coord.y += info.cellSize.v[1];
   drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
-  // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-  snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
+  if (station->alt < 0) {
+    strncpy_safe(buf, "---", COUNTOF(buf));
+  } else {
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
+    snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);
+  }
+
   bottomLeft.coord.x = 172.0f;
   drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 }
