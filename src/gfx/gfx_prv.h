@@ -15,10 +15,10 @@
 #define FONT_ROWS 8
 #define FONT_COLS 16
 
-#define GET_EGL_ERROR(rsrc)              getEglError(rsrc, __FILE__, __LINE__)
-#define GET_SHADER_ERROR(rsrc, shader)   getShaderError(rsrc, shader, __FILE__, __LINE__);
-#define GET_PROGRAM_ERROR(rsrc, program) getProgramError(rsrc, program, __FILE__, __LINE__);
-#define SET_ERROR(rsrc, error, msg)      setError(rsrc, error, msg, __FILE__, __LINE__);
+#define GET_EGL_ERROR(rsrc)              gfx_getEglError(rsrc, __FILE__, __LINE__)
+#define GET_SHADER_ERROR(rsrc, shader)   gfx_getShaderError(rsrc, shader, __FILE__, __LINE__);
+#define GET_PROGRAM_ERROR(rsrc, program) gfx_getProgramError(rsrc, program, __FILE__, __LINE__);
+#define SET_ERROR(rsrc, error, msg)      gfx_setError(rsrc, error, msg, __FILE__, __LINE__);
 
 /**
  * @typedef TexCoords2f
@@ -124,9 +124,9 @@ typedef struct {
  * @param[in] valign     The vertical alignment of @a bottomLeft.
  * @param[out] rndrInfo  The character render info.
  */
-bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
-                            const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
-                            CharacterRenderInfo *rndrInfo);
+bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
+                                const Point2f *bottomLeft, const CharInfo *info,
+                                CharVertAlign valign, CharacterRenderInfo *rndrInfo);
 
 /**
  * @brief Get information about the last EGL error.
@@ -134,7 +134,7 @@ bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
  * @param[in] file     File where the error occurred.
  * @param[in] line     Line number where the error occurred.
  */
-void getEglError(DrawResources_ *rsrc, const char *file, long line);
+void gfx_getEglError(DrawResources_ *rsrc, const char *file, long line);
 
 /**
  * @brief Get program linker errors.
@@ -143,7 +143,7 @@ void getEglError(DrawResources_ *rsrc, const char *file, long line);
  * @param[in] file     File where the error occurred.
  * @param[in] line     Line number where the error occurred.
  */
-void getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, long line);
+void gfx_getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, long line);
 
 /**
  * @brief Get shader compilation errors.
@@ -152,13 +152,13 @@ void getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, lon
  * @param[in] file     File where the error occurred.
  * @param[in] line     Line number where the error occurred.
  */
-void getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line);
+void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line);
 
 /**
  * @brief Reset back to the generic shader and disable all attribute arrays.
  * @param[in] rsrc The gfx context.
  */
-void resetShader(const DrawResources_ *rsrc, Program program);
+void gfx_resetShader(const DrawResources_ *rsrc, Program program);
 
 /**
  * @brief Set a custom error.
@@ -168,7 +168,7 @@ void resetShader(const DrawResources_ *rsrc, Program program);
  * @param[in] file     File where the error occurred.
  * @param[in] line     Line number where the error occurred.
  */
-void setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line);
+void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line);
 
 /**
  * @brief Configure a shader with the current projection matrix and a texture.
@@ -176,6 +176,6 @@ void setError(DrawResources_ *rsrc, int error, const char *msg, const char *file
  * @param[in] program  The shader program to use.
  * @param[in] texture  A GL texture handle or 0 to disable textures.
  */
-void setupShader(const DrawResources_ *rsrc, Program program, GLuint texture);
+void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture);
 
 #endif /* GFX_PRV_H */

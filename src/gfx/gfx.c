@@ -149,7 +149,7 @@ static bool makeShader(GLuint *shader, DrawResources_ *rsrc, GLenum type, const 
 
 static bool readPixelsToPng(Png *png);
 
-void clearSurface(DrawResources resources, Color4f clear) {
+void gfx_clearSurface(DrawResources resources, Color4f clear) {
   UNUSED(resources);
 
   glClearColor(clear.color.r, clear.color.g, clear.color.b, clear.color.a);
@@ -158,7 +158,7 @@ void clearSurface(DrawResources resources, Color4f clear) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-bool commitToScreen(DrawResources resources) {
+bool gfx_commitToScreen(DrawResources resources) {
   Png       png    = {0};
   uint16_t *dither = NULL;
   size_t    bytes  = 0;
@@ -193,7 +193,7 @@ cleanup:
   return ok;
 }
 
-void cleanupGraphics(DrawResources *resources) {
+void gfx_cleanupGraphics(DrawResources *resources) {
   DrawResources_ *rsrc = *resources;
 
   if (!rsrc) {
@@ -233,7 +233,7 @@ void cleanupGraphics(DrawResources *resources) {
   *resources = NULL;
 }
 
-bool dumpSurfaceToPng(DrawResources resources, const char *path) {
+bool gfx_dumpSurfaceToPng(DrawResources resources, const char *path) {
   Png  png = {0};
   bool ok  = false;
 
@@ -250,9 +250,9 @@ bool dumpSurfaceToPng(DrawResources resources, const char *path) {
   return ok;
 }
 
-bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
-                            const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
-                            CharacterRenderInfo *rndrInfo) {
+bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
+                                const Point2f *bottomLeft, const CharInfo *info,
+                                CharVertAlign valign, CharacterRenderInfo *rndrInfo) {
   int            row, col;
   const Texture *tex = NULL;
 
@@ -290,7 +290,7 @@ bool getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
   return true;
 }
 
-void getEglError(DrawResources_ *rsrc, const char *file, long line) {
+void gfx_getEglError(DrawResources_ *rsrc, const char *file, long line) {
   const char *msg = "Unknown error.";
 
   strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
@@ -363,7 +363,7 @@ void getEglError(DrawResources_ *rsrc, const char *file, long line) {
   strncpy_safe(rsrc->errorMsg, msg, COUNTOF(rsrc->errorMsg));
 }
 
-bool getFontInfo(DrawResources resources, Font font, CharInfo *info) {
+bool gfx_getFontInfo(DrawResources resources, Font font, CharInfo *info) {
   UNUSED(resources);
 
   if (font >= FONT_COUNT) {
@@ -375,7 +375,7 @@ bool getFontInfo(DrawResources resources, Font font, CharInfo *info) {
   return true;
 }
 
-bool getIconInfo(DrawResources resources, Icon icon, Vector2f *size) {
+bool gfx_getIconInfo(DrawResources resources, Icon icon, Vector2f *size) {
   DrawResources_ *rsrc = resources;
 
   if (!rsrc) {
@@ -391,7 +391,7 @@ bool getIconInfo(DrawResources resources, Icon icon, Vector2f *size) {
   return true;
 }
 
-void getGfxError(DrawResources resources, int *error, char *msg, size_t len) {
+void gfx_getGfxError(DrawResources resources, int *error, char *msg, size_t len) {
   DrawResources_ *rsrc = resources;
 
   if (!rsrc) {
@@ -406,7 +406,7 @@ void getGfxError(DrawResources resources, int *error, char *msg, size_t len) {
   }
 }
 
-void getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, long line) {
+void gfx_getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, long line) {
   GLsizei len = 0;
 
   glGetProgramInfoLog(program, COUNTOF(rsrc->errorMsg), &len, rsrc->errorMsg);
@@ -415,7 +415,7 @@ void getProgramError(DrawResources_ *rsrc, GLuint program, const char *file, lon
   strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
 }
 
-void getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line) {
+void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line) {
   GLsizei len = 0;
 
   glGetShaderInfoLog(shader, COUNTOF(rsrc->errorMsg), &len, rsrc->errorMsg);
@@ -424,7 +424,7 @@ void getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long 
   strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
 }
 
-bool initGraphics(DrawResources *resources) {
+bool gfx_initGraphics(DrawResources *resources) {
   DrawResources_ *rsrc = NULL;
 
   if (!resources) {
@@ -460,7 +460,7 @@ bool initGraphics(DrawResources *resources) {
   return true;
 }
 
-void resetShader(const DrawResources_ *rsrc, Program program) {
+void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
   glUseProgram(rsrc->programs[GENERAL_SHADER].program);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDisable(GL_TEXTURE_2D);
@@ -469,14 +469,14 @@ void resetShader(const DrawResources_ *rsrc, Program program) {
   glDisableVertexAttribArray(rsrc->programs[program].texIndex);
 }
 
-void setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line) {
+void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line) {
   strncpy_safe(rsrc->errorMsg, msg, COUNTOF(rsrc->errorMsg));
   rsrc->error     = error;
   rsrc->errorLine = line;
   strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
 }
 
-void setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {
+void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {
   if (program >= PROGRAM_COUNT) {
     return;
   }
@@ -745,7 +745,7 @@ static bool loadFont(DrawResources_ *rsrc, const FontImage *entry, GLuint tex, T
   bool ok             = false;
 
   // Get the fully-qualified path to the font image.
-  getPathForFont(entry->name, path, COUNTOF(path));
+  conf_getPathForFont(entry->name, path, COUNTOF(path));
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -826,7 +826,7 @@ static bool loadIcon(DrawResources_ *rsrc, const IconImage *entry, GLuint tex, T
   bool ok             = false;
 
   // Get the fully-qualified path to the font image.
-  getPathForIcon(entry->name, path, COUNTOF(path));
+  conf_getPathForIcon(entry->name, path, COUNTOF(path));
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -880,7 +880,7 @@ static void initRender(DrawResources_ *rsrc) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   makeProjection(rsrc);
-  resetShader(rsrc, GENERAL_SHADER);
+  gfx_resetShader(rsrc, GENERAL_SHADER);
 }
 
 /**

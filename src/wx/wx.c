@@ -160,7 +160,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 
 static char *trimLocalId(const char *id);
 
-void freeStations(WxStation *stations) {
+void wx_freeStations(WxStation *stations) {
   WxStation    *p;
   SkyCondition *s;
 
@@ -190,7 +190,7 @@ void freeStations(WxStation *stations) {
   }
 }
 
-WxStation *queryWx(const char *stations, int *err) {
+WxStation *wx_queryWx(const char *stations, int *err) {
   CURL             *curlLib;
   CURLcode          res;
   char              url[4096];
@@ -305,7 +305,7 @@ WxStation *queryWx(const char *stations, int *err) {
 
     // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight    = isNight(newStation->lat, newStation->lon, now);
+    newStation->isNight    = geo_isNight(newStation->lat, newStation->lon, now);
     newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
@@ -325,15 +325,15 @@ cleanup:
   }
 
   if (!ok) {
-    freeStations(start);
+    wx_freeStations(start);
     start = NULL;
   }
 
   return start;
 }
 
-void updateDayNightState(WxStation *station, time_t now) {
-  station->isNight = isNight(station->lat, station->lon, now);
+void wx_updateDayNightState(WxStation *station, time_t now) {
+  station->isNight = geo_isNight(station->lat, station->lon, now);
 
   // Update icons that have day/night variants.
   switch (station->wx) {

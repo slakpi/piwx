@@ -156,7 +156,7 @@ static void signalHandler(int signo) {
  * @returns true if successful, false otherwise.
  */
 static bool go(bool test, bool verbose) {
-  PiwxConfig   *cfg = getPiwxConfig();
+  PiwxConfig   *cfg = conf_getPiwxConfig();
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextDayNight = 0, nextWx = 0;
   bool          first = true, ret = false;
@@ -178,7 +178,7 @@ static bool go(bool test, bool verbose) {
     goto cleanup;
   }
 
-  if (!initGraphics(&resources)) {
+  if (!gfx_initGraphics(&resources)) {
     writeLog(LOG_WARNING, "Failed to initialize graphics.");
     goto cleanup;
   }
@@ -207,11 +207,11 @@ static bool go(bool test, bool verbose) {
         writeLog(LOG_DEBUG, "Update button pressed.");
       }
 
-      freeStations(wx);
+      wx_freeStations(wx);
 
       drawDownloadScreen(resources, !test);
 
-      wx           = queryWx(cfg->stationQuery, &err);
+      wx           = wx_queryWx(cfg->stationQuery, &err);
       curStation   = wx;
       first        = false;
       draw         = (wx != NULL);
@@ -282,7 +282,7 @@ static bool go(bool test, bool verbose) {
     drawStationScreen(resources, curStation, !test);
 
     if (test) {
-      dumpSurfaceToPng(resources, "test.png");
+      gfx_dumpSurfaceToPng(resources, "test.png");
       break;
     }
   } while (gRun);
@@ -293,16 +293,16 @@ cleanup:
   writeLog(LOG_INFO, "Shutting down.");
 
   if (!test) {
-    clearSurface(resources, gClearColor);
-    commitToScreen(resources);
+    gfx_clearSurface(resources, gClearColor);
+    gfx_commitToScreen(resources);
   }
 
 #if defined WITH_LED_SUPPORT
   updateLEDs(cfg, NULL);
 #endif
 
-  cleanupGraphics(&resources);
-  freeStations(wx);
+  gfx_cleanupGraphics(&resources);
+  wx_freeStations(wx);
   gpioTerminate();
   closeLog();
 
@@ -382,11 +382,11 @@ static unsigned int scanButtons() {
 static void drawDownloadScreen(DrawResources resources, bool commit) {
   Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
 
-  clearSurface(resources, gClearColor);
-  drawIcon(resources, ICON_DOWNLOADING, center);
+  gfx_clearSurface(resources, gClearColor);
+  gfx_drawIcon(resources, ICON_DOWNLOADING, center);
 
   if (commit) {
-    commitToScreen(resources);
+    gfx_commitToScreen(resources);
   }
 }
 
@@ -398,11 +398,11 @@ static void drawDownloadScreen(DrawResources resources, bool commit) {
 static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
   Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
 
-  clearSurface(resources, gClearColor);
-  drawIcon(resources, ICON_DOWNLOAD_ERR, center);
+  gfx_clearSurface(resources, gClearColor);
+  gfx_drawIcon(resources, ICON_DOWNLOAD_ERR, center);
 
   if (commit) {
-    commitToScreen(resources);
+    gfx_commitToScreen(resources);
   }
 }
 
@@ -413,7 +413,7 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawStationScreen(DrawResources resources, const WxStation *station, bool commit) {
-  clearSurface(resources, gClearColor);
+  gfx_clearSurface(resources, gClearColor);
 
   drawBackground(resources);
   drawStationIdentifier(resources, station);
@@ -425,7 +425,7 @@ static void drawStationScreen(DrawResources resources, const WxStation *station,
   drawTempDewPointVisAlt(resources, station);
 
   if (commit) {
-    commitToScreen(resources);
+    gfx_commitToScreen(resources);
   }
 }
 
@@ -439,8 +439,8 @@ static void drawBackground(DrawResources resources) {
                            {{0.0f, gLowerDiv}},
                            {{SCREEN_WIDTH, gLowerDiv}}};
 
-  drawLine(resources, &lines[0], gWhite, 2.0f);
-  drawLine(resources, &lines[2], gWhite, 2.0f);
+  gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
+  gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
 }
 
 /**
@@ -452,14 +452,14 @@ static void drawStationIdentifier(DrawResources resources, const WxStation *stat
   CharInfo info       = {0};
   Point2f  bottomLeft = {0};
 
-  if (!getFontInfo(resources, FONT_16PT, &info)) {
+  if (!gfx_getFontInfo(resources, FONT_16PT, &info)) {
     return;
   }
 
   bottomLeft.coord.y = info.cellSize.v[1];
 
-  drawText(resources, FONT_16PT, bottomLeft, station->localId, strlen(station->localId), gWhite,
-           VERT_ALIGN_CELL);
+  gfx_drawText(resources, FONT_16PT, bottomLeft, station->localId, strlen(station->localId), gWhite,
+               VERT_ALIGN_CELL);
 }
 
 /**
@@ -470,7 +470,7 @@ static void drawStationIdentifier(DrawResources resources, const WxStation *stat
 static void drawStationFlightCategory(DrawResources resources, const WxStation *station) {
   const Point2f center = {{205.0f, 40.5f}};
   Icon          icon   = getFlightCategoryIcon(station->cat);
-  drawIcon(resources, icon, center);
+  gfx_drawIcon(resources, icon, center);
 }
 
 /**
@@ -501,7 +501,7 @@ static Icon getFlightCategoryIcon(FlightCategory cat) {
 static void drawStationWeather(DrawResources resources, const WxStation *station) {
   const Point2f center = {{278.0f, 40.5f}};
   Icon          icon   = getWeatherIcon(station->wx);
-  drawIcon(resources, icon, center);
+  gfx_drawIcon(resources, icon, center);
 }
 
 /**
@@ -569,14 +569,14 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
     return;
   }
 
-  if (!getFontInfo(resources, FONT_8PT, &info)) {
+  if (!gfx_getFontInfo(resources, FONT_8PT, &info)) {
     return;
   }
 
   len                = strlen(station->wxString);
   bottomLeft.coord.x = (SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
   bottomLeft.coord.y = gUpperDiv + info.cellSize.v[1];
-  drawText(resources, FONT_8PT, bottomLeft, station->wxString, len, gWhite, VERT_ALIGN_CELL);
+  gfx_drawText(resources, FONT_8PT, bottomLeft, station->wxString, len, gWhite, VERT_ALIGN_CELL);
 }
 
 /**
@@ -597,7 +597,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
     return;
   }
 
-  if (!getFontInfo(resources, FONT_6PT, &info)) {
+  if (!gfx_getFontInfo(resources, FONT_6PT, &info)) {
     return;
   }
 
@@ -606,7 +606,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
   switch (sky->coverage) {
   case skyClear:
     strncpy_safe(buf, "Clear", COUNTOF(buf));
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+    gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   case skyOvercastSurface:
     if (station->vertVis < 0) {
@@ -616,7 +616,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
       snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
     }
 
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+    gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     return;
   default:
     break;
@@ -643,12 +643,12 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
   // Draw the next highest layer if there is one.
   if (sky->next) {
     getCloudLayerText(sky->next, buf, COUNTOF(buf));
-    drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+    gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
     bottomLeft.coord.y += info.capHeight + info.leading;
   }
 
   getCloudLayerText(sky, buf, COUNTOF(buf));
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 }
 
 /**
@@ -692,29 +692,29 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   Vector2f iconInfo   = {0};
   Icon     icon       = getWindIcon(station->windDir);
 
-  if (!getFontInfo(resources, FONT_6PT, &fontInfo)) {
+  if (!gfx_getFontInfo(resources, FONT_6PT, &fontInfo)) {
     return;
   }
 
-  if (!getIconInfo(resources, icon, &iconInfo)) {
+  if (!gfx_getIconInfo(resources, icon, &iconInfo)) {
     return;
   }
 
   iconInfo.coord.x = 10.0f + (iconInfo.coord.x / 2.0f);
   iconInfo.coord.y = bottomLeft.coord.y + (iconInfo.coord.y / 2.0f);
-  drawIcon(resources, icon, iconInfo);
+  gfx_drawIcon(resources, icon, iconInfo);
 
   getWindDirectionText(station, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   getWindSpeedText(station, false, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   getWindSpeedText(station, true, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gRed, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gRed, VERT_ALIGN_BASELINE);
 }
 
 /**
@@ -814,11 +814,11 @@ static void getWindSpeedText(const WxStation *station, bool gust, char *buf, siz
  * @param[in] station   The weather station information.
  */
 static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *station) {
-  CharInfo     info       = {0};
-  Point2f      bottomLeft = {0};
-  char         buf[33]    = {0};
+  CharInfo info       = {0};
+  Point2f  bottomLeft = {0};
+  char     buf[33]    = {0};
 
-  if (!getFontInfo(resources, FONT_6PT, &info)) {
+  if (!gfx_getFontInfo(resources, FONT_6PT, &info)) {
     return;
   }
 
@@ -834,7 +834,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
 
   bottomLeft.coord.x = 172.0f;
   bottomLeft.coord.y = gLowerDiv + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   if (station->hasTemp && station->hasDewPoint) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -851,7 +851,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
 
   bottomLeft.coord.x = 0.0f;
   bottomLeft.coord.y += info.cellSize.v[1];
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 
   if (station->alt < 0) {
     strncpy_safe(buf, "---", COUNTOF(buf));
@@ -861,7 +861,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   }
 
   bottomLeft.coord.x = 172.0f;
-  drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
+  gfx_drawText(resources, FONT_6PT, bottomLeft, buf, strlen(buf), gWhite, VERT_ALIGN_BASELINE);
 }
 
 /**
@@ -904,7 +904,7 @@ static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t up
 
   if (update & UPDATE_NIGHT) {
     bool wasNight = station->isNight;
-    updateDayNightState(station, now);
+    wx_updateDayNightState(station, now);
     updateLED |= (wasNight != station->isNight);
   }
 

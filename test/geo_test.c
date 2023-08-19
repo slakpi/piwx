@@ -29,7 +29,7 @@ int main() {
     printf(">>> (%.2f, %.2f) on %4.4d-%2.2d-%2.2d\n", testCase->lat, testCase->lon, testCase->y,
            testCase->m, testCase->d);
 
-    if (!calcSunTransitTimes(testCase->lat, testCase->lon, DAY_OFFICIAL, testCase->y, testCase->m,
+    if (!geo_calcDaylightSpan(testCase->lat, testCase->lon, DAY_OFFICIAL, testCase->y, testCase->m,
                              testCase->d, &sr, &ss)) {
       printf("  Failed to calculate.\n");
     }

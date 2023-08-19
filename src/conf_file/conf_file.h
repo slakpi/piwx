@@ -37,7 +37,7 @@ typedef struct {
  * @brief Free an allocated configuration struct.
  * @param[in] cfg The configuration struct to free.
  */
-void freePiwxConfig(PiwxConfig *cfg);
+void conf_freePiwxConfig(PiwxConfig *cfg);
 
 /**
  * @brief   Load the piwx configuration.
@@ -47,7 +47,7 @@ void freePiwxConfig(PiwxConfig *cfg);
  * @returns An initialized configuration structure or NULL if unable to allocate
  *          memory for the structure.
  */
-PiwxConfig *getPiwxConfig();
+PiwxConfig *conf_getPiwxConfig();
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
@@ -58,7 +58,7 @@ PiwxConfig *getPiwxConfig();
  * @param[in] len  The length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *getPathForFont(const char *file, char *path, size_t len);
+char *conf_getPathForFont(const char *file, char *path, size_t len);
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
@@ -69,6 +69,6 @@ char *getPathForFont(const char *file, char *path, size_t len);
  * @param[in] len  The length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *getPathForIcon(const char *file, char *path, size_t len);
+char *conf_getPathForIcon(const char *file, char *path, size_t len);
 
 #endif /* CONF_FILE_H */

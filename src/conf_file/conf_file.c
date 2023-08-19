@@ -21,7 +21,7 @@ typedef void *yyscan_t;
 
 static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len);
 
-void freePiwxConfig(PiwxConfig *cfg) {
+void conf_freePiwxConfig(PiwxConfig *cfg) {
   if (!cfg) {
     return;
   }
@@ -39,7 +39,7 @@ void freePiwxConfig(PiwxConfig *cfg) {
   free(cfg);
 }
 
-PiwxConfig *getPiwxConfig() {
+PiwxConfig *conf_getPiwxConfig() {
   FILE       *cfgFile;
   yyscan_t    scanner;
   PiwxConfig *cfg = malloc(sizeof(PiwxConfig));
@@ -78,11 +78,11 @@ PiwxConfig *getPiwxConfig() {
   return cfg;
 }
 
-char *getPathForFont(const char *file, char *path, size_t len) {
+char *conf_getPathForFont(const char *file, char *path, size_t len) {
   return appendFileToPath(FONT_RESOURCES, file, path, len);
 }
 
-char *getPathForIcon(const char *file, char *path, size_t len) {
+char *conf_getPathForIcon(const char *file, char *path, size_t len) {
   return appendFileToPath(IMAGE_RESOURCES, file, path, len);
 }
 

@@ -47,8 +47,8 @@ static time_t calcTime(int year, int month, int day, double minutes);
 
 static double calcTimeJulianCentury(double jd);
 
-bool calcSunTransitTimes(double lat, double lon, double offset, int year, int month, int day,
-                         time_t *start, time_t *end) {
+bool geo_calcDaylightSpan(double lat, double lon, double offset, int year, int month, int day,
+                          time_t *start, time_t *end) {
   double jd = calcJD(year, month, day);
   double absTime;
 
@@ -67,7 +67,7 @@ bool calcSunTransitTimes(double lat, double lon, double offset, int year, int mo
   return true;
 }
 
-bool isNight(double lat, double lon, time_t obsTime) {
+bool geo_isNight(double lat, double lon, time_t obsTime) {
   time_t    t = obsTime;
   time_t    sr, ss;
   struct tm date;
@@ -83,8 +83,8 @@ bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
-                           date.tm_mday, &sr, &ss)) {
+  if (!geo_calcDaylightSpan(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
+                            date.tm_mday, &sr, &ss)) {
     return false;
   }
 
@@ -108,8 +108,8 @@ bool isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!calcSunTransitTimes(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
-                           date.tm_mday, &sr, &ss)) {
+  if (!geo_calcDaylightSpan(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
+                            date.tm_mday, &sr, &ss)) {
     return false;
   }
 

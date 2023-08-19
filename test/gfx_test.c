@@ -24,28 +24,28 @@ int main() {
   Vector2f      iconInfo = {0};
   Point2f       center   = {0};
 
-  if (!initGraphics(&rsrc)) {
-    getGfxError(rsrc, &error, msg, COUNTOF(msg));
+  if (!gfx_initGraphics(&rsrc)) {
+    gfx_getGfxError(rsrc, &error, msg, COUNTOF(msg));
     printf("Received error %d: %s\n", error, msg);
-    cleanupGraphics(&rsrc);
+    gfx_cleanupGraphics(&rsrc);
     return -1;
   }
 
-  clearSurface(rsrc, clearColor);
-  drawQuad(rsrc, rectVerts, rectColor);
-  drawLine(rsrc, line1Verts, lineColor, 2.0f);
-  drawLine(rsrc, line2Verts, lineColor, 2.0f);
-  drawLine(rsrc, line3Verts, lineColor, 2.0f);
-  drawLine(rsrc, line4Verts, lineColor, 2.0f);
-  drawText(rsrc, FONT_16PT, textLoc, "Hello", 5, textColor, VERT_ALIGN_CELL);
+  gfx_clearSurface(rsrc, clearColor);
+  gfx_drawQuad(rsrc, rectVerts, rectColor);
+  gfx_drawLine(rsrc, line1Verts, lineColor, 2.0f);
+  gfx_drawLine(rsrc, line2Verts, lineColor, 2.0f);
+  gfx_drawLine(rsrc, line3Verts, lineColor, 2.0f);
+  gfx_drawLine(rsrc, line4Verts, lineColor, 2.0f);
+  gfx_drawText(rsrc, FONT_16PT, textLoc, "Hello", 5, textColor, VERT_ALIGN_CELL);
 
-  getIconInfo(rsrc, ICON_WX_VOLCANIC_ASH, &iconInfo);
+  gfx_getIconInfo(rsrc, ICON_WX_VOLCANIC_ASH, &iconInfo);
   center.coord.x = 320.0f - (iconInfo.v[0] / 2.0f);
   center.coord.y = 240.0f - (iconInfo.v[1] / 2.0f);
-  drawIcon(rsrc, ICON_WX_VOLCANIC_ASH, center);
+  gfx_drawIcon(rsrc, ICON_WX_VOLCANIC_ASH, center);
 
-  dumpSurfaceToPng(rsrc, "test.png");
+  gfx_dumpSurfaceToPng(rsrc, "test.png");
   // commitToScreen(rsrc);
-  cleanupGraphics(&rsrc);
+  gfx_cleanupGraphics(&rsrc);
   return 0;
 }

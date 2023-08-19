@@ -19,7 +19,7 @@ static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const C
                           const Point2f *bottomLeft, const CharInfo *info, CharVertAlign valign,
                           Vertex *vertices);
 
-void drawIcon(DrawResources resources, Icon icon, Point2f center) {
+void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center) {
   const DrawResources_ *rsrc   = resources;
   Vertex                buf[4] = {0};
   Color4f               color  = {{1.0f, 1.0f, 1.0f, 1.0f}};
@@ -64,7 +64,7 @@ void drawIcon(DrawResources resources, Icon icon, Point2f center) {
   drawTriangles(rsrc, buf, COUNTOF(buf), RGBA_TEX_SHADER, tex->tex);
 }
 
-void drawLine(DrawResources resources, const Point2f *vertices, Color4f color, float width) {
+void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f color, float width) {
   const DrawResources_ *rsrc   = resources;
   Point2f               offset = {0};
   Vertex                buf[4] = {0};
@@ -88,7 +88,7 @@ void drawLine(DrawResources resources, const Point2f *vertices, Color4f color, f
   drawTriangles(rsrc, buf, COUNTOF(buf), GENERAL_SHADER, 0);
 }
 
-void drawQuad(DrawResources resources, const Point2f *vertices, Color4f color) {
+void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f color) {
   const DrawResources_ *rsrc   = resources;
   Vertex                buf[4] = {0};
 
@@ -101,8 +101,8 @@ void drawQuad(DrawResources resources, const Point2f *vertices, Color4f color) {
   drawTriangles(rsrc, buf, COUNTOF(buf), GENERAL_SHADER, 0);
 }
 
-void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text, size_t len,
-              Color4f textColor, CharVertAlign valign) {
+void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
+                  size_t len, Color4f textColor, CharVertAlign valign) {
   const DrawResources_ *rsrc   = resources;
   CharInfo              info   = {0};
   Point2f               cur    = bottomLeft;
@@ -112,7 +112,7 @@ void drawText(DrawResources resources, Font font, Point2f bottomLeft, const char
     return;
   }
 
-  if (!getFontInfo(resources, font, &info)) {
+  if (!gfx_getFontInfo(resources, font, &info)) {
     return;
   }
 
@@ -142,7 +142,7 @@ static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const C
                           Vertex *vertices) {
   CharacterRenderInfo rndrInfo = {0};
 
-  if (!getCharacterRenderInfo(rsrc, font, c, bottomLeft, info, valign, &rndrInfo)) {
+  if (!gfx_getCharacterRenderInfo(rsrc, font, c, bottomLeft, info, valign, &rndrInfo)) {
     return false;
   }
 
@@ -200,9 +200,9 @@ static void drawTriangles(const DrawResources_ *rsrc, const Vertex *vertices, si
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * count, vertices, GL_STATIC_DRAW);
 
-  setupShader(rsrc, program, texture);
+  gfx_setupShader(rsrc, program, texture);
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-  resetShader(rsrc, program);
+  gfx_resetShader(rsrc, program);
 
   glDeleteBuffers(1, &vbo);
 }
