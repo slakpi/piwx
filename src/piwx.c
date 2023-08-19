@@ -53,7 +53,7 @@ static const struct option gLongArgs[] = {
 };
 // clang-format on
 
-static bool gRun = true;
+static bool gRun;
 
 static void drawBackground(DrawResources resources);
 
@@ -110,6 +110,9 @@ int main(int argc, char *argv[]) {
   int  c;
   bool test = false, verbose = false;
 
+  signal(SIGINT, signalHandler);
+  signal(SIGTERM, signalHandler);
+
   // Parse the command line parameters.
   while ((c = getopt_long(argc, argv, gShortArgs, gLongArgs, 0)) != -1) {
     switch (c) {
@@ -124,6 +127,8 @@ int main(int argc, char *argv[]) {
       return 0;
     }
   }
+
+  gRun = true;
 
   return go(test, verbose) ? 0 : -1;
 }
@@ -330,22 +335,25 @@ static void printConfiguration(const PiwxConfig *config) {
 }
 
 /**
- * @brief   Initializes the pigpio library and sets up signal handling.
+ * @brief   Initializes the pigpio library.
  * @returns The result of @a gpioInitialise.
  */
 static int setupGpio() {
-  int ret = gpioInitialise();
-  int i;
+  int ret, cfg;
+
+  // Turn off internal signal handling so that the library does not force an
+  // exit before we can cleanup.
+  cfg = gpioCfgGetInternals();
+  cfg |= PI_CFG_NOSIGHANDLER;
+  gpioCfgSetInternals(cfg);
+
+  ret = gpioInitialise();
 
   if (ret < 0) {
     return ret;
   }
 
-  gpioSetSignalFunc(SIGINT, signalHandler);
-  gpioSetSignalFunc(SIGTERM, signalHandler);
-  gpioSetSignalFunc(SIGHUP, signalHandler);
-
-  for (i = 0; i < COUNTOF(gButtonPins); ++i) {
+  for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
     gpioSetMode(gButtonPins[i], PI_INPUT);
     gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
   }
