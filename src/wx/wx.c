@@ -347,7 +347,7 @@ void wx_updateDayNightState(WxStation *station, time_t now) {
     break;
   case wxBrokenDay:
   case wxBrokenNight:
-    station->wx = station->isNight ? wxBrokenNight : wxBrokenNight;
+    station->wx = station->isNight ? wxBrokenNight : wxBrokenDay;
     break;
   default:
     break;
