@@ -108,7 +108,7 @@ typedef struct {
   GLuint      fshaders[fragmentShaderCount]; // Fragment shaders
   ProgramInfo programs[programCount];        // Shader programs
   Texture     fonts[fontCount];              // Font textures
-  Texture     icons[ICON_COUNT];             // Icon textures
+  Texture     icons[iconCount];              // Icon textures
   GLfloat     proj[4][4];                    // Projection matrix
 } DrawResources_;
 

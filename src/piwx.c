@@ -383,7 +383,7 @@ static void drawDownloadScreen(DrawResources resources, bool commit) {
   Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
-  gfx_drawIcon(resources, ICON_DOWNLOADING, center);
+  gfx_drawIcon(resources, iconDownloading, center);
 
   if (commit) {
     gfx_commitToScreen(resources);
@@ -399,7 +399,7 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
   Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
-  gfx_drawIcon(resources, ICON_DOWNLOAD_ERR, center);
+  gfx_drawIcon(resources, iconDownloadErr, center);
 
   if (commit) {
     gfx_commitToScreen(resources);
@@ -481,15 +481,15 @@ static void drawStationFlightCategory(DrawResources resources, const WxStation *
 static Icon getFlightCategoryIcon(FlightCategory cat) {
   switch (cat) {
   case catLIFR:
-    return ICON_CAT_LIFR;
+    return iconCatLIFR;
   case catIFR:
-    return ICON_CAT_IFR;
+    return iconCatIFR;
   case catMVFR:
-    return ICON_CAT_MVFR;
+    return iconCatMVFR;
   case catVFR:
-    return ICON_CAT_VFR;
+    return iconCatVFR;
   default:
-    return ICON_CAT_UNK;
+    return iconCatUnk;
   }
 }
 
@@ -507,51 +507,51 @@ static void drawStationWeather(DrawResources resources, const WxStation *station
 /**
  * @brief   Get an icon handle for a dominant weather phenomenon.
  * @param[in] wx Dominant weather phenomenon.
- * @returns An icon handle or ICON_COUNT if the weather phenomenon is invalid.
+ * @returns An icon handle or iconCount if the weather phenomenon is invalid.
  */
 static Icon getWeatherIcon(DominantWeather wx) {
   switch (wx) {
   case wxClearDay:
-    return ICON_WX_CLEAR_DAY;
+    return iconWxClearDay;
   case wxClearNight:
-    return ICON_WX_CLEAR_NIGHT;
+    return iconWxClearNight;
   case wxScatteredOrFewDay:
-    return ICON_WX_FEW_DAY;
+    return iconWxFewDay;
   case wxScatteredOrFewNight:
-    return ICON_WX_FEW_NIGHT;
+    return iconWxFewNight;
   case wxBrokenDay:
-    return ICON_WX_BROKEN_DAY;
+    return iconWxBrokenDay;
   case wxBrokenNight:
-    return ICON_WX_BROKEN_NIGHT;
+    return iconWxBrokenNight;
   case wxOvercast:
-    return ICON_WX_OVERCAST;
+    return iconWxOvercast;
   case wxLightMistHaze:
   case wxObscuration:
-    return ICON_WX_FOG_HAZE;
+    return iconWxFogHaze;
   case wxLightDrizzleRain:
-    return ICON_WX_CHANCE_RAIN;
+    return iconWxChanceRain;
   case wxRain:
-    return ICON_WX_RAIN;
+    return iconWxRain;
   case wxFlurries:
-    return ICON_WX_FLURRIES;
+    return iconWxFlurries;
   case wxLightSnow:
-    return ICON_WX_CHANCE_SNOW;
+    return iconWxChanceSnow;
   case wxSnow:
-    return ICON_WX_SNOW;
+    return iconWxSnow;
   case wxLightFreezingRain:
-    return ICON_WX_CHANCE_FZRA;
+    return iconWxChanceFZRA;
   case wxFreezingRain:
-    return ICON_WX_FZRA;
+    return iconWxFZRA;
   case wxVolcanicAsh:
-    return ICON_WX_VOLCANIC_ASH;
+    return iconWxVolcanicAsh;
   case wxLightTstormsSqualls:
-    return ICON_WX_CHANCE_TS;
+    return iconWxChanceTS;
   case wxTstormsSqualls:
-    return ICON_WX_THUNDERSTORMS;
+    return iconWxThunderstorms;
   case wxFunnelCloud:
-    return ICON_WX_FUNNEL_CLOUD;
+    return iconWxFunnelCloud;
   default:
-    return ICON_COUNT; // Invalid
+    return iconCount; // Invalid
   }
 }
 
@@ -720,11 +720,11 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
 /**
  * @brief   Gets an icon handle for a wind direction.
  * @param[in] direction The wind direction.
- * @returns An icon handle or ICON_COUNT if the direction is invalid.
+ * @returns An icon handle or iconCount if the direction is invalid.
  */
 static Icon getWindIcon(int direction) {
   if (direction < 0) {
-    return ICON_WX_WIND_UNK;
+    return iconWxWindUnk;
   }
 
   switch ((direction + 15) / 30 * 30) {
@@ -733,36 +733,36 @@ static Icon getWindIcon(int direction) {
     // if the wind direction is 1-14, the sector will still be centered on 0,
     // so handle both cases here.
     if (direction == 0) {
-      return ICON_WX_WIND_CALM;
+      return iconWxWindCalm;
     } else {
-      return ICON_WX_WIND_360;
+      return iconWxWind360;
     }
   case 30:
-    return ICON_WX_WIND_30;
+    return iconWxWind30;
   case 60:
-    return ICON_WX_WIND_60;
+    return iconWxWind60;
   case 90:
-    return ICON_WX_WIND_90;
+    return iconWxWind90;
   case 120:
-    return ICON_WX_WIND_120;
+    return iconWxWind120;
   case 150:
-    return ICON_WX_WIND_150;
+    return iconWxWind150;
   case 180:
-    return ICON_WX_WIND_180;
+    return iconWxWind180;
   case 210:
-    return ICON_WX_WIND_210;
+    return iconWxWind210;
   case 240:
-    return ICON_WX_WIND_240;
+    return iconWxWind240;
   case 270:
-    return ICON_WX_WIND_270;
+    return iconWxWind270;
   case 300:
-    return ICON_WX_WIND_300;
+    return iconWxWind300;
   case 330:
-    return ICON_WX_WIND_330;
+    return iconWxWind330;
   case 360:
-    return ICON_WX_WIND_360;
+    return iconWxWind360;
   default:
-    return ICON_COUNT; // Invalid
+    return iconCount; // Invalid
   }
 }
 

@@ -76,48 +76,48 @@ static const FontImage gFontTable[] = {
     {font10pt, "sfmono10.png", {{{26.0f, 51.0f}}, 11.0f, 30.0f, 23.0f, 4.0f}},
     {font16pt, "sfmono16.png", {{{41.0f, 81.0f}}, 17.0f, 47.0f, 36.0f, 7.0f}}};
 
-static const IconImage gIconTable[] = {{ICON_CAT_IFR, "cat_ifr.png"},
-                                       {ICON_CAT_LIFR, "cat_lifr.png"},
-                                       {ICON_CAT_MVFR, "cat_mvfr.png"},
-                                       {ICON_CAT_UNK, "cat_unk.png"},
-                                       {ICON_CAT_VFR, "cat_vfr.png"},
-                                       {ICON_DOWNLOAD_ERR, "download_err.png"},
-                                       {ICON_DOWNLOADING, "downloading.png"},
-                                       {ICON_WX_WIND_30, "wind_30.png"},
-                                       {ICON_WX_WIND_60, "wind_60.png"},
-                                       {ICON_WX_WIND_90, "wind_90.png"},
-                                       {ICON_WX_WIND_120, "wind_120.png"},
-                                       {ICON_WX_WIND_150, "wind_150.png"},
-                                       {ICON_WX_WIND_180, "wind_180.png"},
-                                       {ICON_WX_WIND_210, "wind_210.png"},
-                                       {ICON_WX_WIND_240, "wind_240.png"},
-                                       {ICON_WX_WIND_270, "wind_270.png"},
-                                       {ICON_WX_WIND_300, "wind_300.png"},
-                                       {ICON_WX_WIND_330, "wind_330.png"},
-                                       {ICON_WX_WIND_360, "wind_360.png"},
-                                       {ICON_WX_WIND_CALM, "wind_calm.png"},
-                                       {ICON_WX_WIND_UNK, "wind_unk.png"},
-                                       {ICON_WX_BROKEN_DAY, "wx_broken_day.png"},
-                                       {ICON_WX_BROKEN_NIGHT, "wx_broken_night.png"},
-                                       {ICON_WX_CHANCE_FLURRIES, "wx_chance_flurries.png"},
-                                       {ICON_WX_CHANCE_FZRA, "wx_chance_fzra.png"},
-                                       {ICON_WX_CHANCE_RAIN, "wx_chance_rain.png"},
-                                       {ICON_WX_CHANCE_SNOW, "wx_chance_snow.png"},
-                                       {ICON_WX_CHANCE_TS, "wx_chance_ts.png"},
-                                       {ICON_WX_CLEAR_DAY, "wx_clear_day.png"},
-                                       {ICON_WX_CLEAR_NIGHT, "wx_clear_night.png"},
-                                       {ICON_WX_FEW_DAY, "wx_few_day.png"},
-                                       {ICON_WX_FEW_NIGHT, "wx_few_night.png"},
-                                       {ICON_WX_FLURRIES, "wx_flurries.png"},
-                                       {ICON_WX_FOG_HAZE, "wx_fog_haze.png"},
-                                       {ICON_WX_FUNNEL_CLOUD, "wx_funnel_cloud.png"},
-                                       {ICON_WX_FZRA, "wx_fzra.png"},
-                                       {ICON_WX_OVERCAST, "wx_overcast.png"},
-                                       {ICON_WX_RAIN, "wx_rain.png"},
-                                       {ICON_WX_SLEET, "wx_sleet.png"},
-                                       {ICON_WX_SNOW, "wx_snow.png"},
-                                       {ICON_WX_THUNDERSTORMS, "wx_thunderstorms.png"},
-                                       {ICON_WX_VOLCANIC_ASH, "wx_volcanic_ash.png"}};
+static const IconImage gIconTable[] = {{iconCatIFR, "cat_ifr.png"},
+                                       {iconCatLIFR, "cat_lifr.png"},
+                                       {iconCatMVFR, "cat_mvfr.png"},
+                                       {iconCatUnk, "cat_unk.png"},
+                                       {iconCatVFR, "cat_vfr.png"},
+                                       {iconDownloadErr, "download_err.png"},
+                                       {iconDownloading, "downloading.png"},
+                                       {iconWxWind30, "wind_30.png"},
+                                       {iconWxWind60, "wind_60.png"},
+                                       {iconWxWind90, "wind_90.png"},
+                                       {iconWxWind120, "wind_120.png"},
+                                       {iconWxWind150, "wind_150.png"},
+                                       {iconWxWind180, "wind_180.png"},
+                                       {iconWxWind210, "wind_210.png"},
+                                       {iconWxWind240, "wind_240.png"},
+                                       {iconWxWind270, "wind_270.png"},
+                                       {iconWxWind300, "wind_300.png"},
+                                       {iconWxWind330, "wind_330.png"},
+                                       {iconWxWind360, "wind_360.png"},
+                                       {iconWxWindCalm, "wind_calm.png"},
+                                       {iconWxWindUnk, "wind_unk.png"},
+                                       {iconWxBrokenDay, "wx_broken_day.png"},
+                                       {iconWxBrokenNight, "wx_broken_night.png"},
+                                       {iconWxChanceFlurries, "wx_chance_flurries.png"},
+                                       {iconWxChanceFZRA, "wx_chance_fzra.png"},
+                                       {iconWxChanceRain, "wx_chance_rain.png"},
+                                       {iconWxChanceSnow, "wx_chance_snow.png"},
+                                       {iconWxChanceTS, "wx_chance_ts.png"},
+                                       {iconWxClearDay, "wx_clear_day.png"},
+                                       {iconWxClearNight, "wx_clear_night.png"},
+                                       {iconWxFewDay, "wx_few_day.png"},
+                                       {iconWxFewNight, "wx_few_night.png"},
+                                       {iconWxFlurries, "wx_flurries.png"},
+                                       {iconWxFogHaze, "wx_fog_haze.png"},
+                                       {iconWxFunnelCloud, "wx_funnel_cloud.png"},
+                                       {iconWxFZRA, "wx_fzra.png"},
+                                       {iconWxOvercast, "wx_overcast.png"},
+                                       {iconWxRain, "wx_rain.png"},
+                                       {iconWxSleet, "wx_sleet.png"},
+                                       {iconWxSnow, "wx_snow.png"},
+                                       {iconWxThunderstorms, "wx_thunderstorms.png"},
+                                       {iconWxVolcanicAsh, "wx_volcanic_ash.png"}};
 
 static bool allocResources(DrawResources_ **rsrc);
 
@@ -382,7 +382,7 @@ bool gfx_getIconInfo(DrawResources resources, Icon icon, Vector2f *size) {
     return false;
   }
 
-  if (icon >= ICON_COUNT) {
+  if (icon >= iconCount) {
     return false;
   }
 
@@ -777,14 +777,14 @@ cleanup:
  *          the gfx context will be updated with error information.
  */
 static bool loadIcons(DrawResources_ *rsrc) {
-  GLuint tex[ICON_COUNT] = {0};
-  bool   ok              = false;
+  GLuint tex[iconCount] = {0};
+  bool   ok             = false;
 
   glEnable(GL_TEXTURE_2D);
-  glGenTextures(ICON_COUNT, &tex[0]);
+  glGenTextures(iconCount, &tex[0]);
 
   // Load all of the icons in the table.
-  for (int i = 0; i < ICON_COUNT; ++i) {
+  for (int i = 0; i < iconCount; ++i) {
     if (tex[i] == 0) {
       SET_ERROR(rsrc, -1, "Failed to generate texture.");
       goto cleanup;
@@ -796,7 +796,7 @@ static bool loadIcons(DrawResources_ *rsrc) {
   }
 
   // If we load all of the icons, copy the GL texture handles over.
-  for (int i = 0; i < ICON_COUNT; ++i) {
+  for (int i = 0; i < iconCount; ++i) {
     rsrc->icons[i].tex = tex[i];
     tex[i]             = 0;
   }
@@ -806,7 +806,7 @@ static bool loadIcons(DrawResources_ *rsrc) {
 cleanup:
   glDisable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(ICON_COUNT, &tex[0]);
+  glDeleteTextures(iconCount, &tex[0]);
 
   return ok;
 }

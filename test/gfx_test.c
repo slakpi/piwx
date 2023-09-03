@@ -39,10 +39,10 @@ int main() {
   gfx_drawLine(rsrc, line4Verts, lineColor, 2.0f);
   gfx_drawText(rsrc, font16pt, textLoc, "Hello", 5, textColor, vertAlignCell);
 
-  gfx_getIconInfo(rsrc, ICON_WX_VOLCANIC_ASH, &iconInfo);
+  gfx_getIconInfo(rsrc, iconWxVolcanicAsh, &iconInfo);
   center.coord.x = 320.0f - (iconInfo.v[0] / 2.0f);
   center.coord.y = 240.0f - (iconInfo.v[1] / 2.0f);
-  gfx_drawIcon(rsrc, ICON_WX_VOLCANIC_ASH, center);
+  gfx_drawIcon(rsrc, iconWxVolcanicAsh, center);
 
   gfx_dumpSurfaceToPng(rsrc, "test.png");
   // commitToScreen(rsrc);

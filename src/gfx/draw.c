@@ -29,7 +29,7 @@ void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center) {
     return;
   }
 
-  if (icon >= ICON_COUNT) {
+  if (icon >= iconCount) {
     return;
   }
 
