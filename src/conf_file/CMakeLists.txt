@@ -1,10 +1,10 @@
 #-------------------------------------------------------------------------------
-# Export the interface.
+# Setup an interface target shared between the conf and conf_parser targets.
 #-------------------------------------------------------------------------------
 add_library(conf_intf INTERFACE)
 target_include_directories(conf_intf
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} "${PROJECT_SOURCE_DIR}/src")
-add_library(Piwx::Conf_File_Intf ALIAS conf_intf)
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(conf_intf INTERFACE Piwx::Geo)
 
 #-------------------------------------------------------------------------------
 # Setup the configuration file parser and lexer.

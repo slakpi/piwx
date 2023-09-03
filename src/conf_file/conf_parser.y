@@ -35,7 +35,7 @@ static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error) {
 
 %token<p> TOKEN_PARAM
 %token<str> TOKEN_STRING
-%token<val> TOKEN_VALUE TOKEN_ONOFF TOKEN_LOGLEVEL
+%token<val> TOKEN_VALUE TOKEN_ONOFF TOKEN_LOGLEVEL TOKEN_DAYLIGHT_SPAN
 %start confFile
 
 %%
@@ -47,82 +47,82 @@ confFile
 
 assignment
 : TOKEN_PARAM '=' TOKEN_STRING ';' {
-    switch($1.param) {
-    case confStations:
-      cfg->stationQuery = $3;
+  switch($1.param) {
+  case confStations:
+    cfg->stationQuery = $3;
+    break;
+  case confLED:
+    if ($1.n < 1 || $1.n > MAX_LEDS) {
       break;
-    case confLED:
-      if ($1.n < 1 || $1.n > MAX_LEDS) {
-        break;
-      }
-
-      if (cfg->ledAssignments[$1.n - 1]) {
-        free(cfg->ledAssignments[$1.n - 1]);
-      }
-
-      cfg->ledAssignments[$1.n - 1] = $3;
-
-      break;
-    default:
-      YYERROR;
     }
+
+    if (cfg->ledAssignments[$1.n - 1]) {
+      free(cfg->ledAssignments[$1.n - 1]);
+    }
+
+    cfg->ledAssignments[$1.n - 1] = $3;
+
+    break;
+  default:
+    YYERROR;
+  }
   }
 | TOKEN_PARAM '=' TOKEN_VALUE ';' {
-    switch($1.param) {
-    case confCycleTime:
-      cfg->cycleTime = $3;
-      break;
-    case confHighWindSpeed:
-      cfg->highWindSpeed = $3;
-      break;
-    case confHighWindBlink:
-      cfg->highWindBlink = $3;
-      break;
-    case confLEDBrightness:
-      cfg->ledBrightness = min(max($3, 0), 255);
-      break;
-    case confLEDNightBrightness:
-      cfg->ledNightBrightness = min(max($3, 0), 255);
-      break;
-    case confLEDDataPin:
-      cfg->ledDataPin = $3;
-      break;
-    case confLEDDMAChannel:
-      cfg->ledDMAChannel = $3;
-      break;
-    default:
-      YYERROR;
-    }
+  switch($1.param) {
+  case confCycleTime:
+    cfg->cycleTime = $3;
+    break;
+  case confHighWindSpeed:
+    cfg->highWindSpeed = $3;
+    break;
+  case confHighWindBlink:
+    cfg->highWindBlink = $3;
+    break;
+  case confLEDBrightness:
+    cfg->ledBrightness = min(max($3, 0), 255);
+    break;
+  case confLEDNightBrightness:
+    cfg->ledNightBrightness = min(max($3, 0), 255);
+    break;
+  case confLEDDataPin:
+    cfg->ledDataPin = $3;
+    break;
+  case confLEDDMAChannel:
+    cfg->ledDMAChannel = $3;
+    break;
+  default:
+    YYERROR;
+  }
   }
 | TOKEN_PARAM '=' TOKEN_ONOFF ';' {
-    switch ($1.param) {
-    case confHighWindSpeed:
-      if ($3 == 0) {
-        // Only handle `off`. `on` will just leave the current value / default.
-        cfg->highWindSpeed = 0;
-      }
-      break;
-    case confHighWindBlink:
-      cfg->highWindBlink = $3;
-      break;
-    case confLEDBrightness:
-      if ($3 == 0) {
-        // Only handle `off`. `on` will just leave the current value / default.
-        cfg->ledBrightness = 0;
-      }
-      break;
-    case confLEDNightBrightness:
-      if ($3 == 0) {
-        // Only handle `off`. `on` will just leave the current value / default.
-        cfg->ledNightBrightness = 0;
-      }
-      break;
-    default:
-      YYERROR;
+  switch ($1.param) {
+  case confHighWindSpeed:
+    if ($3 == 0) {
+      // Only handle `off`. `on` will just leave the current value / default.
+      cfg->highWindSpeed = 0;
     }
+    break;
+  case confHighWindBlink:
+    cfg->highWindBlink = $3;
+    break;
+  case confLEDBrightness:
+    if ($3 == 0) {
+      // Only handle `off`. `on` will just leave the current value / default.
+      cfg->ledBrightness = 0;
+    }
+    break;
+  case confLEDNightBrightness:
+    if ($3 == 0) {
+      // Only handle `off`. `on` will just leave the current value / default.
+      cfg->ledNightBrightness = 0;
+    }
+    break;
+  default:
+    YYERROR;
+  }
   }
 | TOKEN_PARAM '=' TOKEN_LOGLEVEL ';' {
-    switch ($1.param) {
+  switch ($1.param) {
     case confLogLevel:
       switch ($3) {
       case logWarning:
@@ -134,9 +134,29 @@ assignment
         cfg->logLevel = logQuiet;
         break;
       }
+      break;
     default:
       YYERROR;
     }
+  }
+| TOKEN_PARAM '=' TOKEN_DAYLIGHT_SPAN ';' {
+  switch ($1.param) {
+  case confDaylight:
+    switch ($3) {
+    case daylightOfficial:
+    case daylightCivil:
+    case daylightNautical:
+    case daylightAstronomical:
+      cfg->daylight = $3;
+      break;
+    default:
+      cfg->daylight = daylightCivil;
+      break;
+    }
+    break;
+  default:
+    YYERROR;
+  }
   }
 | error ';'
 ;

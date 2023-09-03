@@ -9,6 +9,7 @@
 
 #include "conf_file.h"
 #include "conf_param.h"
+#include "geo.h"
 #include "log.h"
 #include <string.h>
 
@@ -70,6 +71,26 @@ WS          [\v\r\n\t ]+
   return TOKEN_LOGLEVEL;
 }
 
+"official" {
+  yylval->val = daylightOfficial;
+  return TOKEN_DAYLIGHT_SPAN;
+}
+
+"civil" {
+  yylval->val = daylightCivil;
+  return TOKEN_DAYLIGHT_SPAN;
+}
+
+"nautical" {
+  yylval->val = daylightNautical;
+  return TOKEN_DAYLIGHT_SPAN;
+}
+
+"astronomical" {
+  yylval->val = daylightAstronomical;
+  return TOKEN_DAYLIGHT_SPAN;
+}
+
 "stations" {
   yylval->p.param = confStations;
   return TOKEN_PARAM;
@@ -118,6 +139,11 @@ WS          [\v\r\n\t ]+
 
 "loglevel" {
   yylval->p.param = confLogLevel;
+  return TOKEN_PARAM;
+}
+
+"daylight" {
+  yylval->p.param = confDaylight;
   return TOKEN_PARAM;
 }
 

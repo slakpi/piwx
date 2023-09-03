@@ -1,10 +1,9 @@
 #-------------------------------------------------------------------------------
-# Export the interface.
+# Setup an interface target shared between wx and wx_lexer.
 #-------------------------------------------------------------------------------
 add_library(wx_intf INTERFACE)
 target_include_directories(wx_intf
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src)
-add_library(Piwx::Wx_Intf ALIAS wx_intf)
 
 #-------------------------------------------------------------------------------
 # Setup the weather phenomena lexer.

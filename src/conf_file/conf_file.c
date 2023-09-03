@@ -14,6 +14,7 @@ typedef void *yyscan_t;
 
 #include "conf.lexer.h"
 #include "config.h"
+#include "geo.h"
 #include "log.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,6 +62,7 @@ PiwxConfig *conf_getPiwxConfig() {
   cfg->ledDataPin         = 18;
   cfg->ledDMAChannel      = 10;
   cfg->logLevel           = logWarning;
+  cfg->daylight           = daylightCivil;
 
   cfgFile = fopen(CONFIG_FILE, "r");
 
