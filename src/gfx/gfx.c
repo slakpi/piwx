@@ -71,10 +71,10 @@ static const EGLint gPbufferAttribs[] = {
 static const EGLint gContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
 static const FontImage gFontTable[] = {
-    {FONT_6PT, "sfmono6.png", {{{16.0f, 31.0f}}, 7.0f, 18.0f, 14.0f, 5.0f}},
-    {FONT_8PT, "sfmono8.png", {{{21.0f, 41.0f}}, 9.0f, 24.0f, 18.0f, 3.0f}},
-    {FONT_10PT, "sfmono10.png", {{{26.0f, 51.0f}}, 11.0f, 30.0f, 23.0f, 4.0f}},
-    {FONT_16PT, "sfmono16.png", {{{41.0f, 81.0f}}, 17.0f, 47.0f, 36.0f, 7.0f}}};
+    {font6pt, "sfmono6.png", {{{16.0f, 31.0f}}, 7.0f, 18.0f, 14.0f, 5.0f}},
+    {font8pt, "sfmono8.png", {{{21.0f, 41.0f}}, 9.0f, 24.0f, 18.0f, 3.0f}},
+    {font10pt, "sfmono10.png", {{{26.0f, 51.0f}}, 11.0f, 30.0f, 23.0f, 4.0f}},
+    {font16pt, "sfmono16.png", {{{41.0f, 81.0f}}, 17.0f, 47.0f, 36.0f, 7.0f}}};
 
 static const IconImage gIconTable[] = {{ICON_CAT_IFR, "cat_ifr.png"},
                                        {ICON_CAT_LIFR, "cat_lifr.png"},
@@ -212,7 +212,7 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     glDeleteShader(rsrc->fshaders[i]);
   }
 
-  for (int i = 0; i < FONT_COUNT; ++i) {
+  for (int i = 0; i < fontCount; ++i) {
     glDeleteTextures(1, &rsrc->fonts[i].tex);
   }
 
@@ -264,7 +264,7 @@ bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
     return false;
   }
 
-  if (font >= FONT_COUNT) {
+  if (font >= fontCount) {
     return false;
   }
 
@@ -277,7 +277,7 @@ bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
 
   // If using baseline alignment, move the coordinates down to place the
   // character baseline at the coordinates rather than the cell edge.
-  if (valign == VERT_ALIGN_BASELINE) {
+  if (valign == vertAlignBaseline) {
     rndrInfo->bottomLeft.coord.y += info->baseline;
   }
 
@@ -366,7 +366,7 @@ void gfx_getEglError(DrawResources_ *rsrc, const char *file, long line) {
 bool gfx_getFontInfo(DrawResources resources, Font font, CharInfo *info) {
   UNUSED(resources);
 
-  if (font >= FONT_COUNT) {
+  if (font >= fontCount) {
     return false;
   }
 
@@ -696,14 +696,14 @@ static bool makeProgram(GLuint *program, DrawResources_ *rsrc, GLuint vert, GLui
  *          the gfx context will be updated with error information.
  */
 static bool loadFonts(DrawResources_ *rsrc) {
-  GLuint tex[FONT_COUNT] = {0};
-  bool   ok              = false;
+  GLuint tex[fontCount] = {0};
+  bool   ok             = false;
 
   glEnable(GL_TEXTURE_2D);
-  glGenTextures(FONT_COUNT, &tex[0]);
+  glGenTextures(fontCount, &tex[0]);
 
   // Load all of the fonts in the table.
-  for (int i = 0; i < FONT_COUNT; ++i) {
+  for (int i = 0; i < fontCount; ++i) {
     if (tex[i] == 0) {
       SET_ERROR(rsrc, -1, "Failed to generate texture.");
       goto cleanup;
@@ -715,7 +715,7 @@ static bool loadFonts(DrawResources_ *rsrc) {
   }
 
   // If we load all of the fonts, copy the GL texture handles over.
-  for (int i = 0; i < FONT_COUNT; ++i) {
+  for (int i = 0; i < fontCount; ++i) {
     rsrc->fonts[i].tex = tex[i];
     tex[i]             = 0;
   }
@@ -725,7 +725,7 @@ static bool loadFonts(DrawResources_ *rsrc) {
 cleanup:
   glDisable(GL_TEXTURE_2D);
   glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(FONT_COUNT, &tex[0]);
+  glDeleteTextures(fontCount, &tex[0]);
 
   return ok;
 }

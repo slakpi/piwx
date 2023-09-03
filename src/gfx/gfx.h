@@ -23,7 +23,7 @@ typedef void *DrawResources;
  * @enum  Font
  * @brief Gfx font handles.
  */
-typedef enum { FONT_6PT, FONT_8PT, FONT_10PT, FONT_16PT, FONT_COUNT } Font;
+typedef enum { font6pt, font8pt, font10pt, font16pt, fontCount } Font;
 
 /**
  * @struct CharInfo
@@ -41,7 +41,7 @@ typedef struct {
  * @enum  CharVertAlign
  * @brief Vertical alignment of characters.
  */
-typedef enum { VERT_ALIGN_BASELINE, VERT_ALIGN_CELL } CharVertAlign;
+typedef enum { vertAlignBaseline, vertAlignCell } CharVertAlign;
 
 /**
  * @enum  Icon

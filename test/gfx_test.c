@@ -37,7 +37,7 @@ int main() {
   gfx_drawLine(rsrc, line2Verts, lineColor, 2.0f);
   gfx_drawLine(rsrc, line3Verts, lineColor, 2.0f);
   gfx_drawLine(rsrc, line4Verts, lineColor, 2.0f);
-  gfx_drawText(rsrc, FONT_16PT, textLoc, "Hello", 5, textColor, VERT_ALIGN_CELL);
+  gfx_drawText(rsrc, font16pt, textLoc, "Hello", 5, textColor, vertAlignCell);
 
   gfx_getIconInfo(rsrc, ICON_WX_VOLCANIC_ASH, &iconInfo);
   center.coord.x = 320.0f - (iconInfo.v[0] / 2.0f);
