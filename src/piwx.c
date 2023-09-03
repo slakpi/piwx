@@ -211,7 +211,7 @@ static bool go(bool test, bool verbose) {
 
       drawDownloadScreen(resources, !test);
 
-      wx           = wx_queryWx(cfg->stationQuery, DAYLIGHT_CIVIL, &err);
+      wx           = wx_queryWx(cfg->stationQuery, daylightCivil, &err);
       curStation   = wx;
       first        = false;
       draw         = (wx != NULL);
@@ -904,7 +904,7 @@ static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t up
 
   if (update & UPDATE_NIGHT) {
     bool wasNight = station->isNight;
-    wx_updateDayNightState(station, DAYLIGHT_CIVIL, now);
+    wx_updateDayNightState(station, daylightCivil, now);
     updateLED |= (wasNight != station->isNight);
   }
 

@@ -8,10 +8,10 @@
 #include <time.h>
 
 typedef enum {
-  DAYLIGHT_OFFICIAL,
-  DAYLIGHT_CIVIL,
-  DAYLIGHT_NAUTICAL,
-  DAYLIGHT_ASTRONOMICAL
+  daylightOfficial,
+  daylightCivil,
+  daylightNautical,
+  daylightAstronomical
 } DaylightSpan;
 
 /**

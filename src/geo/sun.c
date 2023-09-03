@@ -133,13 +133,13 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) 
 static double getTWilightAngularValue(DaylightSpan daylight) {
   switch (daylight) {
   default:
-  case DAYLIGHT_OFFICIAL:
+  case daylightOfficial:
     return DAY_OFFICIAL;
-  case DAYLIGHT_CIVIL:
+  case daylightCivil:
     return CIVIL_TWILIGHT;
-  case DAYLIGHT_NAUTICAL:
+  case daylightNautical:
     return NAUTICAL_TWILIGHT;
-  case DAYLIGHT_ASTRONOMICAL:
+  case daylightAstronomical:
     return ASTONOMICAL_TWILIGHT;
   }
 }
