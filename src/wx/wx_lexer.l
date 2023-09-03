@@ -5,7 +5,6 @@
 
 %{
 
-#include "wx.h"
 #include "wx_type.h"
 #include <string.h>
 

@@ -190,7 +190,7 @@ void wx_freeStations(WxStation *stations) {
   }
 }
 
-WxStation *wx_queryWx(const char *stations, int *err) {
+WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
   CURL             *curlLib;
   CURLcode          res;
   char              url[4096];
@@ -305,7 +305,7 @@ WxStation *wx_queryWx(const char *stations, int *err) {
 
     // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight    = geo_isNight(newStation->lat, newStation->lon, now);
+    newStation->isNight    = geo_isNight(newStation->lat, newStation->lon, daylight, now);
     newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
@@ -332,8 +332,8 @@ cleanup:
   return start;
 }
 
-void wx_updateDayNightState(WxStation *station, time_t now) {
-  station->isNight = geo_isNight(station->lat, station->lon, now);
+void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t now) {
+  station->isNight = geo_isNight(station->lat, station->lon, daylight, now);
 
   // Update icons that have day/night variants.
   switch (station->wx) {

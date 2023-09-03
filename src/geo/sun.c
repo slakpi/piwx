@@ -7,10 +7,14 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define PI          3.1415926536
-#define RAD_TO_DEG  (180.0 / PI)
-#define DEG_TO_RAD  (PI / 180.0)
-#define SEC_PER_DAY 86400
+#define PI                   3.1415926536
+#define RAD_TO_DEG           (180.0 / PI)
+#define DEG_TO_RAD           (PI / 180.0)
+#define SEC_PER_DAY          86400
+#define DAY_OFFICIAL         90.833
+#define CIVIL_TWILIGHT       96.0
+#define NAUTICAL_TWILIGHT    102.0
+#define ASTONOMICAL_TWILIGHT 108.0
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime);
@@ -47,18 +51,21 @@ static time_t calcTime(int year, int month, int day, double minutes);
 
 static double calcTimeJulianCentury(double jd);
 
-bool geo_calcDaylightSpan(double lat, double lon, double offset, int year, int month, int day,
-                          time_t *start, time_t *end) {
+static double getTWilightAngularValue(DaylightSpan daylight);
+
+bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int year, int month,
+                          int day, time_t *start, time_t *end) {
+  double angle = getTWilightAngularValue(daylight);
   double jd = calcJD(year, month, day);
   double absTime;
 
-  if (!calcAbsTime(lat, lon, jd, offset, true, &absTime)) {
+  if (!calcAbsTime(lat, lon, jd, angle, true, &absTime)) {
     return false;
   }
 
   *start = calcTime(year, month, day, absTime);
 
-  if (!calcAbsTime(lat, lon, jd, offset, false, &absTime)) {
+  if (!calcAbsTime(lat, lon, jd, angle, false, &absTime)) {
     return false;
   }
 
@@ -67,13 +74,13 @@ bool geo_calcDaylightSpan(double lat, double lon, double offset, int year, int m
   return true;
 }
 
-bool geo_isNight(double lat, double lon, time_t obsTime) {
+bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) {
   time_t    t = obsTime;
   time_t    sr, ss;
   struct tm date;
 
   // Consider a report issued at 1753L on July 31 in the US Pacific Daylight
-  // time zone. The UTC date/time is 0053Z on Aug 1, so `calcSunTransitTimes()`
+  // time zone. The UTC date/time is 0053Z on Aug 1, so `geo_calcDaylightSpan()`
   // will calculate the sunrise/sunset for Aug 1, not July 31. Using the Aug 1
   // data, 0053Z will be less than the sunrise time and `isNight()` would
   // indicate night time despite it being day time PDT.
@@ -83,8 +90,8 @@ bool geo_isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!geo_calcDaylightSpan(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
-                            date.tm_mday, &sr, &ss)) {
+  if (!geo_calcDaylightSpan(lat, lon, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
+                            &sr, &ss)) {
     return false;
   }
 
@@ -108,14 +115,33 @@ bool geo_isNight(double lat, double lon, time_t obsTime) {
 
   gmtime_r(&t, &date);
 
-  if (!geo_calcDaylightSpan(lat, lon, CIVIL_TWILIGHT, date.tm_year + 1900, date.tm_mon + 1,
-                            date.tm_mday, &sr, &ss)) {
+  if (!geo_calcDaylightSpan(lat, lon, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
+                            &sr, &ss)) {
     return false;
   }
 
   // It's night time if greater than sunset on the previous day or less than
   // sunrise on the next day.
   return (obsTime >= ss || obsTime < sr);
+}
+
+/**
+ * @brief   Get the twilight angular offset for a daylight span.
+ * @param[in] daylight The daylight span of interest.
+ * @returns The twlight angular offset in degrees.
+ */
+static double getTWilightAngularValue(DaylightSpan daylight) {
+  switch (daylight) {
+  default:
+  case DAYLIGHT_OFFICIAL:
+    return DAY_OFFICIAL;
+  case DAYLIGHT_CIVIL:
+    return CIVIL_TWILIGHT;
+  case DAYLIGHT_NAUTICAL:
+    return NAUTICAL_TWILIGHT;
+  case DAYLIGHT_ASTRONOMICAL:
+    return ASTONOMICAL_TWILIGHT;
+  }
 }
 
 /**
@@ -143,12 +169,12 @@ static double calcJD(int y, int m, int d) {
  * @brief   Calculates the UTC sunset or sunrise time at a given location.
  * @param[in]  lat     Latitude of the location (+N/-S) in degrees.
  * @param[in]  lon     Longitude of the location (+E/-W) in degrees.
- * @param[in]  jd      Julian day of transit.
- * @param[in]  offset  Transit offset (official, civil, nautical, astronomical)
+ * @param[in]  jd      Julian day of interest.
+ * @param[in]  offset  Agnular offset (official, civil, nautical, astronomical)
  *                     in degrees.
  * @param[in]  sunrise True if sunrise, false if sunset.
  * @param[out] absTime UTC time (UNIX time).
- * @returns True if able to calculate the transit time.
+ * @returns True if able to calculate the sunset/sunrise time.
  */
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime) {
@@ -288,12 +314,12 @@ static double calcObliquityCorrection(double t) {
 
 /**
  * @brief   Calculate the solar hour angle for sunrise.
- * @details See https://en.wikipedia.org/wiki/Hour_angle. Converts the transit
+ * @details See https://en.wikipedia.org/wiki/Hour_angle. Converts the angular
  *          offset relative to the location to a solar hour angle relative to
  *          solar noon.
  * @param[in] lat      The latitude of the location in degrees.
  * @param[in] solarDec The solar declination in degrees.
- * @param[in] offset   Transit offset (official, civil, nautical, astronomical)
+ * @param[in] offset   Angular offset (official, civil, nautical, astronomical)
  *                     in degrees.
  * @returns The sunrise hour angle in radians.
  */
@@ -310,7 +336,7 @@ static double calcHourAngleSunrise(double lat, double solarDec, double offset) {
  * @details See @a calcHourAngleSunrise.
  * @param[in] lat      The latitude of the location in degrees.
  * @param[in] solarDec The solar declination in degrees.
- * @param[in] offset   Transit offset (official, civil, nautical, astronomical)
+ * @param[in] offset   Angular offset (official, civil, nautical, astronomical)
  *                     in degrees.
  * @returns The sunset hour angle in radians.
  */
@@ -320,11 +346,11 @@ static double calcHourAngleSunset(double lat, double solarDec, double offset) {
 
 /**
  * @brief   Convert the offset from midnight to a date.
- * @param[in] year    Year of transit.
- * @param[in] month   Month of transit.
- * @param[in] day     Day of transit.
+ * @param[in] year    Year of interest.
+ * @param[in] month   Month of interest.
+ * @param[in] day     Day of interest.
  * @param[in] minutes Offset from midnight in minutes.
- * @returns The UTC date/time of the transit (UNIX time).
+ * @returns The UTC date/time of interest (UNIX time).
  */
 static time_t calcTime(int year, int month, int day, double minutes) {
   struct tm t = {

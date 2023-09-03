@@ -4,6 +4,7 @@
 #if !defined WX_H
 #define WX_H
 
+#include "geo.h"
 #include <stdbool.h>
 #include <time.h>
 
@@ -103,17 +104,19 @@ void wx_freeStations(WxStation *stations);
 /**
  * @brief   Query the weather source for a comma-separated list of stations.
  * @param[in]  stations The list of stations to query.
+ * @param[in]  daylight The daylight span to use for determining night.
  * @param[out] err      Query error code.
  * @returns A pointer to the head of a circular list of weather station entries
  *          or null if there is an error.
  */
-WxStation *wx_queryWx(const char *stations, int *err);
+WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err);
 
 /**
  * @brief Updates the @a isNight flag and icon for the new observation time.
- * @param[in] station The weather station to update.
- * @param[in] now     The new observation time.
+ * @param[in] station  The weather station to update.
+ * @param[in] daylight The daylight span to use for determining night.
+ * @param[in] now      The new observation time.
  */
-void wx_updateDayNightState(WxStation *station, time_t now);
+void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t now);
 
 #endif /* WX_H */
