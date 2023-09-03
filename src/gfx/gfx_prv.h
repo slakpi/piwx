@@ -72,44 +72,44 @@ typedef struct {
  * @enum  VertexShader
  * @brief Vertex shader handles.
  */
-typedef enum { GENERAL_VERTEX, VERTEX_COUNT } VertexShader;
+typedef enum { vertexGeneral, vertexShaderCount } VertexShader;
 
 /**
  * @enum  FragmentShader
  * @brief Fragment shader handles.
  */
 typedef enum {
-  GENERAL_FRAGMENT,
-  ALPHA_TEX_FRAGMENT,
-  RGBA_TEX_FRAGMENT,
-  FRAGMENT_COUNT
+  fragmentGeneral,
+  fragmentAlphaTex,
+  fragmentRGBATex,
+  fragmentShaderCount
 } FragmentShader;
 
 /**
  * @enum  Program
  * @brief Shader program handles.
  */
-typedef enum { GENERAL_SHADER, ALPHA_TEX_SHADER, RGBA_TEX_SHADER, PROGRAM_COUNT } Program;
+typedef enum { programGeneral, programAlphaTex, programRGBATex, programCount } Program;
 
 /**
  * @struct DrawResources_
  * @brief  Private implementation of the gfx DrawResources context.
  */
 typedef struct {
-  EGLDisplay  display;                  // EGL display object
-  EGLContext  context;                  // EGL context
-  EGLSurface  surface;                  // EGL surface
-  int         error;                    // Last error code
-  char        errorMsg[256];            // Last error message
-  char        errorFile[256];           // File where the last error occurred
-  long        errorLine;                // Line number of last error occurred
-  int         major, minor;             // EGL API version
-  GLuint      vshaders[VERTEX_COUNT];   // Vertex shaders
-  GLuint      fshaders[FRAGMENT_COUNT]; // Fragment shaders
-  ProgramInfo programs[PROGRAM_COUNT];  // Shader programs
-  Texture     fonts[FONT_COUNT];        // Font textures
-  Texture     icons[ICON_COUNT];        // Icon textures
-  GLfloat     proj[4][4];               // Projection matrix
+  EGLDisplay  display;                       // EGL display object
+  EGLContext  context;                       // EGL context
+  EGLSurface  surface;                       // EGL surface
+  int         error;                         // Last error code
+  char        errorMsg[256];                 // Last error message
+  char        errorFile[256];                // File where the last error occurred
+  long        errorLine;                     // Line number of last error occurred
+  int         major, minor;                  // EGL API version
+  GLuint      vshaders[vertexShaderCount];   // Vertex shaders
+  GLuint      fshaders[fragmentShaderCount]; // Fragment shaders
+  ProgramInfo programs[programCount];        // Shader programs
+  Texture     fonts[FONT_COUNT];             // Font textures
+  Texture     icons[ICON_COUNT];             // Icon textures
+  GLfloat     proj[4][4];                    // Projection matrix
 } DrawResources_;
 
 /**

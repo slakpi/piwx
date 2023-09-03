@@ -200,15 +200,15 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     return;
   }
 
-  for (int i = 0; i < PROGRAM_COUNT; ++i) {
+  for (int i = 0; i < programCount; ++i) {
     glDeleteProgram(rsrc->programs[i].program);
   }
 
-  for (int i = 0; i < VERTEX_COUNT; ++i) {
+  for (int i = 0; i < vertexShaderCount; ++i) {
     glDeleteShader(rsrc->vshaders[i]);
   }
 
-  for (int i = 0; i < FRAGMENT_COUNT; ++i) {
+  for (int i = 0; i < fragmentShaderCount; ++i) {
     glDeleteShader(rsrc->fshaders[i]);
   }
 
@@ -461,7 +461,7 @@ bool gfx_initGraphics(DrawResources *resources) {
 }
 
 void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
-  glUseProgram(rsrc->programs[GENERAL_SHADER].program);
+  glUseProgram(rsrc->programs[programGeneral].program);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glDisable(GL_TEXTURE_2D);
   glDisableVertexAttribArray(rsrc->programs[program].posIndex);
@@ -477,7 +477,7 @@ void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *
 }
 
 void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {
-  if (program >= PROGRAM_COUNT) {
+  if (program >= programCount) {
     return;
   }
 
@@ -591,23 +591,23 @@ static bool initShaders(DrawResources_ *rsrc) {
 
   static const char *vshaders[]  = {GENERAL_VERT_SRC};
   static const char *fshaders[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC};
-  static const Link  linkTable[] = {{GENERAL_VERTEX, GENERAL_FRAGMENT},
-                                    {GENERAL_VERTEX, ALPHA_TEX_FRAGMENT},
-                                    {GENERAL_VERTEX, RGBA_TEX_FRAGMENT}};
+  static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
+                                    {vertexGeneral, fragmentAlphaTex},
+                                    {vertexGeneral, fragmentRGBATex}};
 
-  for (int i = 0; i < VERTEX_COUNT; ++i) {
+  for (int i = 0; i < vertexShaderCount; ++i) {
     if (!makeShader(&rsrc->vshaders[i], rsrc, GL_VERTEX_SHADER, vshaders[i])) {
       return false;
     }
   }
 
-  for (int i = 0; i < FRAGMENT_COUNT; ++i) {
+  for (int i = 0; i < fragmentShaderCount; ++i) {
     if (!makeShader(&rsrc->fshaders[i], rsrc, GL_FRAGMENT_SHADER, fshaders[i])) {
       return false;
     }
   }
 
-  for (int i = 0; i < PROGRAM_COUNT; ++i) {
+  for (int i = 0; i < programCount; ++i) {
     GLuint vert = rsrc->vshaders[linkTable[i].v];
     GLuint frag = rsrc->fshaders[linkTable[i].f];
 
@@ -880,7 +880,7 @@ static void initRender(DrawResources_ *rsrc) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   makeProjection(rsrc);
-  gfx_resetShader(rsrc, GENERAL_SHADER);
+  gfx_resetShader(rsrc, programGeneral);
 }
 
 /**

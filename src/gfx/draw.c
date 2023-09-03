@@ -61,7 +61,7 @@ void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center) {
 
   vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
 
-  drawTriangles(rsrc, buf, COUNTOF(buf), RGBA_TEX_SHADER, tex->tex);
+  drawTriangles(rsrc, buf, COUNTOF(buf), programRGBATex, tex->tex);
 }
 
 void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f color, float width) {
@@ -85,7 +85,7 @@ void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f colo
 
   vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
 
-  drawTriangles(rsrc, buf, COUNTOF(buf), GENERAL_SHADER, 0);
+  drawTriangles(rsrc, buf, COUNTOF(buf), programGeneral, 0);
 }
 
 void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f color) {
@@ -98,7 +98,7 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
 
   vectorFill2f(buf[0].pos.v, sizeof(Vertex), vertices, COUNTOF(buf));
   vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
-  drawTriangles(rsrc, buf, COUNTOF(buf), GENERAL_SHADER, 0);
+  drawTriangles(rsrc, buf, COUNTOF(buf), programGeneral, 0);
 }
 
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
@@ -121,7 +121,7 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
       continue;
     }
 
-    drawTriangles(rsrc, &buf[0], 4, ALPHA_TEX_SHADER, rsrc->fonts[font].tex);
+    drawTriangles(rsrc, &buf[0], 4, programAlphaTex, rsrc->fonts[font].tex);
 
     cur.coord.x += info.cellSize.v[0];
   }
