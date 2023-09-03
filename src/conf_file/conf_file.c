@@ -60,7 +60,7 @@ PiwxConfig *conf_getPiwxConfig() {
   cfg->ledNightBrightness = 32;
   cfg->ledDataPin         = 18;
   cfg->ledDMAChannel      = 10;
-  cfg->logLevel           = LOG_WARNING;
+  cfg->logLevel           = logWarning;
 
   cfgFile = fopen(CONFIG_FILE, "r");
 

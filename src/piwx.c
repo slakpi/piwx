@@ -171,15 +171,15 @@ static bool go(bool test, bool verbose) {
   }
 
   openLog(cfg->logLevel);
-  writeLog(LOG_INFO, "Starting up.");
+  writeLog(logInfo, "Starting up.");
 
   if (setupGpio() < 0) {
-    writeLog(LOG_WARNING, "Failed to initialize pigpio.\n");
+    writeLog(logWarning, "Failed to initialize pigpio.\n");
     goto cleanup;
   }
 
   if (!gfx_initGraphics(&resources)) {
-    writeLog(LOG_WARNING, "Failed to initialize graphics.");
+    writeLog(logWarning, "Failed to initialize graphics.");
     goto cleanup;
   }
 
@@ -200,11 +200,11 @@ static bool go(bool test, bool verbose) {
     // the refresh button, then requery the weather data.
     if (first || now >= nextUpdate || (bc & BUTTON_1)) {
       if (first) {
-        writeLog(LOG_DEBUG, "Performing startup weather query.");
+        writeLog(logDebug, "Performing startup weather query.");
       } else if (now >= nextUpdate) {
-        writeLog(LOG_DEBUG, "Update time out: %lu >= %lu", now, nextUpdate);
+        writeLog(logDebug, "Update time out: %lu >= %lu", now, nextUpdate);
       } else if (bc & BUTTON_1) {
-        writeLog(LOG_DEBUG, "Update button pressed.");
+        writeLog(logDebug, "Update button pressed.");
       }
 
       wx_freeStations(wx);
@@ -290,7 +290,7 @@ static bool go(bool test, bool verbose) {
   ret = true;
 
 cleanup:
-  writeLog(LOG_INFO, "Shutting down.");
+  writeLog(logInfo, "Shutting down.");
 
   if (!test) {
     gfx_clearSurface(resources, gClearColor);

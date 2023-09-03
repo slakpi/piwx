@@ -56,7 +56,7 @@ static double getTWilightAngularValue(DaylightSpan daylight);
 bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int year, int month,
                           int day, time_t *start, time_t *end) {
   double angle = getTWilightAngularValue(daylight);
-  double jd = calcJD(year, month, day);
+  double jd    = calcJD(year, month, day);
   double absTime;
 
   if (!calcAbsTime(lat, lon, jd, angle, true, &absTime)) {

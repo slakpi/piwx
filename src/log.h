@@ -17,10 +17,10 @@
  * @warning The log is not thread-safe.
  */
 typedef enum {
-  LOG_QUIET,
-  LOG_WARNING,
-  LOG_INFO,
-  LOG_DEBUG,
+  logQuiet,
+  logWarning,
+  logInfo,
+  logDebug,
 } LogLevel;
 
 /**

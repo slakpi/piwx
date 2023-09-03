@@ -12,7 +12,7 @@
 #define MAX_LOG 1024
 
 static FILE *gLog      = NULL;
-static int   gMaxLevel = LOG_QUIET;
+static int   gMaxLevel = logQuiet;
 
 static const char *getLevelText(LogLevel level);
 
@@ -26,7 +26,7 @@ void assertLog(bool condition, const char *fmt, ...) {
   }
 
   va_start(args, fmt);
-  writeLogV(LOG_WARNING, fmt, args);
+  writeLogV(logWarning, fmt, args);
   va_end(args);
 
   assert(0);
@@ -37,7 +37,7 @@ bool openLog(LogLevel maxLevel) {
     closeLog();
   }
 
-  if (maxLevel <= LOG_QUIET) {
+  if (maxLevel <= logQuiet) {
     return true;
   }
 
@@ -59,7 +59,7 @@ void closeLog() {
 
   fclose(gLog);
   gLog      = NULL;
-  gMaxLevel = LOG_QUIET;
+  gMaxLevel = logQuiet;
 }
 
 void writeLog(LogLevel level, const char *fmt, ...) {
@@ -81,11 +81,11 @@ void writeLog(LogLevel level, const char *fmt, ...) {
  */
 static const char *getLevelText(LogLevel level) {
   switch (level) {
-  case LOG_WARNING:
+  case logWarning:
     return "WARNING";
-  case LOG_INFO:
+  case logInfo:
     return "INFO";
-  case LOG_DEBUG:
+  case logDebug:
     return "DEBUG";
   default:
     return "";
