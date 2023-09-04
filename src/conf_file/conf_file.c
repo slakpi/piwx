@@ -13,7 +13,6 @@ typedef void *yyscan_t;
 #define YYSTYPE CONF_STYPE
 
 #include "conf.lexer.h"
-#include "config.h"
 #include "geo.h"
 #include "log.h"
 #include <stdio.h>
@@ -40,20 +39,27 @@ void conf_freePiwxConfig(PiwxConfig *cfg) {
   free(cfg);
 }
 
-PiwxConfig *conf_getPiwxConfig() {
-  FILE       *cfgFile;
-  yyscan_t    scanner;
-  PiwxConfig *cfg = malloc(sizeof(PiwxConfig));
+PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResources,
+                               const char *fontResources, const char *configFile) {
+  FILE       *cfgFile = NULL;
+  yyscan_t    scanner = NULL;
+  PiwxConfig *cfg     = NULL;
+
+  if (!installPrefix || !imageResources || !fontResources || !configFile) {
+    return NULL;
+  }
+
+  cfg = malloc(sizeof(PiwxConfig));
 
   if (!cfg) {
     return NULL;
   }
 
   memset(cfg, 0, sizeof(PiwxConfig)); // NOLINT -- Size known.
-  cfg->installPrefix      = strdup(INSTALL_PREFIX);
-  cfg->imageResources     = strdup(IMAGE_RESOURCES);
-  cfg->fontResources      = strdup(FONT_RESOURCES);
-  cfg->configFile         = strdup(CONFIG_FILE);
+  cfg->installPrefix      = strdup(installPrefix);
+  cfg->imageResources     = strdup(imageResources);
+  cfg->fontResources      = strdup(fontResources);
+  cfg->configFile         = strdup(configFile);
   cfg->cycleTime          = 60;
   cfg->highWindSpeed      = 25;
   cfg->highWindBlink      = 0;
@@ -64,7 +70,7 @@ PiwxConfig *conf_getPiwxConfig() {
   cfg->logLevel           = logWarning;
   cfg->daylight           = daylightCivil;
 
-  cfgFile = fopen(CONFIG_FILE, "r");
+  cfgFile = fopen(configFile, "r");
 
   if (!cfgFile) {
     return cfg;
@@ -80,22 +86,22 @@ PiwxConfig *conf_getPiwxConfig() {
   return cfg;
 }
 
-char *conf_getPathForFont(const char *file, char *path, size_t len) {
-  return appendFileToPath(FONT_RESOURCES, file, path, len);
+char *conf_getPathForFont(const char *fontResources, const char *file, char *path, size_t len) {
+  return appendFileToPath(fontResources, file, path, len);
 }
 
-char *conf_getPathForIcon(const char *file, char *path, size_t len) {
-  return appendFileToPath(IMAGE_RESOURCES, file, path, len);
+char *conf_getPathForIcon(const char *imageResources, const char *file, char *path, size_t len) {
+  return appendFileToPath(imageResources, file, path, len);
 }
 
 /**
  * @brief   Append a file name to a path prefix.
  * @details A POSIX-only function to append a trailing backslash to @a prefix,
  *          if necessary, followed by @a name.
- * @param[in] prefix Null-terminated path prefix.
- * @param[in] file   Null-terminated file name.
- * @param[in] path   Output buffer. May not overlap @a prefix or @a file.
- * @param[in] len    Length of @a path.
+ * @param[in]  prefix Null-terminated path prefix.
+ * @param[in]  file   Null-terminated file name.
+ * @param[out] path   Output buffer. May not overlap @a prefix or @a file.
+ * @param[in]  len    Length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
 static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len) {

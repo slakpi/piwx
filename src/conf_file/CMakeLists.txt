@@ -26,10 +26,8 @@ target_link_libraries(conf_parser PRIVATE conf_intf)
 target_compile_options(conf_parser PRIVATE -Wno-unused-function -Wno-unused-variable)
 
 #-------------------------------------------------------------------------------
-# Setup the configuration library to share with tests.
+# Setup the configuration library.
 #-------------------------------------------------------------------------------
-configure_file(config.h.in config.h)
-
 add_library(conf STATIC conf_file.c)
 target_link_libraries(conf
   PUBLIC conf_intf

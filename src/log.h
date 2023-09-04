@@ -40,10 +40,11 @@ void closeLog();
 
 /**
  * @brief Open the log.
+ * @param[in] logFile  The path to PiWx's log file.
  * @param[in] maxLevel The maximum level to output.
  * @returns True if successful, false otherwise.
  */
-bool openLog(LogLevel maxLevel);
+bool openLog(const char *logFile, LogLevel maxLevel);
 
 /**
  * @brief Write a message at the specified log level.

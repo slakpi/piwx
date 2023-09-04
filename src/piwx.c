@@ -156,7 +156,8 @@ static void signalHandler(int signo) {
  * @returns true if successful, false otherwise.
  */
 static bool go(bool test, bool verbose) {
-  PiwxConfig   *cfg = conf_getPiwxConfig();
+  PiwxConfig *cfg =
+      conf_getPiwxConfig(INSTALL_PREFIX, IMAGE_RESOURCES, FONT_RESOURCES, CONFIG_FILE);
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextDayNight = 0, nextWx = 0;
   bool          first = true, ret = false;
@@ -170,7 +171,7 @@ static bool go(bool test, bool verbose) {
     return 0; // Nothing to do, but not an error.
   }
 
-  openLog(cfg->logLevel);
+  openLog(LOG_FILE, cfg->logLevel);
   writeLog(logInfo, "Starting up.");
 
   if (setupGpio() < 0) {
@@ -178,7 +179,7 @@ static bool go(bool test, bool verbose) {
     goto cleanup;
   }
 
-  if (!gfx_initGraphics(&resources)) {
+  if (!gfx_initGraphics(cfg->fontResources, cfg->imageResources, &resources)) {
     writeLog(logWarning, "Failed to initialize graphics.");
     goto cleanup;
   }

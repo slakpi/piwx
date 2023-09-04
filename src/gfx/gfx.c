@@ -131,13 +131,15 @@ static void initRender(DrawResources_ *rsrc);
 
 static bool initShaders(DrawResources_ *rsrc);
 
-static bool loadFont(DrawResources_ *rsrc, const FontImage *entry, GLuint tex, Texture *texture);
+static bool loadFont(DrawResources_ *rsrc, const char *fontResources, const FontImage *entry,
+                     GLuint tex, Texture *texture);
 
-static bool loadFonts(DrawResources_ *rsrc);
+static bool loadFonts(DrawResources_ *rsrc, const char *fontResources);
 
-static bool loadIcon(DrawResources_ *rsrc, const IconImage *entry, GLuint tex, Texture *texture);
+static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const IconImage *entry,
+                     GLuint tex, Texture *texture);
 
-static bool loadIcons(DrawResources_ *rsrc);
+static bool loadIcons(DrawResources_ *rsrc, const char *imageResources);
 
 static void loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture);
 
@@ -424,10 +426,11 @@ void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, l
   strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
 }
 
-bool gfx_initGraphics(DrawResources *resources) {
+bool gfx_initGraphics(const char *fontResources, const char *imageResources,
+                      DrawResources *resources) {
   DrawResources_ *rsrc = NULL;
 
-  if (!resources) {
+  if (!fontResources || !imageResources || !resources) {
     return false;
   }
 
@@ -447,11 +450,11 @@ bool gfx_initGraphics(DrawResources *resources) {
     return false;
   }
 
-  if (!loadFonts(rsrc)) {
+  if (!loadFonts(rsrc, fontResources)) {
     return false;
   }
 
-  if (!loadIcons(rsrc)) {
+  if (!loadIcons(rsrc, imageResources)) {
     return false;
   }
 
@@ -626,10 +629,10 @@ static bool initShaders(DrawResources_ *rsrc) {
 
 /**
  * @brief   Compile a shader.
- * @param[out] shader  New shader.
- * @param[in,out] rsrc The gfx context.
- * @param[in] type     The type of shader to compile.
- * @param[in] source   The shader source code.
+ * @param[out]    shader New shader.
+ * @param[in,out] rsrc   The gfx context.
+ * @param[in]     type   The type of shader to compile.
+ * @param[in]     source The shader source code.
  * @returns True if able to compile the shader, false otherwise. If false, the
  *          gfx context will be updated with error information.
  */
@@ -657,10 +660,10 @@ static bool makeShader(GLuint *shader, DrawResources_ *rsrc, GLenum type, const 
 
 /**
  * @brief   Link a shader program.
- * @param[out] shader  New program.
- * @param[in,out] rsrc The gfx context.
- * @param[in] vert     The vertex shader to use.
- * @param[in] frag     The fragment shader to use.
+ * @param[out]    shader New program.
+ * @param[in,out] rsrc   The gfx context.
+ * @param[in]     vert   The vertex shader to use.
+ * @param[in]     frag   The fragment shader to use.
  * @returns True if able to link the program false otherwise. If false, the gfx
  *          context will be updated with error information.
  */
@@ -691,11 +694,12 @@ static bool makeProgram(GLuint *program, DrawResources_ *rsrc, GLuint vert, GLui
  * @brief   Load font textures.
  * @details A font image must be 16 characters by 8 characters. The image must
  *          also be an 8-bit grayscale image.
- * @param[in,out] rsrc The gfx context.
+ * @param[in,out] rsrc           The gfx context.
+ * @param[in]     fontResources  The path to PiWx's font resources.
  * @returns True if able to load all font resources, false otherwise. If false,
  *          the gfx context will be updated with error information.
  */
-static bool loadFonts(DrawResources_ *rsrc) {
+static bool loadFonts(DrawResources_ *rsrc, const char *fontResources) {
   GLuint tex[fontCount] = {0};
   bool   ok             = false;
 
@@ -709,7 +713,7 @@ static bool loadFonts(DrawResources_ *rsrc) {
       goto cleanup;
     }
 
-    if (!loadFont(rsrc, &gFontTable[i], tex[i], &rsrc->fonts[i])) {
+    if (!loadFont(rsrc, fontResources, &gFontTable[i], tex[i], &rsrc->fonts[i])) {
       goto cleanup;
     }
   }
@@ -732,20 +736,22 @@ cleanup:
 
 /**
  * @brief Load a single font image.
- * @param[in,out] rsrc The gfx context.
- * @param[in] entry    Font table entry.
- * @param[in] tex      The GL texture handle.
- * @param[in] texture  The texture wrapper.
+ * @param[in,out] rsrc           The gfx context.
+ * @param[in]     fontResources  The path to PiWx's font resources.
+ * @param[in]     entry          Font table entry.
+ * @param[in]     tex            The GL texture handle.
+ * @param[in]     texture        The texture wrapper.
  * @returns True if able to load the font resource, false otherwise. If false,
  *          the gfx context will be updated with error information.
  */
-static bool loadFont(DrawResources_ *rsrc, const FontImage *entry, GLuint tex, Texture *texture) {
+static bool loadFont(DrawResources_ *rsrc, const char *fontResources, const FontImage *entry,
+                     GLuint tex, Texture *texture) {
   Png  png            = {0};
   char path[MAX_PATH] = {0};
   bool ok             = false;
 
   // Get the fully-qualified path to the font image.
-  conf_getPathForFont(entry->name, path, COUNTOF(path));
+  conf_getPathForFont(fontResources, entry->name, path, COUNTOF(path));
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -772,11 +778,12 @@ cleanup:
 
 /**
  * @brief   Load icon textures.
- * @param[in,out] rsrc The gfx context.
+ * @param[in,out] rsrc           The gfx context.
+ * @param[in]     imageResources The path to PiWx's image resources.
  * @returns True if able to load all icon resources, false otherwise. If false,
  *          the gfx context will be updated with error information.
  */
-static bool loadIcons(DrawResources_ *rsrc) {
+static bool loadIcons(DrawResources_ *rsrc, const char *imageResources) {
   GLuint tex[iconCount] = {0};
   bool   ok             = false;
 
@@ -790,7 +797,7 @@ static bool loadIcons(DrawResources_ *rsrc) {
       goto cleanup;
     }
 
-    if (!loadIcon(rsrc, &gIconTable[i], tex[i], &rsrc->icons[i])) {
+    if (!loadIcon(rsrc, imageResources, &gIconTable[i], tex[i], &rsrc->icons[i])) {
       goto cleanup;
     }
   }
@@ -813,20 +820,22 @@ cleanup:
 
 /**
  * @brief Load a single icon image.
- * @param[in,out] rsrc The gfx context.
- * @param[in] entry    Icon table entry.
- * @param[in] tex      The GL texture handle.
- * @param[in] texture  The texture wrapper.
+ * @param[in,out] rsrc           The gfx context.
+ * @param[in]     imageResources The path to PiWx's image resources.
+ * @param[in]     entry          Icon table entry.
+ * @param[in]     tex            The GL texture handle.
+ * @param[in]     texture        The texture wrapper.
  * @returns True if able to load the icon resource, false otherwise. If false,
  *          the gfx context will be updated with error information.
  */
-static bool loadIcon(DrawResources_ *rsrc, const IconImage *entry, GLuint tex, Texture *texture) {
+static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const IconImage *entry,
+                     GLuint tex, Texture *texture) {
   Png  png            = {0};
   char path[MAX_PATH] = {0};
   bool ok             = false;
 
   // Get the fully-qualified path to the font image.
-  conf_getPathForIcon(entry->name, path, COUNTOF(path));
+  conf_getPathForIcon(imageResources, entry->name, path, COUNTOF(path));
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -851,9 +860,9 @@ cleanup:
 
 /**
  * @brief Configure a texture a load pixels.
- * @param[in] png      The PNG image providing pixels.
- * @param[in] tex      The GL texture handle.
- * @param[in] format   The texture color format.
+ * @param[in]  png     The PNG image providing pixels.
+ * @param[in]  tex     The GL texture handle.
+ * @param[in]  format  The texture color format.
  * @param[out] texture The texture wrapper.
  */
 static void loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture) {
@@ -927,7 +936,7 @@ static bool readPixelsToPng(Png *png) {
 
 /**
  * @brief   Convert a RGBA8888 PNG to a RGB565 bitmap.
- * @param[in] png    The PNG to dither.
+ * @param[in]  png   The PNG to dither.
  * @param[out] bmp   The 16-bit RGB565 bitmap.
  * @param[out] bytes The size of the bitmap in bytes.
  * @returns True if able to convert the PNG, false if the PNG is invalid or

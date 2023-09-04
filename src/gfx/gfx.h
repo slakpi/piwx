@@ -183,34 +183,37 @@ bool gfx_dumpSurfaceToPng(DrawResources resources, const char *path);
 
 /**
  * @brief Get the character information for a font.
- * @param[in] resources The gfx context.
- * @param[in] font      The font to query.
- * @param[out] info     The character information.
+ * @param[in]  resources The gfx context.
+ * @param[in]  font      The font to query.
+ * @param[out] info      The character information.
  */
 bool gfx_getFontInfo(DrawResources resources, Font font, CharInfo *info);
 
 /**
  * @brief Get the width and height of an icon.
- * @param[in] resources The gfx context.
- * @param[in] icon      The icon to query.
- * @param[out] size     The icon dimenisons in pixels.
+ * @param[in]  resources The gfx context.
+ * @param[in]  icon      The icon to query.
+ * @param[out] size      The icon dimenisons in pixels.
  */
 bool gfx_getIconInfo(DrawResources resources, Icon icon, Vector2f *size);
 
 /**
  * @brief Get error information from a gfx context.
- * @param[in] resources The gfx context.
- * @param[out] error    The EGL error code.
- * @param[out] msg      The EGL error message.
- * @param[in] len       Length of @a msg.
+ * @param[in]  resources The gfx context.
+ * @param[out] error     The EGL error code.
+ * @param[out] msg       The EGL error message.
+ * @param[in]  len       Length of @a msg.
  */
 void gfx_getGfxError(DrawResources resources, int *error, char *msg, size_t len);
 
 /**
  * @brief   Initialize a new gfx context.
- * @param[out] resources The new gfx context.
+ * @param[in]  fontResources  The path to PiWx's font resources.
+ * @param[in]  imageResources The path to PiWx's image resources.
+ * @param[out] resources      The new gfx context.
  * @returns True if able to create a new gfx context, false otherwise.
  */
-bool gfx_initGraphics(DrawResources *resources);
+bool gfx_initGraphics(const char *fontResources, const char *imageResources,
+                      DrawResources *resources);
 
 #endif /* GFX_H */

@@ -2,7 +2,6 @@
  * @file log.c
  */
 #include "log.h"
-#include "config.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
@@ -32,7 +31,7 @@ void assertLog(bool condition, const char *fmt, ...) {
   assert(0);
 }
 
-bool openLog(LogLevel maxLevel) {
+bool openLog(const char *logFile, LogLevel maxLevel) {
   if (gLog) {
     closeLog();
   }
@@ -41,7 +40,7 @@ bool openLog(LogLevel maxLevel) {
     return true;
   }
 
-  gLog = fopen(LOG_FILE, "a+");
+  gLog = fopen(logFile, "a+");
 
   if (!gLog) {
     return false;
