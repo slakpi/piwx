@@ -4,9 +4,7 @@
 #include "conf_file.h"
 #include "config.h"
 #include "gfx.h"
-#if defined WITH_LED_SUPPORT
 #include "led.h"
-#endif
 #include "log.h"
 #include "util.h"
 #include "wx.h"
@@ -37,13 +35,21 @@
 #define BLINK_INTERVAL_SEC     1
 #define NIGHT_INTERVAL_SEC     120
 
-static const Color4f gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
-static const Color4f gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
-static const Color4f gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
-static const float   gUpperDiv     = 81.0f;
-static const float   gLowerDiv     = 122.0f;
-static const int     gButtonPins[] = {17, 22, 23, 27};
-static const char   *gShortArgs    = "tVv";
+#define MIX_BRIGHTNESS(c, b) ((((uint16_t)(c) << 8) * (b)) >> 8)
+
+static const LEDColor gColorVFR     = {0, 255, 0};
+static const LEDColor gColorMVFR    = {0, 0, 255};
+static const LEDColor gColorIFR     = {255, 0, 0};
+static const LEDColor gColorLIFR    = {255, 0, 255};
+static const LEDColor gColorWind    = {255, 192, 0};
+static const LEDColor gColorUnk     = {64, 64, 64};
+static const Color4f  gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
+static const Color4f  gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
+static const Color4f  gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
+static const float    gUpperDiv     = 81.0f;
+static const float    gLowerDiv     = 122.0f;
+static const int      gButtonPins[] = {17, 22, 23, 27};
+static const char    *gShortArgs    = "tVv";
 // clang-format off
 static const struct option gLongArgs[] = {
   { "test",        no_argument,       0, 't' },
@@ -81,6 +87,8 @@ static void getCloudLayerText(const SkyCondition *sky, char *buf, size_t len);
 
 static Icon getFlightCategoryIcon(FlightCategory cat);
 
+static LEDColor getLEDColor(const PiwxConfig *cfg, const WxStation *station);
+
 static Icon getWeatherIcon(DominantWeather wx);
 
 static Icon getWindIcon(int direction);
@@ -98,6 +106,8 @@ static unsigned int scanButtons();
 static int setupGpio();
 
 static void signalHandler(int signo);
+
+static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations);
 
 static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t update, time_t now);
 
@@ -222,14 +232,10 @@ static bool go(bool test, bool verbose) {
       nextDayNight = now + NIGHT_INTERVAL_SEC;
 
       if (wx) {
-#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
-#endif
       } else {
         drawDownloadErrorScreen(resources, !test);
-#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, NULL);
-#endif
 
         // Try again at the retry interval rather than on the update interval
         // boundary.
@@ -268,9 +274,7 @@ static bool go(bool test, bool verbose) {
       }
 
       if (updateStations(cfg, wx, update, now)) {
-#if defined WITH_LED_SUPPORT
         updateLEDs(cfg, wx);
-#endif
       }
     }
 
@@ -298,10 +302,7 @@ cleanup:
     gfx_commitToScreen(resources);
   }
 
-#if defined WITH_LED_SUPPORT
   updateLEDs(cfg, NULL);
-#endif
-
   gfx_cleanupGraphics(&resources);
   wx_freeStations(wx);
   gpioTerminate();
@@ -869,8 +870,8 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
  * @brief   Perform periodic updates of weather station display state.
  * @param[in] cfg      PiWx configuration.
  * @param[in] stations List of weather stations.
- * @param[in] update  The state items to update.
- * @param[in] now     The new observation time.
+ * @param[in] update   The state items to update.
+ * @param[in] now      The new observation time.
  * @returns True if the LED string needs to be updated.
  */
 static bool updateStations(const PiwxConfig *cfg, WxStation *stations, uint32_t update,
@@ -917,4 +918,84 @@ static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t up
   }
 
   return updateLED;
+}
+
+/**
+ * @brief Update the LEDs assigned to weather stations.
+ * @param[in] cfg      PiWx configuration.
+ * @param[in] stations List of weather stations.
+ */
+static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
+  LEDColor colors[MAX_LEDS] = {0};
+  const WxStation *p = stations;
+
+  if (!stations) {
+    led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, NULL, 0);
+    return;
+  }
+
+  while (p) {
+    for (int i = 0; i < MAX_LEDS; ++i) {
+      if (!cfg->ledAssignments[i]) {
+        continue;
+      }
+
+      if (strcmp(p->id, cfg->ledAssignments[i]) != 0) {
+        continue;
+      }
+
+      colors[i] = getLEDColor(cfg, p);
+      break;
+    }
+
+    p = p->next;
+
+    // Circular list.
+    if (p == stations) {
+      break;
+    }
+  }
+
+  led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, colors, MAX_LEDS);
+}
+
+/**
+ * @brief   Get the LED color for a weather report.
+ * @param[in] cfg     PiWx configuration.
+ * @param[in] station The weather station.
+ * @returns The flight category color or high wind color as appropriate.
+ */
+static LEDColor getLEDColor(const PiwxConfig *cfg, const WxStation *station) {
+  LEDColor color      = {0};
+  int      brightness = station->isNight ? cfg->ledNightBrightness : cfg->ledBrightness;
+
+  switch (station->cat) {
+  case catVFR:
+    color = gColorVFR;
+    break;
+  case catMVFR:
+    color = gColorMVFR;
+    break;
+  case catIFR:
+    color = gColorIFR;
+    break;
+  case catLIFR:
+    color = gColorLIFR;
+    break;
+  default:
+    color = gColorUnk;
+    break;
+  }
+
+  if (station->blinkState) {
+    color = gColorWind;
+  }
+
+  brightness = min(max(brightness, 0), UINT8_MAX);
+
+  color.r = MIX_BRIGHTNESS(color.r, (uint8_t)brightness);
+  color.g = MIX_BRIGHTNESS(color.g, (uint8_t)brightness);
+  color.b = MIX_BRIGHTNESS(color.b, (uint8_t)brightness);
+
+  return color;
 }

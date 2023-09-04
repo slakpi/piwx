@@ -1,6 +1,13 @@
 add_compile_options($<IF:$<CONFIG:Debug>,-D_DEBUG,-DNDEBUG>)
 
 #-------------------------------------------------------------------------------
+# Config test.
+#-------------------------------------------------------------------------------
+add_executable(cfg_test cfg_test.c "${PROJECT_SOURCE_DIR}/src/util.c")
+target_include_directories(cfg_test PRIVATE "${PROJECT_SOURCE_DIR}/src")
+target_link_libraries(cfg_test PRIVATE Piwx::Conf_File)
+
+#-------------------------------------------------------------------------------
 # Graphics test.
 #-------------------------------------------------------------------------------
 add_executable(gfx_test gfx_test.c "${PROJECT_SOURCE_DIR}/src/util.c")

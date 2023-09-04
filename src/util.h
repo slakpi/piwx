@@ -14,20 +14,20 @@
 #define UNUSED(x)           ((void)(x))
 
 /**
- * @brief   Returns the minimum of two values.
- * @param[in] a First value.
- * @param[in] b Second value.
- * @returns The minimum of @a a and @a b.
- */
-int min(int a, int b);
-
-/**
  * @brief   Returns the maximum of two values.
  * @param[in] a First value.
  * @param[in] b Second value.
  * @returns The maximum of @a a and @a b.
  */
 int max(int a, int b);
+
+/**
+ * @brief   Returns the minimum of two values.
+ * @param[in] a First value.
+ * @param[in] b Second value.
+ * @returns The minimum of @a a and @a b.
+ */
+int min(int a, int b);
 
 /**
  * @brief   Safer version of @a strncpy.
@@ -42,5 +42,21 @@ int max(int a, int b);
  *          destination buffer were large enough.
  */
 size_t strncpy_safe(char *dest, const char *src, size_t dest_sz);
+
+/**
+ * @brief   Returns the maximum of two values.
+ * @param[in] a First value.
+ * @param[in] b Second value.
+ * @returns The maximum of @a a and @a b.
+ */
+unsigned int umax(unsigned int a, unsigned int b);
+
+/**
+ * @brief   Returns the minimum of two values.
+ * @param[in] a First value.
+ * @param[in] b Second value.
+ * @returns The minimum of @a a and @a b.
+ */
+unsigned int umin(unsigned int a, unsigned int b);
 
 #endif /* UTIL_H */

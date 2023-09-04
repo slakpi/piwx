@@ -45,12 +45,8 @@ build:
     % make
     % sudo make install
 
-To build with support for WS2811 LED strips, add the LED option to the CMake
-command:
-
-    -DWITH_LED_SUPPORT=ON
-
-LED support requires the `ws2811` library listed above.
+LED support requires the `ws2811` library listed above. If the `ws2811` library
+is available on the system, PiWx will build with LED support enabled.
 
 Configuration
 -------------

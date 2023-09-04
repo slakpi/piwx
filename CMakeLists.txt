@@ -7,11 +7,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(piwx C)
 
 #-------------------------------------------------------------------------------
-# Script options.
-#-------------------------------------------------------------------------------
-option(WITH_LED_SUPPORT "Include support for WS2811 LED weather display." OFF)
-
-#-------------------------------------------------------------------------------
 # Setup the install paths.
 #-------------------------------------------------------------------------------
 set(INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})

@@ -12,13 +12,13 @@
 #define LED_COUNT 50
 
 ws2811_t ledstring = {
-    .freq   = TARGET_FREQ,
-    .dmanum = DMA,
+    .freq   = DEFAULT_TARGET_FREQ,
+    .dmanum = DEFAULT_DMA,
     .channel =
         {
             [0] =
                 {
-                    .gpionum    = GPIO_PIN,
+                    .gpionum    = DEFAULT_GPIO_PIN,
                     .count      = LED_COUNT,
                     .invert     = 0,
                     .brightness = 255,
