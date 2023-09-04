@@ -19,14 +19,12 @@
  * The library is incorrect for some WS2811 strings. The GBR constant is
  * really BRG ordering on the ALITOVE string.
  */
-#define STRIP_TYPE          WS2811_STRIP_GBR
+#define STRIP_TYPE WS2811_STRIP_GBR
 
 #define WS2811_COLOR(c) (((c).b << 16) | ((c).r << 8) | (c).g)
 
 #if !defined HAS_LED_SUPPORT
-int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count) {
-  return 0;
-}
+int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count) { return 0; }
 #else
 int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count) {
   ws2811_return_t ret;

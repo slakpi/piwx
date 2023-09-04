@@ -926,8 +926,8 @@ static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t up
  * @param[in] stations List of weather stations.
  */
 static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
-  LEDColor colors[MAX_LEDS] = {0};
-  const WxStation *p = stations;
+  LEDColor         colors[MAX_LEDS] = {0};
+  const WxStation *p                = stations;
 
   if (!stations) {
     led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, NULL, 0);
