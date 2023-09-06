@@ -6,27 +6,17 @@ add_compile_options($<IF:$<CONFIG:Debug>,-D_DEBUG,-DNDEBUG>)
 add_executable(cfg_test cfg_test.c "${PROJECT_SOURCE_DIR}/src/util.c")
 target_include_directories(cfg_test PRIVATE "${PROJECT_SOURCE_DIR}/src")
 target_link_libraries(cfg_test PRIVATE Piwx::Conf_File)
-
-#-------------------------------------------------------------------------------
-# Graphics test.
-#-------------------------------------------------------------------------------
-add_executable(gfx_test gfx_test.c "${PROJECT_SOURCE_DIR}/src/util.c")
-target_include_directories(gfx_test PRIVATE "${PROJECT_SOURCE_DIR}/src")
-target_link_libraries(gfx_test PRIVATE Piwx::Conf_File Piwx::Gfx m)
-target_compile_options(gfx_test PRIVATE ${SIMD_C_FLAGS})
-
-#-------------------------------------------------------------------------------
-# LED test.
-#-------------------------------------------------------------------------------
-if (WITH_LED_SUPPORT)
-  add_executable(led_test led_test.c)
-  target_link_libraries(led_test WS2811::WS2811)
-endif ()
+add_test(NAME test_config COMMAND $<TARGET_FILE:cfg_test>)
 
 #-------------------------------------------------------------------------------
 # Geo test.
 #-------------------------------------------------------------------------------
 add_executable(geo_test geo_test.c "${PROJECT_SOURCE_DIR}/src/util.c")
 target_include_directories(geo_test PRIVATE "${PROJECT_SOURCE_DIR}/src")
-target_link_libraries(geo_test PRIVATE Piwx::Conf_File Piwx::Geo m)
-target_compile_options(geo_test PRIVATE ${SIMD_C_FLAGS})
+target_link_libraries(geo_test PRIVATE Piwx::Geo m)
+add_test(NAME test_geo COMMAND $<TARGET_FILE:geo_test>)
+
+#-------------------------------------------------------------------------------
+# Enable test configuration.
+#-------------------------------------------------------------------------------
+enable_testing()

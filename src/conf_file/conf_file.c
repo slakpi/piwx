@@ -6,6 +6,7 @@ typedef void *yyscan_t;
 // clang-format off
 // These includes must be in this order.
 #include "conf_file.h"
+#include "conf_file_prv.h"
 #include "conf_param.h"
 #include "conf.parser.h"
 // clang-format on
@@ -42,7 +43,6 @@ void conf_freePiwxConfig(PiwxConfig *cfg) {
 PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResources,
                                const char *fontResources, const char *configFile) {
   FILE       *cfgFile = NULL;
-  yyscan_t    scanner = NULL;
   PiwxConfig *cfg     = NULL;
 
   if (!installPrefix || !imageResources || !fontResources || !configFile) {
@@ -76,14 +76,23 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
     return cfg;
   }
 
-  conf_lex_init(&scanner);
-  conf_set_in(cfgFile, scanner);
-  conf_parse(scanner, cfg);
-  conf_lex_destroy(scanner);
+  (void)conf_parseStream(cfg, cfgFile);
 
   fclose(cfgFile);
 
   return cfg;
+}
+
+bool conf_parseStream(PiwxConfig *cfg, FILE *cfgFile) {
+  yyscan_t scanner = NULL;
+  int      ret;
+
+  conf_lex_init(&scanner);
+  conf_set_in(cfgFile, scanner);
+  ret = conf_parse(scanner, cfg);
+  conf_lex_destroy(scanner);
+
+  return (ret == 0);
 }
 
 char *conf_getPathForFont(const char *fontResources, const char *file, char *path, size_t len) {

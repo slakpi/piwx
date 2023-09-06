@@ -31,6 +31,8 @@ bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int yea
 
 /**
  * @brief   Checks if the given observation time is night at the given location.
+ * @details The daylight span is considered a half-open interval that does not
+ *          include the end time of the span.
  * @param[in] lat      Observation latitude.
  * @param[in] lon      Observation longitude.
  * @param[in] daylight The daylight span defining "day".
