@@ -64,7 +64,7 @@ add_subdirectory(test)
 # Setup the installation targets.
 #-------------------------------------------------------------------------------
 install(TARGETS piwx DESTINATION bin)
-install(DIRECTORY share/wxicons/ DESTINATION ${SHARE_PREFIX}wxicons)
-install(DIRECTORY share/fonts/ DESTINATION ${SHARE_PREFIX}fonts)
+install(DIRECTORY share/wxicons/ DESTINATION ${SHARE_PREFIX}wxicons FILES_MATCHING PATTERN "*.png")
+install(DIRECTORY share/fonts/ DESTINATION ${SHARE_PREFIX}fonts FILES_MATCHING PATTERN "*.png")
 install(FILES etc/piwx.conf.example DESTINATION ${ETC_PREFIX})
 install(DIRECTORY DESTINATION ${VAR_PREFIX})
