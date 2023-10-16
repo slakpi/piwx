@@ -212,8 +212,6 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
   count = strncpy_safe(url,
                        "https://aviationweather.gov/cgi-bin/data/metar.php?"
                        "format=xml&"
-                       "hours=1.5&"
-                       "tafs=false&"
                        "ids=",
                        COUNTOF(url));
 
