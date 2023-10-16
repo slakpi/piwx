@@ -51,22 +51,22 @@ WS          [\v\r\n\t ]+
 }
 
 "quiet" {
-  yylval->val = LOG_QUIET;
+  yylval->val = logQuiet;
   return TOKEN_LOGLEVEL;
 }
 
 "warning" {
-  yylval->val = LOG_WARNING;
+  yylval->val = logWarning;
   return TOKEN_LOGLEVEL;
 }
 
 "info" {
-  yylval->val = LOG_INFO;
+  yylval->val = logInfo;
   return TOKEN_LOGLEVEL;
 }
 
 "debug" {
-  yylval->val = LOG_DEBUG;
+  yylval->val = logDebug;
   return TOKEN_LOGLEVEL;
 }
 

@@ -125,13 +125,13 @@ assignment
     switch ($1.param) {
     case confLogLevel:
       switch ($3) {
-      case LOG_WARNING:
-      case LOG_INFO:
-      case LOG_DEBUG:
+      case logWarning:
+      case logInfo:
+      case logDebug:
         cfg->logLevel = $3;
         break;
       default:
-        cfg->logLevel = LOG_QUIET;
+        cfg->logLevel = logQuiet;
         break;
       }
     default:
