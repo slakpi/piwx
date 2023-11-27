@@ -60,15 +60,15 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
   cfg->imageResources     = strdup(imageResources);
   cfg->fontResources      = strdup(fontResources);
   cfg->configFile         = strdup(configFile);
-  cfg->cycleTime          = 60;
-  cfg->highWindSpeed      = 25;
-  cfg->highWindBlink      = 0;
-  cfg->ledBrightness      = 32;
-  cfg->ledNightBrightness = 32;
-  cfg->ledDataPin         = 18;
-  cfg->ledDMAChannel      = 10;
-  cfg->logLevel           = logWarning;
-  cfg->daylight           = daylightCivil;
+  cfg->cycleTime          = DEFAULT_CYCLE_TIME;
+  cfg->highWindSpeed      = DEFAULT_HIGH_WIND_SPEED;
+  cfg->highWindBlink      = DEFAULT_HIGH_WIND_BLINK;
+  cfg->ledBrightness      = DEFAULT_LED_BRIGHTNESS;
+  cfg->ledNightBrightness = DEFAULT_LED_NIGHT_BRIGHTNESS;
+  cfg->ledDataPin         = DEFAULT_LED_DATA_PIN;
+  cfg->ledDMAChannel      = DEFAULT_LED_DMA_CHANNEL;
+  cfg->logLevel           = DEFAULT_LOG_LEVEL;
+  cfg->daylight           = DEFAULT_DAYLIGHT;
 
   cfgFile = fopen(configFile, "r");
 

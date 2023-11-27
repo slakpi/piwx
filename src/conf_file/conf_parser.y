@@ -5,9 +5,8 @@
 typedef void* yyscan_t;
 
 #include "conf_file.h"
+#include "conf_file_prv.h"
 #include "conf_param.h"
-#include "log.h"
-#include "util.h"
 
 #include "conf.parser.h"
 #include "conf.lexer.h"
@@ -70,13 +69,13 @@ assignment
 | TOKEN_PARAM '=' TOKEN_VALUE ';' {
   switch($1.param) {
   case confCycleTime:
-    cfg->cycleTime = $3;
+    cfg->cycleTime = max($3, 1);
     break;
   case confHighWindSpeed:
-    cfg->highWindSpeed = $3;
+    cfg->highWindSpeed = max($3, 1);
     break;
   case confHighWindBlink:
-    cfg->highWindBlink = $3;
+    cfg->highWindBlink = ($3 != 0);
     break;
   case confLEDBrightness:
     cfg->ledBrightness = min(max($3, 0), 255);
@@ -97,25 +96,19 @@ assignment
 | TOKEN_PARAM '=' TOKEN_ONOFF ';' {
   switch ($1.param) {
   case confHighWindSpeed:
-    if ($3 == 0) {
-      // Only handle `off`. `on` will just leave the current value / default.
-      cfg->highWindSpeed = 0;
-    }
+    cfg->highWindSpeed = ($3 == 0 ? 0 : DEFAULT_HIGH_WIND_SPEED);
     break;
   case confHighWindBlink:
-    cfg->highWindBlink = $3;
+    cfg->highWindBlink = ($3 == 0 ? false : true);
     break;
   case confLEDBrightness:
-    if ($3 == 0) {
-      // Only handle `off`. `on` will just leave the current value / default.
-      cfg->ledBrightness = 0;
-    }
+    cfg->ledBrightness = ($3 == 0 ? 0 : DEFAULT_LED_BRIGHTNESS);
     break;
   case confLEDNightBrightness:
-    if ($3 == 0) {
-      // Only handle `off`. `on` will just leave the current value / default.
-      cfg->ledNightBrightness = 0;
-    }
+    cfg->ledNightBrightness = ($3 == 0 ? 0 : DEFAULT_LED_NIGHT_BRIGHTNESS);
+    break;
+  case confLogLevel:
+    cfg->logLevel = ($3 == 0 ? logQuiet : DEFAULT_LOG_LEVEL);
     break;
   default:
     YYERROR;
