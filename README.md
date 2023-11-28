@@ -1,7 +1,7 @@
 PiWx: Raspberry Pi Aviation Weather
 ===================================
 
-![Weather Display](support/images/sample.png)
+![Weather Display](doc/images/sample.png)
 
 PiWx is a configurable aviation METAR display designed to work with the
 Adafruit 320x240 PiTFT framebuffer display. While PiWx is hard-coded to work
@@ -140,7 +140,7 @@ Running Automatically
 ---------------------
 
 To run PiWx automatically on boot, refer to the sample service file in the
-repository under `support/systemd`. This file must be placed in
+repository under `doc/systemd`. This file must be placed in
 `/lib/systemd/system` and renamed to `piwx.service`.
 
 Use `sudo systemctl start piwx.service` to test starting PiWx and use
