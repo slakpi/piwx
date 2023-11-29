@@ -61,7 +61,7 @@ sample to a new file called `piwx.conf`.
     # Airport METAR display cycle time in seconds.
     cycletime=5;
 
-With LED support enabled, `piwx` will drive a 50-LED WS281x strip to display
+With LED support enabled, PiWx will drive a 50-LED WS281x strip to display
 flight categories at select airports. The `led<num>` option assigns an airport
 to a LED where `<num>` is a number between 1 and 50 inclusive.
 
@@ -72,21 +72,30 @@ to a LED where `<num>` is a number between 1 and 50 inclusive.
     ...
 
 It is not necessary to assign LEDs sequentially. Unassigned LEDs will just
-remain off. `piwx` supports a brightness option with 256 levels of brightness
-where 0 or `off` is off and 255 is full intensity.
+remain off.
+
+PiWx provides a `brightness` option with 256 levels of brightness where 0 or
+`off` is off and 255 is full intensity.
 
     # Set LED brightness
     brightness=64;
 
-PiWx calculates sunrise / sunset information for each airport in the station
-list. This allows automatically dimming the LEDs at night with the night
-brightness option:
+By default, PiWx considers Civil Twilight as day. PiWx will switch an airport
+LED to day brightness at the beginning of local Civil Twilight and switch the
+LED to night brightness at the end of local Civil Twilight. The
+`nightbrightness` option controls the brightness of LEDs for airports where the
+local time is night.
 
     # Set night brightness
     nightbrightness=8;
 
-When PiWx determines that it is night at an airport, it will switch to using the
-specified night brightness level.
+PiWx provides a `daylight` option to control the length of the day. This option
+can be one of: `official`, `civil`, `nautical`, or `astronomical`. These values
+represent respectively: sunrise to sunset, Civil Twilight, Nautical Twilight,
+and Astronomical Twilight.
+
+    # Change daylight to Nautical Twilight
+    daylight=nautical;
 
 Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
@@ -115,7 +124,7 @@ will just display Yellow:
     # Disable high-wind blinking
     highwindblink=off;
 
-By default, `piwx` uses GPIO18 and DMA Channel 10 to drive the LED string.
+By default, PiWx uses GPIO18 and DMA Channel 10 to drive the LED string.
 These may be configured using the following options:
 
     # Set LED GPIO pin to GPIO12 (BE CAREFUL)
@@ -124,11 +133,11 @@ These may be configured using the following options:
     leddma=10;
 
 BE EXTREMEMLY CAREFUL when choosing the DMA channel. Read up on the available
-DMA channels. `piwx` currently only supports GPIO12 and GPIO18 (PWM0). The
+DMA channels. PiWx currently only supports GPIO12 and GPIO18 (PWM0). The
 default options are the safest. Leave these options alone unless there is a
 compelling option to change them.
 
-`piwx` can log basic events to `<prefix>/var/piwx/piwx.log`. The logger supports
+PiWx can log basic events to `<prefix>/var/piwx/piwx.log`. The logger supports
 four levels of output: `quiet` (default), `warning`, `info`, and `debug`. Each
 level of debug suppresses the levels above it, e.g. `warning` suppresses `info`
 and `debug` messages.
