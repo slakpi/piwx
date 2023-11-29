@@ -20,9 +20,9 @@ typedef struct {
 } SpanTestCase;
 
 typedef struct {
-  time_t obsTime;
   double lat;
   double lon;
+  time_t obsTime;
   bool   exp[4];
 } NightTestCase;
 
@@ -82,67 +82,67 @@ static const SpanTestCase gSpanTestCases[] = {
 // clang-format off
 static const NightTestCase gNightTestCases[] = {
   // Aurora, OR; The start of official daylight.
-  {1689424666, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689424666, {
     false, false, false, false
   }},
   // Aurora, OR; 1 second before the start of official daylight.
-  {1689424665, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689424665, {
     true, false, false, false
   }},
   // Aurora, OR; The start of civil twilight.
-  {1689422495, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689422495, {
     true, false, false, false
   }},
   // Aurora, OR; 1 second before the start of civil twilight.
-  {1689422494, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689422494, {
     true, true, false, false
   }},
   // Aurora, OR; The start of nautical twilight.
-  {1689419664, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689419664, {
     true, true, false, false
   }},
   // Aurora, OR; 1 second before the start of nautical twilight.
-  {1689419663, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689419663, {
     true, true, true, false
   }},
   // Aurora, OR; The start of astronomical twilight.
-  {1689416120, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689416120, {
     true, true, true, false
   }},
   // Aurora, OR; 1 second before the start of astronomical twilight.
-  {1689416119, 45.2471264, -122.7700469, {
+  {45.2471264, -122.7700469, 1689416119, {
     true, true, true, true
   }},
   // Tokyo, Japan; 1 second before the end of official daylight.
-  {1475914488, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475914488, {
     false, false, false, false
   }},
   // Tokyo, Japan; The end of official daylight.
-  {1475914489, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475914489, {
     true, false, false, false
   }},
   // Tokyo, Japan; 1 second before the end of civil twilight.
-  {1475916021, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475916021, {
     true, false, false, false
   }},
   // Tokyo, Japan; The end of civil twilight.
-  {1475916022, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475916022, {
     true, true, false, false
   }},
   // Tokyo, Japan; 1 second before the end of nautical twilight.
-  {1475917795, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475917795, {
     true, true, false, false
   }},
   // Tokyo, Japan; The end of nautical twilight.
-  {1475917796, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475917796, {
     true, true, true, false
   }},
   // Tokyo, Japan; 1 second before the end of astronomical twilight.
-  {1475919572, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475919572, {
     true, true, true, false
   }},
   // Tokyo, Japan; The end of astronomical twilight.
-  {1475919573, 35.768812179426085, 139.78138877967353, {
+  {35.768812179426085, 139.78138877967353, 1475919573, {
     true, true, true, true
   }}
 };
@@ -171,7 +171,7 @@ static bool testDaylightSpan() {
     const SpanTestCase *testCase = &gSpanTestCases[i];
 
     for (int j = 0; j < COUNTOF(gSpanOrder); ++j) {
-      time_t s, e;
+      time_t s = 0, e = 0;
 
       assert(geo_calcDaylightSpan(testCase->lat, testCase->lon, gSpanOrder[j], testCase->y,
                                   testCase->m, testCase->d, &s, &e));

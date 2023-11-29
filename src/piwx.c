@@ -196,16 +196,16 @@ static bool go(bool test, bool verbose) {
 
   do {
     bool         draw = false;
-    unsigned int b, bl = 0, bc;
+    unsigned int b = 0, bl = 0, bc;
     int          err;
     time_t       now    = time(NULL);
     int          update = NO_UPDATE;
 
     // Scan the buttons. Mask off any buttons that were pressed on the last scan
     // and are either still pressed or were released.
+    bl = b;
     b  = scanButtons();
     bc = (~bl) & b;
-    bl = b;
 
     // If this is the first run, the update time has expired, or someone pressed
     // the refresh button, then requery the weather data.

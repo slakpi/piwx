@@ -32,7 +32,7 @@ static const TestFn gTests[] = {testNormalParse};
 int main() {
   bool ok = true;
 
-  memset(gTempFilePath, 0, sizeof(gTempFilePath));
+  memset(gTempFilePath, 0, sizeof(gTempFilePath)); // NOLINT -- Size known.
   gTempFile = NULL;
 
   for (int i = 0; i < COUNTOF(gTests); ++i) {
@@ -189,6 +189,6 @@ static void closeTempFile() {
 
   fclose(gTempFile);
   unlink(gTempFilePath);
-  memset(gTempFilePath, 0, sizeof(gTempFilePath));
+  memset(gTempFilePath, 0, sizeof(gTempFilePath)); // NOLINT -- Size known.
   gTempFile = NULL;
 }
