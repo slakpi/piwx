@@ -10,6 +10,27 @@
 #include <string.h>
 #include <unistd.h>
 
+#define CHECK_STRING(a, e) {                                                                       \
+  if (!compareStrings((a), (e))) {                                                                 \
+    fprintf(stderr, "%s %d -- \"%s\" != \"%s\"\n", __FUNCTION__, __LINE__, a, e);                  \
+    return false;                                                                                  \
+  }                                                                                                \
+}
+
+#define CHECK_SIGNED_INTEGER(a, e) {                                                               \
+  if (a != e) {                                                                                    \
+    fprintf(stderr, "%s %d -- %d != %d\n", __FUNCTION__, __LINE__, a, e);                          \
+    return false;                                                                                  \
+  }                                                                                                \
+}
+
+#define CHECK_UNSIGNED_INTEGER(a, e) {                                                             \
+  if (a != e) {                                                                                    \
+    fprintf(stderr, "%s %d -- %u != %u\n", __FUNCTION__, __LINE__, a, e);                          \
+    return false;                                                                                  \
+  }                                                                                                \
+}
+
 typedef bool (*TestFn)();
 
 static char  gTempFilePath[MAX_PATH];
@@ -152,19 +173,19 @@ static void writeValidConfFile(FILE *cfgFile, const PiwxConfig *cfg) {
 }
 
 static bool compareConf(const PiwxConfig *act, const PiwxConfig *exp) {
-  if (!compareStrings(act->stationQuery, exp->stationQuery) || act->cycleTime != exp->cycleTime ||
-      act->highWindSpeed != exp->highWindSpeed || act->highWindBlink != exp->highWindBlink ||
-      act->ledBrightness != exp->ledBrightness ||
-      act->ledNightBrightness != exp->ledNightBrightness || act->ledDataPin != exp->ledDataPin ||
-      act->ledDMAChannel != exp->ledDMAChannel || act->logLevel != exp->logLevel ||
-      act->daylight != exp->daylight) {
-    return false;
-  }
+  CHECK_STRING(act->stationQuery, exp->stationQuery);
+  CHECK_SIGNED_INTEGER(act->cycleTime, exp->cycleTime);
+  CHECK_SIGNED_INTEGER(act->highWindSpeed, exp->highWindSpeed);
+  CHECK_SIGNED_INTEGER(!!act->highWindBlink, !!exp->highWindBlink);
+  CHECK_SIGNED_INTEGER(act->ledBrightness, exp->ledBrightness);
+  CHECK_SIGNED_INTEGER(act->ledNightBrightness, exp->ledNightBrightness);
+  CHECK_SIGNED_INTEGER(act->ledDataPin, exp->ledDataPin);
+  CHECK_SIGNED_INTEGER(act->ledDMAChannel, exp->ledDMAChannel);
+  CHECK_SIGNED_INTEGER(act->logLevel, exp->logLevel);
+  CHECK_SIGNED_INTEGER(act->daylight, exp->daylight);
 
   for (int i = 0; i < COUNTOF(act->ledAssignments); ++i) {
-    if (!compareStrings(act->ledAssignments[i], exp->ledAssignments[i])) {
-      return false;
-    }
+    CHECK_STRING(act->ledAssignments[i], exp->ledAssignments[i]);
   }
 
   return true;
