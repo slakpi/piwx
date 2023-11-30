@@ -35,7 +35,7 @@
 #define BLINK_INTERVAL_SEC     1
 #define NIGHT_INTERVAL_SEC     120
 
-#define MIX_BRIGHTNESS(c, b) ((((uint16_t)(c) << 8) * (b)) >> 8)
+#define MIX_BRIGHTNESS(c, b) (((uint16_t)(c) * (b)) >> 8)
 
 static const LEDColor gColorVFR     = {0, 255, 0};
 static const LEDColor gColorMVFR    = {0, 0, 255};
