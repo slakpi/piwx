@@ -173,16 +173,19 @@ static bool testDaylightSpan() {
     for (int j = 0; j < COUNTOF(gSpanOrder); ++j) {
       time_t s = 0, e = 0;
 
-      assert(geo_calcDaylightSpan(testCase->lat, testCase->lon, gSpanOrder[j], testCase->y,
-                                  testCase->m, testCase->d, &s, &e));
+      if (!geo_calcDaylightSpan(testCase->lat, testCase->lon, gSpanOrder[j], testCase->y,
+                                testCase->m, testCase->d, &s, &e)) {
+        fprintf(stderr, "geo_calcDaylightSpan() failed.");
+        ok = false;
+      }
 
-      if (s != testCase->exp[j].start) {
+      if (ok && s != testCase->exp[j].start) {
         fprintf(stderr, "Daylight test case %d, span %d, %lu != %lu\n", i, j, s,
                 testCase->exp[j].start);
         ok = false;
       }
 
-      if (e != testCase->exp[j].end) {
+      if (ok && e != testCase->exp[j].end) {
         fprintf(stderr, "Daylight test case %d, span %d, %lu != %lu\n", i, j, e,
                 testCase->exp[j].end);
         ok = false;
