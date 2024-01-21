@@ -1,16 +1,16 @@
 /**
  * @file sun.c
  * @see https://github.com/buelowp/sunset/blob/master/src/sunset.cpp
+ * @see https://en.wikipedia.org/wiki/Subsolar_point
  */
 #include "geo.h"
+#include "geo_prv.h"
 #include <math.h>
 #include <stdbool.h>
 #include <time.h>
 
-#define PI                   3.1415926536
-#define RAD_TO_DEG           (180.0 / PI)
-#define DEG_TO_RAD           (PI / 180.0)
 #define SEC_PER_DAY          86400
+#define SEC_PER_HOUR         3600
 #define DAY_OFFICIAL         90.833
 #define CIVIL_TWILIGHT       96.0
 #define NAUTICAL_TWILIGHT    102.0
@@ -51,13 +51,17 @@ static time_t calcTime(int year, int month, int day, double minutes);
 
 static double calcTimeJulianCentury(double jd);
 
-static double getTWilightAngularValue(DaylightSpan daylight);
+static double getTwilightAngularValue(DaylightSpan daylight);
 
 bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int year, int month,
                           int day, time_t *start, time_t *end) {
-  double angle = getTWilightAngularValue(daylight);
+  double angle = getTwilightAngularValue(daylight);
   double jd    = calcJD(year, month, day);
   double absTime;
+
+  // NOTE: The start and end times seem to be within a minute of online sources.
+  //       This may be due to the Equation of Time which seems to be slightly
+  //       off compared to online sources.
 
   if (!calcAbsTime(lat, lon, jd, angle, true, &absTime)) {
     return false;
@@ -70,6 +74,34 @@ bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int yea
   }
 
   *end = calcTime(year, month, day, absTime);
+
+  return true;
+}
+
+bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
+  struct tm date;
+  double    jd, t, eqTime;
+  double    hrs = ((double)(obsTime % SEC_PER_DAY)) / SEC_PER_HOUR;
+
+  // NOTE: The subsolar point calculation seems to be off by several minutes.
+  //       This may be due to the Equation of Time which seems to be slightly
+  //       off compared to online sources. It seems to be off by less than 10
+  //       minutes of longitude.
+
+  gmtime_r(&obsTime, &date);
+
+  jd = calcJD(date.tm_year + 1900, date.tm_mon + 1, date.tm_mday);
+  t  = calcTimeJulianCentury(jd);
+
+  if (!calcSunDeclination(t, lat)) {
+    return false;
+  }
+
+  if (!calcEquationOfTime(t, &eqTime)) {
+    return false;
+  }
+
+  *lon = -15 * (hrs - 12 + (eqTime / 60.0));
 
   return true;
 }
@@ -131,7 +163,7 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) 
  * @param[in] daylight The daylight span of interest.
  * @returns The twlight angular offset in degrees.
  */
-static double getTWilightAngularValue(DaylightSpan daylight) {
+static double getTwilightAngularValue(DaylightSpan daylight) {
   switch (daylight) {
   default:
   case daylightOfficial:

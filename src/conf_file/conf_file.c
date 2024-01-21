@@ -99,7 +99,7 @@ char *conf_getPathForFont(const char *fontResources, const char *file, char *pat
   return appendFileToPath(fontResources, file, path, len);
 }
 
-char *conf_getPathForIcon(const char *imageResources, const char *file, char *path, size_t len) {
+char *conf_getPathForImage(const char *imageResources, const char *file, char *path, size_t len) {
   return appendFileToPath(imageResources, file, path, len);
 }
 

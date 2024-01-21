@@ -117,11 +117,11 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
   }
 
   for (size_t i = 0; i < len; ++i) {
-    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, &buf[0])) {
+    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, buf)) {
       continue;
     }
 
-    drawTriangles(rsrc, &buf[0], 4, programAlphaTex, rsrc->fonts[font].tex);
+    drawTriangles(rsrc, buf, 4, programAlphaTex, rsrc->fonts[font].tex);
 
     cur.coord.x += info.cellSize.v[0];
   }

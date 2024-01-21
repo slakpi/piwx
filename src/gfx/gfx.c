@@ -141,8 +141,6 @@ static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const Ico
 
 static bool loadIcons(DrawResources_ *rsrc, const char *imageResources);
 
-static void loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture);
-
 static void makeProjection(DrawResources_ *rsrc);
 
 static bool makeProgram(GLuint *program, DrawResources_ *rsrc, GLuint vert, GLuint frag);
@@ -228,6 +226,13 @@ void gfx_cleanupGraphics(DrawResources *resources) {
 
   if (rsrc->display != EGL_NO_DISPLAY) {
     eglTerminate(rsrc->display);
+  }
+
+  free(rsrc->globe);
+  free(rsrc->globeIndices);
+
+  for (int i = 0; i < globeTexCount; ++i) {
+    glDeleteTextures(1, &rsrc->globeTex[i].tex);
   }
 
   free(rsrc);
@@ -458,9 +463,26 @@ bool gfx_initGraphics(const char *fontResources, const char *imageResources,
     return false;
   }
 
+  if (!gfx_initGlobe(rsrc, imageResources)) {
+    return false;
+  }
+
   initRender(rsrc);
 
   return true;
+}
+
+void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture) {
+  glBindTexture(GL_TEXTURE_2D, tex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexImage2D(GL_TEXTURE_2D, 0, format, png->width, png->height, 0, format, GL_UNSIGNED_BYTE,
+               png->rows[0]);
+  glGenerateMipmap(GL_TEXTURE_2D);
+
+  texture->texSize.v[0] = png->width;
+  texture->texSize.v[1] = png->height;
 }
 
 void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
@@ -703,8 +725,7 @@ static bool loadFonts(DrawResources_ *rsrc, const char *fontResources) {
   GLuint tex[fontCount] = {0};
   bool   ok             = false;
 
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(fontCount, &tex[0]);
+  glGenTextures(fontCount, tex);
 
   // Load all of the fonts in the table.
   for (int i = 0; i < fontCount; ++i) {
@@ -727,9 +748,7 @@ static bool loadFonts(DrawResources_ *rsrc, const char *fontResources) {
   ok = true;
 
 cleanup:
-  glDisable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(fontCount, &tex[0]);
+  glDeleteTextures(fontCount, tex);
 
   return ok;
 }
@@ -766,7 +785,7 @@ static bool loadFont(DrawResources_ *rsrc, const char *fontResources, const Font
     goto cleanup;
   }
 
-  loadTexture(&png, tex, GL_ALPHA, texture);
+  gfx_loadTexture(&png, tex, GL_ALPHA, texture);
 
   ok = true;
 
@@ -787,8 +806,7 @@ static bool loadIcons(DrawResources_ *rsrc, const char *imageResources) {
   GLuint tex[iconCount] = {0};
   bool   ok             = false;
 
-  glEnable(GL_TEXTURE_2D);
-  glGenTextures(iconCount, &tex[0]);
+  glGenTextures(iconCount, tex);
 
   // Load all of the icons in the table.
   for (int i = 0; i < iconCount; ++i) {
@@ -811,9 +829,7 @@ static bool loadIcons(DrawResources_ *rsrc, const char *imageResources) {
   ok = true;
 
 cleanup:
-  glDisable(GL_TEXTURE_2D);
-  glBindTexture(GL_TEXTURE_2D, 0);
-  glDeleteTextures(iconCount, &tex[0]);
+  glDeleteTextures(iconCount, tex);
 
   return ok;
 }
@@ -834,8 +850,8 @@ static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const Ico
   char path[MAX_PATH] = {0};
   bool ok             = false;
 
-  // Get the fully-qualified path to the font image.
-  conf_getPathForIcon(imageResources, entry->name, path, COUNTOF(path));
+  // Get the fully-qualified path to the icon image.
+  conf_getPathForImage(imageResources, entry->name, path, COUNTOF(path));
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -848,7 +864,7 @@ static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const Ico
     goto cleanup;
   }
 
-  loadTexture(&png, tex, GL_RGBA, texture);
+  gfx_loadTexture(&png, tex, GL_RGBA, texture);
 
   ok = true;
 
@@ -856,26 +872,6 @@ cleanup:
   freePng(&png);
 
   return ok;
-}
-
-/**
- * @brief Configure a texture a load pixels.
- * @param[in]  png     The PNG image providing pixels.
- * @param[in]  tex     The GL texture handle.
- * @param[in]  format  The texture color format.
- * @param[out] texture The texture wrapper.
- */
-static void loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture) {
-  glBindTexture(GL_TEXTURE_2D, tex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, format, png->width, png->height, 0, format, GL_UNSIGNED_BYTE,
-               png->rows[0]);
-  glGenerateMipmap(GL_TEXTURE_2D);
-
-  texture->texSize.v[0] = png->width;
-  texture->texSize.v[1] = png->height;
 }
 
 /**

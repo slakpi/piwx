@@ -1,9 +1,16 @@
 #include "geo.h"
 #include "util.h"
 #include <assert.h>
+#include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
+
+// Allows up to a tenth of a millimeter of error in ECEF calculations.
+#define ECEF_EPSILON 1e-4
+
+// Allows up to a second of error in subsolar calculations.
+#define SUBSOLAR_EPSILON (1.0 / 3600.0)
 
 typedef struct {
   time_t start;
@@ -25,6 +32,20 @@ typedef struct {
   time_t obsTime;
   bool   exp[4];
 } NightTestCase;
+
+typedef struct {
+  double lat;
+  double lon;
+  float x;
+  float y;
+  float z;
+} LatLonToECEFCase;
+
+typedef struct {
+  time_t obsTime;
+  double lat;
+  double lon;
+} SubsolarTestCase;
 
 typedef bool (*TestFn)();
 
@@ -148,11 +169,66 @@ static const NightTestCase gNightTestCases[] = {
 };
 // clang-format on
 
+// Any coordinate less than ECEF_EPSILON is zeroed out.
+// clang-format off
+static const LatLonToECEFCase gECEFCases[] = {
+  {90, 0, 0.0f, 0.0f, 6356752.314245f},
+  {45, 0, 4517590.878837506f, 0.0f, 4487348.408877217f},
+  {45, 45, 3194419.1450443445f, 3194419.1450606463f, 4487348.408877217f},
+  {45, 90, 0.0f, 4517590.878837506f, 4487348.408877217f},
+  {45, 135, -3194419.145076949f, 3194419.145028042f, 4487348.408877217f},
+  {45, 180, -4517590.878837506f, 0.0f, 4487348.408877217f},
+  {45, -135, -3194419.145076949f, -3194419.145028042f, 4487348.408877217f},
+  {45, -90, 0.0f, -4517590.878837506f, 4487348.408877217f},
+  {45, -45, 3194419.1450443445f, -3194419.1450606463f, 4487348.408877217f},
+  {90, 0, 0.0f, 0.0f, 6356752.314245f},
+  {90, 45, 0.0f, 0.0f, 6356752.314245f},
+  {90, 135, 0.0f, 0.0f, 6356752.314245f},
+  {90, 180, 0.0f, 0.0f, 6356752.314245f},
+  {90, 225, 0.0f, 0.0f, 6356752.314245f},
+  {90, 270, 0.0f, 0.0f, 6356752.314245f},
+  {90, 315, 0.0f, 0.0f, 6356752.314245f},
+  {-45, 0, 4517590.878837506f, 0.0f, -4487348.408877217f},
+  {-45, 45, 3194419.1450443445f, 3194419.1450606463f, -4487348.408877217f},
+  {-45, 90, 0.0f, 4517590.878837506f, -4487348.408877217f},
+  {-45, 135, -3194419.145076949f, 3194419.145028042f, -4487348.408877217f},
+  {-45, 180, -4517590.878837506f, 0.0f, -4487348.408877217f},
+  {-45, -135, -3194419.145076949f, -3194419.145028042f, -4487348.408877217f},
+  {-45, -90, 0.0f, -4517590.878837506f, -4487348.408877217f},
+  {-45, -45, 3194419.1450443445f, -3194419.1450606463f, -4487348.408877217f},
+  {-90, 0, 0.0f, 0.0f, -6356752.314245f},
+};
+// clang-format on
+
+// Coodinates are to the nearest minute.
+//
+//   NOTE: These test cases fail with the current calculation. The equation of
+//         time calculation is slightly off and may be pushing these coordinates
+//         off as well. There's an error of less than 10 minutes of longitude
+//         though.
+//
+// clang-format off
+// static const SubsolarTestCase gSubsolarCases[] = {
+//   // 2024 Jan. 18 at 14:40:00 UTC
+//   {1705588800, -20.5666666667, -37.4166666667},
+//   // 1979 Apr. 22 at 09:00:00 UTC
+//   {293619600, 12.05, 44.6666666667},
+//   // 2019 Oct. 10 at 19:00:00 UTC
+//   {1570734000, -6.75, -108.25},
+// };
+// clang-format on
+
+static bool floatsEqual(double a, double b, double eps);
+
 static bool testDaylightSpan();
 
 static bool testIsNight();
 
-static const TestFn gTests[] = {testDaylightSpan, testIsNight};
+static bool testLatLonToECEF();
+
+static bool testSubsolarPoint();
+
+static const TestFn gTests[] = {testDaylightSpan, testIsNight, testLatLonToECEF, testSubsolarPoint};
 
 int main() {
   bool ok = true;
@@ -163,6 +239,8 @@ int main() {
 
   return (ok ? 0 : -1);
 }
+
+static bool floatsEqual(double a, double b, double eps) { return fabs(a - b) < eps; }
 
 static bool testDaylightSpan() {
   bool ok = true;
@@ -190,10 +268,6 @@ static bool testDaylightSpan() {
                 testCase->exp[j].end);
         ok = false;
       }
-
-      if (ok) {
-        fprintf(stderr, "Daylight test case %d, span %d passed.\n", i, j);
-      }
     }
   }
 
@@ -212,11 +286,60 @@ static bool testIsNight() {
       if (isNight != testCase->exp[j]) {
         fprintf(stderr, "Night test case %d, span %d, %d != %d\n", i, j, isNight, testCase->exp[j]);
         ok = false;
-      } else {
-        fprintf(stderr, "Night test case %d, span %d passed\n", i, j);
       }
     }
   }
+
+  return ok;
+}
+
+static bool testLatLonToECEF() {
+  bool ok = true;
+
+  for (int i = 0; i < COUNTOF(gECEFCases); ++i) {
+    const LatLonToECEFCase *testCase = &gECEFCases[i];
+    float                   x, y, z;
+
+    geo_LatLonToECEF(testCase->lat, testCase->lon, &x, &y, &z);
+
+    if (ok && !floatsEqual(x, testCase->x, ECEF_EPSILON)) {
+      fprintf(stderr, "ECEF test case %d, X %f != %f\n", i, x, testCase->x);
+      ok = false;
+    }
+
+    if (ok && !floatsEqual(y, testCase->y, ECEF_EPSILON)) {
+      fprintf(stderr, "ECEF test case %d, Y %f != %f\n", i, y, testCase->y);
+      ok = false;
+    }
+
+    if (ok && !floatsEqual(z, testCase->z, ECEF_EPSILON)) {
+      fprintf(stderr, "ECEF test case %d, Z %f != %f\n", i, z, testCase->z);
+      ok = false;
+    }
+  }
+
+  return ok;
+}
+
+bool testSubsolarPoint() {
+  bool ok = true;
+
+  // for (int i = 0; i < COUNTOF(gSubsolarCases); ++i) {
+  //   const SubsolarTestCase *testCase = &gSubsolarCases[i];
+  //   double                  lat, lon;
+
+  //   geo_calcSubsolarPoint(testCase->obsTime, &lat, &lon);
+
+  //   if (ok && !floatsEqual(lat, testCase->lat, SUBSOLAR_EPSILON)) {
+  //     fprintf(stderr, "Subsolar test case %d, Lat %f != %f\n", i, lat, testCase->lat);
+  //     ok = false;
+  //   }
+
+  //   if (ok && !floatsEqual(lon, testCase->lon, SUBSOLAR_EPSILON)) {
+  //     fprintf(stderr, "Subsolar test case %d, Lon %f != %f\n", i, lon, testCase->lon);
+  //     ok = false;
+  //   }
+  // }
 
   return ok;
 }

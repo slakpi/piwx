@@ -75,6 +75,6 @@ char *conf_getPathForFont(const char *fontResources, const char *file, char *pat
  * @param[in]  len            The length of @a path.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *conf_getPathForIcon(const char *imageResources, const char *file, char *path, size_t len);
+char *conf_getPathForImage(const char *imageResources, const char *file, char *path, size_t len);
 
 #endif /* CONF_FILE_H */

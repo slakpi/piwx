@@ -100,6 +100,12 @@ typedef enum {
 typedef Vector4f Color4f;
 
 /**
+ * @typedef Point3f
+ * @brief   Floating-point 3D point.
+ */
+typedef Vector3f Point3f;
+
+/**
  * @typedef Point2f
  * @brief   Floating-point 2D point.
  */
@@ -128,12 +134,21 @@ bool gfx_commitToScreen(DrawResources resources);
 void gfx_cleanupGraphics(DrawResources *resources);
 
 /**
+ * @brief Draw the Earth centered on the given latitude and longitude.
+ * @param[in] resources The gfx context.
+ * @param[in] lat       The view latitude in degrees.
+ * @param[in] lon       The view longitude in degrees.
+ * @param[in] alt       The view altitude in meters.
+ */
+void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt);
+
+/**
  * @brief Draw an icon centered on a point.
  * @param[in] resources The gfx context.
  * @param[in] icon      The icon to draw.
  * @param[in] center    The center of the icon in pixels.
  */
-void gfx_drawIcon(DrawResources, Icon icon, Point2f center);
+void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center);
 
 /**
  * @brief Draws a solid line with the given color and width.

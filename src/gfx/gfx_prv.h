@@ -5,6 +5,7 @@
 #define GFX_PRV_H
 
 #include "gfx.h"
+#include "img.h"
 #include "vec.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -31,10 +32,20 @@ typedef Vector2f TexCoords2f;
  * @brief  Textured, 2D vertex.
  */
 typedef struct {
-  Point2f     pos;   // Vertex position
-  Color4f     color; // Vertex color
-  TexCoords2f tex;   // Vertex texture coordinates
+  Point2f     pos;
+  Color4f     color;
+  TexCoords2f tex;
 } Vertex;
+
+/**
+ * @struct Vertex3D
+ * @brief  Textured, 3D vertex.
+ */
+typedef struct {
+  Point3f     pos;
+  Color4f     color;
+  TexCoords2f tex;
+} Vertex3D;
 
 /**
  * @struct Texture
@@ -92,6 +103,16 @@ typedef enum {
 typedef enum { programGeneral, programAlphaTex, programRGBATex, programCount } Program;
 
 /**
+ * @enum  GlobeTexture
+ * @brief Indices for the globe textures.
+ */
+typedef enum {
+  globeDay,
+  globeNight,
+  globeTexCount
+} GlobeTexture;
+
+/**
  * @struct DrawResources_
  * @brief  Private implementation of the gfx DrawResources context.
  */
@@ -110,6 +131,9 @@ typedef struct {
   Texture     fonts[fontCount];              // Font textures
   Texture     icons[iconCount];              // Icon textures
   GLfloat     proj[4][4];                    // Projection matrix
+  Vertex3D   *globe;                         // Globe vertices
+  GLuint     *globeIndices;                  // Indices for globe triangles
+  Texture     globeTex[globeTexCount];       // Globe textures
 } DrawResources_;
 
 /**
@@ -153,6 +177,23 @@ void gfx_getProgramError(DrawResources_ *rsrc, GLuint program, const char *file,
  * @param[in] line     Line number where the error occurred.
  */
 void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line);
+
+/**
+ * @brief   Initialize the globe model for day/night display.
+ * @param[in,out] rsrc           The gfx context.
+ * @param[in]     imageResources The path to PiWx's image resources.
+ * @returns True if successful, false otherwise.
+ */
+bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources);
+
+/**
+ * @brief Configure a texture a load pixels.
+ * @param[in]  png     The PNG image providing pixels.
+ * @param[in]  tex     The GL texture handle.
+ * @param[in]  format  The texture color format.
+ * @param[out] texture The texture wrapper.
+ */
+void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture);
 
 /**
  * @brief Reset back to the generic shader and disable all attribute arrays.

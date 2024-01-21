@@ -231,11 +231,12 @@ cleanup:
 static bool validateBits(png_byte bits) { return (bits == 8 || bits == 16); }
 
 /**
- * @brief Validates that the color format is RGBA or grayscale.
+ * @brief Validates that the color format is RGB, RGBA or grayscale.
  * @param[in] color PNG color format.
  */
 static bool validateColor(png_byte color) {
-  return (color == PNG_COLOR_TYPE_RGBA || color == PNG_COLOR_TYPE_GRAY);
+  return (color == PNG_COLOR_TYPE_RGB || color == PNG_COLOR_TYPE_RGBA ||
+          color == PNG_COLOR_TYPE_GRAY);
 }
 
 /**
@@ -249,6 +250,8 @@ static bool validateColor(png_byte color) {
  */
 static size_t calcRowBytes(png_byte bits, png_byte color, png_uint_32 width) {
   switch (color) {
+  case PNG_COLOR_TYPE_RGB:
+    return (bits * width * 3) >> 3;
   case PNG_COLOR_TYPE_RGBA:
     return (bits * width * 4) >> 3;
   case PNG_COLOR_TYPE_GRAY:

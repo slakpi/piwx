@@ -47,7 +47,11 @@ set(RELEASE "R42-dev")
 #-------------------------------------------------------------------------------
 # Setup the global compile options.
 #-------------------------------------------------------------------------------
-add_compile_options(-Wall -Werror=unused-function -Werror=unused-variable)
+add_compile_options(
+  -Wall
+  $<$<CONFIG:Release>:-Werror=unused-function>
+  $<$<CONFIG:Release>:-Werror=unused-variable>
+  $<$<CONFIG:Debug>:-D_DEBUG>)
 
 #-------------------------------------------------------------------------------
 # Bring subdirectories into the project.
