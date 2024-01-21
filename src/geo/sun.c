@@ -86,7 +86,7 @@ bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
   // NOTE: The subsolar point calculation seems to be off by several minutes.
   //       This may be due to the Equation of Time which seems to be slightly
   //       off compared to online sources. It seems to be off by less than 10
-  //       minutes of longitude.
+  //       minutes of latitude, so within roughly 10 nm of the real point.
 
   gmtime_r(&obsTime, &date);
 
