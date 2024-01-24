@@ -23,7 +23,7 @@ target_compile_options(wx_lexer PRIVATE -Wno-unused-function -Wno-unused-variabl
 add_library(wx STATIC wx.c)
 target_link_libraries(wx
   PUBLIC wx_intf
-  PRIVATE wx_lexer CURL::libcurl LibXml2::LibXml2 Piwx::Geo Threads::Threads)
+  PRIVATE wx_lexer CURL::libcurl LibXml2::LibXml2 Piwx::Geo Piwx::Util Threads::Threads)
 
 #-------------------------------------------------------------------------------
 # Export the library.

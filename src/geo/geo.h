@@ -7,6 +7,16 @@
 #include <stdbool.h>
 #include <time.h>
 
+#define GEO_DAY_OFFICIAL         90.833
+#define GEO_CIVIL_TWILIGHT       96.0
+#define GEO_NAUTICAL_TWILIGHT    102.0
+#define GEO_ASTONOMICAL_TWILIGHT 108.0
+
+#define GEO_WGS84_SEMI_MAJOR_M  6378137.0
+#define GEO_WGS84_SEMI_MAJOR_M2 (GEO_WGS84_SEMI_MAJOR_M * GEO_WGS84_SEMI_MAJOR_M)
+#define GEO_WGS84_SEMI_MINOR_M  6356752.314245
+#define GEO_WGS84_SEMI_MINOR_M2 (GEO_WGS84_SEMI_MINOR_M * GEO_WGS84_SEMI_MINOR_M)
+
 typedef enum {
   daylightOfficial,
   daylightCivil,

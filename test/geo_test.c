@@ -47,7 +47,7 @@ typedef struct {
   double lon;
 } SubsolarTestCase;
 
-typedef bool (*TestFn)();
+typedef bool (*TestFn)(void);
 
 // clang-format off
 static const DaylightSpan gSpanOrder[] = {
@@ -220,13 +220,13 @@ static const LatLonToECEFCase gECEFCases[] = {
 
 static bool floatsEqual(double a, double b, double eps);
 
-static bool testDaylightSpan();
+static bool testDaylightSpan(void);
 
-static bool testIsNight();
+static bool testIsNight(void);
 
-static bool testLatLonToECEF();
+static bool testLatLonToECEF(void);
 
-static bool testSubsolarPoint();
+static bool testSubsolarPoint(void);
 
 static const TestFn gTests[] = {testDaylightSpan, testIsNight, testLatLonToECEF, testSubsolarPoint};
 
@@ -234,6 +234,8 @@ int main() {
   bool ok = true;
 
   for (int i = 0; i < COUNTOF(gTests); ++i) {
+    // Don't short circuit by placing `ok &&` at the beginning, run the test
+    // even if previous tests failed.
     ok = gTests[i]() && ok;
   }
 
@@ -242,7 +244,7 @@ int main() {
 
 static bool floatsEqual(double a, double b, double eps) { return fabs(a - b) < eps; }
 
-static bool testDaylightSpan() {
+static bool testDaylightSpan(void) {
   bool ok = true;
 
   for (int i = 0; i < COUNTOF(gSpanTestCases); ++i) {
@@ -274,7 +276,7 @@ static bool testDaylightSpan() {
   return ok;
 }
 
-static bool testIsNight() {
+static bool testIsNight(void) {
   bool ok = true;
 
   for (int i = 0; i < COUNTOF(gNightTestCases); ++i) {
@@ -293,7 +295,7 @@ static bool testIsNight() {
   return ok;
 }
 
-static bool testLatLonToECEF() {
+static bool testLatLonToECEF(void) {
   bool ok = true;
 
   for (int i = 0; i < COUNTOF(gECEFCases); ++i) {
@@ -321,7 +323,7 @@ static bool testLatLonToECEF() {
   return ok;
 }
 
-bool testSubsolarPoint() {
+bool testSubsolarPoint(void) {
   bool ok = true;
 
   // for (int i = 0; i < COUNTOF(gSubsolarCases); ++i) {

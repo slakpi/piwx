@@ -4,6 +4,7 @@
 #if !defined UTIL_H
 #define UTIL_H
 
+#include <math.h>
 #include <stddef.h>
 
 #define TINY_VALUE 1e-15
@@ -12,6 +13,9 @@
 #define MEMBER_OFFSET(s, m) ((void *)&(((s *)0)->m))
 #define COUNTOF(arr)        (sizeof(arr) / sizeof(*(arr)))
 #define UNUSED(x)           ((void)(x))
+
+#define RAD_TO_DEG (180.0 / M_PI)
+#define DEG_TO_RAD (M_PI / 180.0)
 
 /**
  * @brief   Returns the maximum of two values.

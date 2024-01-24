@@ -1,11 +1,10 @@
 #-------------------------------------------------------------------------------
-# Setup the geo library.
+# Setup the util library.
 #-------------------------------------------------------------------------------
-add_library(geo STATIC ecef.c sun.c)
-target_include_directories(geo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(geo PRIVATE Piwx::Util)
+add_library(util STATIC util.c)
+target_include_directories(util PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 #-------------------------------------------------------------------------------
 # Export the library.
 #-------------------------------------------------------------------------------
-add_library(Piwx::Geo ALIAS geo)
+add_library(Piwx::Util ALIAS util)

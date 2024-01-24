@@ -31,20 +31,20 @@
   }                                                                                                \
 }
 
-typedef bool (*TestFn)();
+typedef bool (*TestFn)(void);
 
 static char  gTempFilePath[MAX_PATH];
 static FILE *gTempFile;
 
-static void closeTempFile();
+static void closeTempFile(void);
 
 static bool compareConf(const PiwxConfig *act, const PiwxConfig *exp);
 
 static bool compareStrings(const char *act, const char *exp);
 
-static void openTempFile();
+static void openTempFile(void);
 
-static bool testNormalParse();
+static bool testNormalParse(void);
 
 static void writeValidConfFile(FILE *cfgFile, const PiwxConfig *cfg);
 
@@ -57,13 +57,15 @@ int main() {
   gTempFile = NULL;
 
   for (int i = 0; i < COUNTOF(gTests); ++i) {
+    // Don't short circuit by placing `ok &&` at the beginning, run the test
+    // even if previous tests failed.
     ok = gTests[i]() && ok;
   }
 
   return (ok ? 0 : -1);
 }
 
-static bool testNormalParse() {
+static bool testNormalParse(void) {
   bool       ok  = true;
   PiwxConfig cfg = {
       .stationQuery       = "KHIO;K7S3;KTPA;KGNV;KDEN;KSEA",
@@ -100,7 +102,7 @@ static bool testNormalParse() {
   return ok;
 }
 
-static void openTempFile() {
+static void openTempFile(void) {
   char tmpFile[] = {"/tmp/piwxXXXXXX"};
   int  fd        = mkstemp(tmpFile);
 
@@ -203,7 +205,7 @@ static bool compareStrings(const char *act, const char *exp) {
   return true;
 }
 
-static void closeTempFile() {
+static void closeTempFile(void) {
   if (!gTempFile) {
     return;
   }

@@ -5,6 +5,7 @@
 #include "conf_file.h"
 #include "gfx_prv.h"
 #include "img.h"
+#include "transform.h"
 #include "util.h"
 #include "vec.h"
 #include <EGL/egl.h>
@@ -25,8 +26,10 @@
 // clang-format off
 #include "alpha_tex.frag.h"
 #include "general.frag.h"
+#include "globe.frag.h"
 #include "rgba_tex.frag.h"
 #include "general.vert.h"
+#include "globe.vert.h"
 // clang-format on
 
 #if defined __ARM_NEON
@@ -65,7 +68,7 @@ static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_B
                                         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE};
 
 static const EGLint gPbufferAttribs[] = {
-    EGL_WIDTH, SCREEN_WIDTH, EGL_HEIGHT, SCREEN_HEIGHT, EGL_NONE,
+    EGL_WIDTH, GFX_SCREEN_WIDTH, EGL_HEIGHT, GFX_SCREEN_HEIGHT, EGL_NONE,
 };
 
 static const EGLint gContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
@@ -141,7 +144,7 @@ static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const Ico
 
 static bool loadIcons(DrawResources_ *rsrc, const char *imageResources);
 
-static void makeProjection(DrawResources_ *rsrc);
+static void makeProjection(TransformMatrix proj);
 
 static bool makeProgram(GLuint *program, DrawResources_ *rsrc, GLuint vert, GLuint frag);
 
@@ -230,6 +233,7 @@ void gfx_cleanupGraphics(DrawResources *resources) {
 
   free(rsrc->globe);
   free(rsrc->globeIndices);
+  glDeleteBuffers(2, rsrc->globeBuffers);
 
   for (int i = 0; i < globeTexCount; ++i) {
     glDeleteTextures(1, &rsrc->globeTex[i].tex);
@@ -502,7 +506,7 @@ void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *
 }
 
 void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {
-  if (program >= programCount) {
+  if (program >= programGlobe) {
     return;
   }
 
@@ -614,11 +618,13 @@ static bool initShaders(DrawResources_ *rsrc) {
     GLuint v, f;
   } Link;
 
-  static const char *vshaders[]  = {GENERAL_VERT_SRC};
-  static const char *fshaders[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC};
+  static const char *vshaders[]  = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
+  static const char *fshaders[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
+                                    GLOBE_FRAG_SRC};
   static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
                                     {vertexGeneral, fragmentAlphaTex},
-                                    {vertexGeneral, fragmentRGBATex}};
+                                    {vertexGeneral, fragmentRGBATex},
+                                    {vertexGlobe, fragmentGlobe}};
 
   for (int i = 0; i < vertexShaderCount; ++i) {
     if (!makeShader(&rsrc->vshaders[i], rsrc, GL_VERTEX_SHADER, vshaders[i])) {
@@ -879,39 +885,44 @@ cleanup:
  * @param[in] rsrc The gfx context.
  */
 static void initRender(DrawResources_ *rsrc) {
-  glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+  glViewport(0, 0, GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  makeProjection(rsrc);
+  makeProjection(rsrc->proj);
   gfx_resetShader(rsrc, programGeneral);
 }
 
 /**
  * @brief Initialize the projection with a column-major orthographic matrix.
- * @param[in,out] rsrc The gfx context.
+ * @param[in,out] proj The projection matrix.
  */
-static void makeProjection(DrawResources_ *rsrc) {
-  rsrc->proj[0][0] = 2.0f / SCREEN_WIDTH;
-  rsrc->proj[0][1] = 0.0f;
-  rsrc->proj[0][2] = 0.0f;
-  rsrc->proj[0][3] = 0.0f;
+static void makeProjection(TransformMatrix proj) {
+  // Orthographic cuboid that just uses the largest screen dimension for the
+  // depth. This allows 3D rendering.
+  const float far  = max(GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT);
+  const float near = -far;
 
-  rsrc->proj[1][0] = 0.0f;
-  rsrc->proj[1][1] = 2.0f / SCREEN_HEIGHT;
-  rsrc->proj[1][2] = 0.0f;
-  rsrc->proj[1][3] = 0.0f;
+  proj[0][0] = 2.0f / GFX_SCREEN_WIDTH;
+  proj[0][1] = 0.0f;
+  proj[0][2] = 0.0f;
+  proj[0][3] = 0.0f;
 
-  rsrc->proj[2][0] = 0.0f;
-  rsrc->proj[2][1] = 0.0f;
-  rsrc->proj[2][2] = -1.0f;
-  rsrc->proj[2][3] = 0.0f;
+  proj[1][0] = 0.0f;
+  proj[1][1] = 2.0f / GFX_SCREEN_HEIGHT;
+  proj[1][2] = 0.0f;
+  proj[1][3] = 0.0f;
 
-  rsrc->proj[3][0] = -1.0f;
-  rsrc->proj[3][1] = -1.0f;
-  rsrc->proj[3][2] = 0.0f;
-  rsrc->proj[3][3] = 1.0f;
+  proj[2][0] = 0.0f;
+  proj[2][1] = 0.0f;
+  proj[2][2] = -2.0f / (float)(far - near);
+  proj[2][3] = 0.0f;
+
+  proj[3][0] = -1.0f;
+  proj[3][1] = -1.0f;
+  proj[3][2] = -(float)(far + near) / (float)(far - near);
+  proj[3][3] = 1.0f;
 }
 
 /**
@@ -920,12 +931,12 @@ static void makeProjection(DrawResources_ *rsrc) {
  * @returns True if able to allocate memory for a PNG, false otherwise.
  */
 static bool readPixelsToPng(Png *png) {
-  if (!allocPng(png, 8, PNG_COLOR_TYPE_RGBA, SCREEN_WIDTH, SCREEN_HEIGHT, 4)) {
+  if (!allocPng(png, 8, PNG_COLOR_TYPE_RGBA, GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT, 4)) {
     return false;
   }
 
   // The only useful pair OpenGL ES supports is GL_RGBA
-  glReadPixels(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, png->rows[0]);
+  glReadPixels(0, 0, GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT, GL_RGBA, GL_UNSIGNED_BYTE, png->rows[0]);
 
   return true;
 }

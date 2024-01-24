@@ -22,12 +22,13 @@ add_subdirectory(conf_file)
 add_subdirectory(led)
 add_subdirectory(geo)
 add_subdirectory(gfx)
+add_subdirectory(util)
 add_subdirectory(wx)
 
 #-------------------------------------------------------------------------------
 # Setup the piwx target.
 #-------------------------------------------------------------------------------
-add_executable(piwx log.c piwx.c util.c)
+add_executable(piwx log.c piwx.c)
 target_include_directories(piwx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
-  piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Geo Piwx::Gfx Piwx::Led Piwx::Wx m)
+  piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Geo Piwx::Gfx Piwx::Led Piwx::Util Piwx::Wx m)

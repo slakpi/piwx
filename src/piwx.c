@@ -101,9 +101,9 @@ static bool go(bool test, bool verbose);
 
 static void printConfiguration(const PiwxConfig *config);
 
-static unsigned int scanButtons();
+static unsigned int scanButtons(void);
 
-static int setupGpio();
+static int setupGpio(void);
 
 static void signalHandler(int signo);
 
@@ -171,7 +171,7 @@ static bool go(bool test, bool verbose) {
   WxStation    *wx = NULL, *curStation = NULL;
   time_t        nextUpdate = 0, nextBlink = 0, nextDayNight = 0, nextWx = 0;
   bool          first = true, ret = false;
-  DrawResources resources = INVALID_RESOURCES;
+  DrawResources resources = GFX_INVALID_RESOURCES;
 
   if (verbose) {
     printConfiguration(cfg);
@@ -338,7 +338,7 @@ static void printConfiguration(const PiwxConfig *config) {
  * @brief   Initializes the pigpio library.
  * @returns The result of @a gpioInitialise.
  */
-static int setupGpio() {
+static int setupGpio(void) {
   int ret, cfg;
 
   // Turn off internal signal handling so that the library does not force an
@@ -365,7 +365,7 @@ static int setupGpio() {
  * @brief Scans the buttons on the PiTFT.
  * @returns Bitmask of pressed buttons.
  */
-static unsigned int scanButtons() {
+static unsigned int scanButtons(void) {
   unsigned int buttons = 0;
 
   for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
@@ -382,7 +382,7 @@ static unsigned int scanButtons() {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawDownloadScreen(DrawResources resources, bool commit) {
-  Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
+  Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
   gfx_drawIcon(resources, iconDownloading, center);
@@ -398,7 +398,7 @@ static void drawDownloadScreen(DrawResources resources, bool commit) {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
-  Point2f center = {{SCREEN_WIDTH / 2.0f, SCREEN_HEIGHT / 2.0f}};
+  Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
   gfx_drawIcon(resources, iconDownloadErr, center);
@@ -415,16 +415,20 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawStationScreen(DrawResources resources, const WxStation *station, bool commit) {
+  const Point2f center = {{0, 0}};
+
   gfx_clearSurface(resources, gClearColor);
 
-  drawBackground(resources);
-  drawStationIdentifier(resources, station);
-  drawStationFlightCategory(resources, station);
-  drawStationWeather(resources, station);
-  drawStationWxString(resources, station);
-  drawCloudLayers(resources, station);
-  drawWindInfo(resources, station);
-  drawTempDewPointVisAlt(resources, station);
+  // drawBackground(resources);
+  // drawStationIdentifier(resources, station);
+  // drawStationFlightCategory(resources, station);
+  // drawStationWeather(resources, station);
+  // drawStationWxString(resources, station);
+  // drawCloudLayers(resources, station);
+  // drawWindInfo(resources, station);
+  // drawTempDewPointVisAlt(resources, station);
+
+  gfx_drawGlobe(resources, 45, -122, 0, center);
 
   if (commit) {
     gfx_commitToScreen(resources);
@@ -437,9 +441,9 @@ static void drawStationScreen(DrawResources resources, const WxStation *station,
  */
 static void drawBackground(DrawResources resources) {
   const Point2f lines[] = {{{0.0f, gUpperDiv}},
-                           {{SCREEN_WIDTH, gUpperDiv}},
+                           {{GFX_SCREEN_WIDTH, gUpperDiv}},
                            {{0.0f, gLowerDiv}},
-                           {{SCREEN_WIDTH, gLowerDiv}}};
+                           {{GFX_SCREEN_WIDTH, gLowerDiv}}};
 
   gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
   gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
@@ -576,7 +580,7 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
   }
 
   len                = strlen(station->wxString);
-  bottomLeft.coord.x = (SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
+  bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
   bottomLeft.coord.y = gUpperDiv + info.cellSize.v[1];
   gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gWhite, vertAlignCell);
 }

@@ -6,6 +6,7 @@
 #include "gfx.h"
 #include "gfx_prv.h"
 #include "img.h"
+#include "transform.h"
 #include "util.h"
 #include "vec.h"
 #include <assert.h>
@@ -47,7 +48,49 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
 
 static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources);
 
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt) {}
+static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform);
+
+void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, Point2f center) {
+  const DrawResources_ *rsrc = resources;
+  const float lat_rad = (float)(lat * DEG_TO_RAD);
+  const float lon_rad = (float)(lon * DEG_TO_RAD);
+  const float scale = (float)(GFX_SCREEN_WIDTH / GEO_WGS84_SEMI_MAJOR_M);
+  TransformMatrix xform, tmp;
+
+  if (!rsrc->globe) {
+    return;
+  }
+
+  // The projection has the eye looking in the +Z direction with +Y pointing
+  // down and +X pointing right. The globe is ECEF with the North pole on +Z,
+  // the South pole on -Z, the Prime Meridian on +X and the antimeridian on -X.
+  // Initially, the eye would be at the center of the globe looking at the North
+  // pole with 90 degrees longitude below the eye and -90 degrees longitude
+  // above.
+  //
+  // The latitude is adjusted by a 90-degree counter clockwise rotation to bring
+  // the North pole up to -Y. The longitude is adjusted by a 180-degree counter
+  // clockwise rotation to bring the Prime Meridian around to the eye.
+
+  makeScale(xform, scale, scale, scale);
+
+  // makeTranslation(xform, 0, 0, -GEO_WGS84_SEMI_MAJOR_M - alt);
+
+  // makeXRotation(tmp, lat_rad + (float)(90.0 * DEG_TO_RAD));
+  // combineTransforms(xform, tmp);
+
+  // makeYRotation(tmp, lon_rad + (float)(180.0 * DEG_TO_RAD));
+  // combineTransforms(xform, tmp);
+
+  glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
+
+  setupGlobeShader(rsrc, xform);
+  glDrawElements(GL_TRIANGLES, TRI_COUNT, GL_UNSIGNED_INT, NULL);
+  gfx_resetShader(rsrc, programGlobe);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
 
 bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
   if (rsrc->globe) {
@@ -134,8 +177,15 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   bool      ok      = false;
   Vertex3D *globe   = malloc(sizeof(Vertex3D) * VERTEX_COUNT);
   GLuint   *indices = malloc(sizeof(GLuint) * INDEX_COUNT);
+  GLuint    buffers[2];
 
   if (!globe || !indices) {
+    goto cleanup;
+  }
+
+  glGenBuffers(2, buffers);
+
+  if (buffers[0] == 0 || buffers[1] == 0) {
     goto cleanup;
   }
 
@@ -201,17 +251,30 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   indices[tri++] = idx;
   indices[tri++] = VERTEX_COUNT - LON_COUNT - 1;
 
-  rsrc->globe        = globe;
-  rsrc->globeIndices = indices;
+  glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex3D) * VERTEX_COUNT, globe, GL_STATIC_DRAW);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  globe   = NULL;
-  indices = NULL;
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * INDEX_COUNT, indices, GL_STATIC_DRAW);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+  rsrc->globe           = globe;
+  rsrc->globeIndices    = indices;
+  rsrc->globeBuffers[0] = buffers[0];
+  rsrc->globeBuffers[1] = buffers[1];
+
+  globe      = NULL;
+  indices    = NULL;
+  buffers[0] = 0;
+  buffers[1] = 0;
 
   ok = true;
 
 cleanup:
   free(globe);
   free(indices);
+  glDeleteBuffers(2, buffers);
 
   return ok;
 }
@@ -310,4 +373,36 @@ cleanup:
   freePng(&png);
 
   return ok;
+}
+
+static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform) {
+  const ProgramInfo *program = &rsrc->programs[programGeneral];
+  GLuint viewIndex;
+
+  glUseProgram(program->program);
+
+  glUniformMatrix4fv(program->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
+
+  viewIndex = glGetUniformLocation(program->program, "view");
+  glUniformMatrix4fv(viewIndex, 1, GL_FALSE, (const GLfloat *)xform);
+
+  glEnableVertexAttribArray(program->posIndex);
+  glVertexAttribPointer(program->posIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, pos));
+
+  glEnableVertexAttribArray(program->colorIndex);
+  glVertexAttribPointer(program->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, color));
+
+  glEnable(GL_TEXTURE_2D);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeDay].tex);
+
+  glActiveTexture(GL_TEXTURE1);
+  glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeNight].tex);
+
+  glEnableVertexAttribArray(program->texIndex);
+  glVertexAttribPointer(program->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, tex));
 }

@@ -4,17 +4,13 @@
  * @see https://en.wikipedia.org/wiki/Subsolar_point
  */
 #include "geo.h"
-#include "geo_prv.h"
+#include "util.h"
 #include <math.h>
 #include <stdbool.h>
 #include <time.h>
 
 #define SEC_PER_DAY          86400
 #define SEC_PER_HOUR         3600
-#define DAY_OFFICIAL         90.833
-#define CIVIL_TWILIGHT       96.0
-#define NAUTICAL_TWILIGHT    102.0
-#define ASTONOMICAL_TWILIGHT 108.0
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime);
@@ -167,13 +163,13 @@ static double getTwilightAngularValue(DaylightSpan daylight) {
   switch (daylight) {
   default:
   case daylightOfficial:
-    return DAY_OFFICIAL;
+    return GEO_DAY_OFFICIAL;
   case daylightCivil:
-    return CIVIL_TWILIGHT;
+    return GEO_CIVIL_TWILIGHT;
   case daylightNautical:
-    return NAUTICAL_TWILIGHT;
+    return GEO_NAUTICAL_TWILIGHT;
   case daylightAstronomical:
-    return ASTONOMICAL_TWILIGHT;
+    return GEO_ASTONOMICAL_TWILIGHT;
   }
 }
 
@@ -277,7 +273,7 @@ static double calcJDFromJulianCentury(double t) { return t * 36525.0 + 2451545.0
  * @brief   Calculate the solar equation of time.
  * @details The solar equation of time is the difference between noon and solar
  *          noon at a given point in time.
- * @param[in] t      The Julian century.
+ * @param[in]  t     The Julian century.
  * @param[out] Etime The equation of time.
  * @returns True if able to calculate the equation of time, false otherwise.
  */

@@ -9,9 +9,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define SCREEN_WIDTH      320.0f
-#define SCREEN_HEIGHT     240.0f
-#define INVALID_RESOURCES NULL
+#define GFX_INVALID_RESOURCES NULL
+#define GFX_SCREEN_WIDTH      320.0f
+#define GFX_SCREEN_HEIGHT     240.0f
 
 /**
  * @typedef DrawResources
@@ -139,8 +139,9 @@ void gfx_cleanupGraphics(DrawResources *resources);
  * @param[in] lat       The view latitude in degrees.
  * @param[in] lon       The view longitude in degrees.
  * @param[in] alt       The view altitude in meters.
+ * @param[in] center    Center of the globe in pixels.
  */
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt);
+void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, Point2f center);
 
 /**
  * @brief Draw an icon centered on a point.

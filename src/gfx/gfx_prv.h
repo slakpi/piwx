@@ -6,6 +6,7 @@
 
 #include "gfx.h"
 #include "img.h"
+#include "transform.h"
 #include "vec.h"
 #include <EGL/egl.h>
 #include <GLES2/gl2.h>
@@ -83,7 +84,7 @@ typedef struct {
  * @enum  VertexShader
  * @brief Vertex shader handles.
  */
-typedef enum { vertexGeneral, vertexShaderCount } VertexShader;
+typedef enum { vertexGeneral, vertexGlobe, vertexShaderCount } VertexShader;
 
 /**
  * @enum  FragmentShader
@@ -93,6 +94,7 @@ typedef enum {
   fragmentGeneral,
   fragmentAlphaTex,
   fragmentRGBATex,
+  fragmentGlobe,
   fragmentShaderCount
 } FragmentShader;
 
@@ -100,40 +102,37 @@ typedef enum {
  * @enum  Program
  * @brief Shader program handles.
  */
-typedef enum { programGeneral, programAlphaTex, programRGBATex, programCount } Program;
+typedef enum { programGeneral, programAlphaTex, programRGBATex, programGlobe, programCount } Program;
 
 /**
  * @enum  GlobeTexture
  * @brief Indices for the globe textures.
  */
-typedef enum {
-  globeDay,
-  globeNight,
-  globeTexCount
-} GlobeTexture;
+typedef enum { globeDay, globeNight, globeTexCount } GlobeTexture;
 
 /**
  * @struct DrawResources_
  * @brief  Private implementation of the gfx DrawResources context.
  */
 typedef struct {
-  EGLDisplay  display;                       // EGL display object
-  EGLContext  context;                       // EGL context
-  EGLSurface  surface;                       // EGL surface
-  int         error;                         // Last error code
-  char        errorMsg[256];                 // Last error message
-  char        errorFile[256];                // File where the last error occurred
-  long        errorLine;                     // Line number of last error occurred
-  int         major, minor;                  // EGL API version
-  GLuint      vshaders[vertexShaderCount];   // Vertex shaders
-  GLuint      fshaders[fragmentShaderCount]; // Fragment shaders
-  ProgramInfo programs[programCount];        // Shader programs
-  Texture     fonts[fontCount];              // Font textures
-  Texture     icons[iconCount];              // Icon textures
-  GLfloat     proj[4][4];                    // Projection matrix
-  Vertex3D   *globe;                         // Globe vertices
-  GLuint     *globeIndices;                  // Indices for globe triangles
-  Texture     globeTex[globeTexCount];       // Globe textures
+  EGLDisplay      display;                       // EGL display object
+  EGLContext      context;                       // EGL context
+  EGLSurface      surface;                       // EGL surface
+  int             error;                         // Last error code
+  char            errorMsg[256];                 // Last error message
+  char            errorFile[256];                // File where the last error occurred
+  long            errorLine;                     // Line number of last error occurred
+  int             major, minor;                  // EGL API version
+  GLuint          vshaders[vertexShaderCount];   // Vertex shaders
+  GLuint          fshaders[fragmentShaderCount]; // Fragment shaders
+  ProgramInfo     programs[programCount];        // Shader programs
+  Texture         fonts[fontCount];              // Font textures
+  Texture         icons[iconCount];              // Icon textures
+  TransformMatrix proj;                          // Projection matrix
+  Vertex3D       *globe;                         // Globe vertices
+  GLuint         *globeIndices;                  // Indices for globe triangles
+  GLuint          globeBuffers[2];               // Vertex and Index buffers
+  Texture         globeTex[globeTexCount];       // Globe textures
 } DrawResources_;
 
 /**

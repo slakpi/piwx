@@ -36,7 +36,7 @@ void assertLog(bool condition, const char *fmt, ...);
 /**
  * @brief Close the log file.
  */
-void closeLog();
+void closeLog(void);
 
 /**
  * @brief Open the log.

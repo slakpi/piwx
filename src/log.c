@@ -51,7 +51,7 @@ bool openLog(const char *logFile, LogLevel maxLevel) {
   return true;
 }
 
-void closeLog() {
+void closeLog(void) {
   if (!gLog) {
     return;
   }

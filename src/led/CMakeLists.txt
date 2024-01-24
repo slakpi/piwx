@@ -10,6 +10,8 @@ add_library(led STATIC led.c)
 target_include_directories(
   led PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
       PRIVATE ${PROJECT_SOURCE_DIR}/src)
+target_link_libraries(led PRIVATE Piwx::Util)
+
 if (WS2811_FOUND)
   target_compile_definitions(led PRIVATE HAS_LED_SUPPORT)
   target_link_libraries(led PUBLIC WS2811::WS2811)
