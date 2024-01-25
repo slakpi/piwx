@@ -87,6 +87,8 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, 
   glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
+  // NOTE: Older OpenGL ES versions only supported unsigned short indices.
+
   setupGlobeShader(rsrc, xform);
   glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
   gfx_resetShader(rsrc, programGlobe);
