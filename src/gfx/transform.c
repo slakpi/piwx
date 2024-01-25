@@ -19,7 +19,7 @@ void combineTransforms(TransformMatrix a, const TransformMatrix b) {
     }
   }
 
-  memcpy(a, tmp, sizeof(tmp));
+  memcpy(a, tmp, sizeof(tmp)); // NOLINT -- Size known.
 }
 
 void makeIdentity(TransformMatrix mat) {
@@ -70,21 +70,21 @@ void makeTranslation(TransformMatrix mat, float x, float y, float z) {
   mat[0][0] = 1.0f;
   mat[0][1] = 0.0f;
   mat[0][2] = 0.0f;
-  mat[0][3] = x;
+  mat[0][3] = 0.0f;
 
   mat[1][0] = 0.0f;
   mat[1][1] = 1.0f;
   mat[1][2] = 0.0f;
-  mat[1][3] = y;
+  mat[1][3] = 0.0f;
 
   mat[2][0] = 0.0f;
   mat[2][1] = 0.0f;
   mat[2][2] = 1.0f;
-  mat[2][3] = z;
+  mat[2][3] = 0.0f;
 
-  mat[3][0] = 0.0f;
-  mat[3][1] = 0.0f;
-  mat[3][2] = 0.0f;
+  mat[3][0] = x;
+  mat[3][1] = y;
+  mat[3][2] = z;
   mat[3][3] = 1.0f;
 }
 

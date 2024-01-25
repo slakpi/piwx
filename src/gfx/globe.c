@@ -10,6 +10,7 @@
 #include "util.h"
 #include "vec.h"
 #include <assert.h>
+#include <stdint.h>
 
 #define LAT_INTERVAL_DEG 10
 _Static_assert(90 % LAT_INTERVAL_DEG == 0, "Invalid latitude interval");
@@ -34,6 +35,7 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 
 // Three indices per triangle.
 #define INDEX_COUNT (TRI_COUNT * 3)
+_Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 
 #if defined _DEBUG
 static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResources);
@@ -54,7 +56,7 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, 
   const DrawResources_ *rsrc = resources;
   const float lat_rad = (float)(lat * DEG_TO_RAD);
   const float lon_rad = (float)(lon * DEG_TO_RAD);
-  const float scale = (float)(GFX_SCREEN_WIDTH / GEO_WGS84_SEMI_MAJOR_M);
+  const float scale = (float)(GFX_SCREEN_HEIGHT / (2.0f * GEO_WGS84_SEMI_MAJOR_M));
   TransformMatrix xform, tmp;
 
   if (!rsrc->globe) {
@@ -64,29 +66,25 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, 
   // The projection has the eye looking in the +Z direction with +Y pointing
   // down and +X pointing right. The globe is ECEF with the North pole on +Z,
   // the South pole on -Z, the Prime Meridian on +X and the antimeridian on -X.
-  // Initially, the eye would be at the center of the globe looking at the North
-  // pole with 90 degrees longitude below the eye and -90 degrees longitude
-  // above.
+  // The eye is initially looking at Antarctica.
   //
   // The latitude is adjusted by a 90-degree counter clockwise rotation to bring
   // the North pole up to -Y. The longitude is adjusted by a 180-degree counter
   // clockwise rotation to bring the Prime Meridian around to the eye.
 
-  makeScale(xform, scale, scale, scale);
+  makeTranslation(xform, GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f, GFX_SCREEN_WIDTH);
 
-  // makeTranslation(xform, 0, 0, -GEO_WGS84_SEMI_MAJOR_M - alt);
+  makeXRotation(tmp, (90.0f + lat) * DEG_TO_RAD);
+  combineTransforms(xform, tmp);
 
-  // makeXRotation(tmp, lat_rad + (float)(90.0 * DEG_TO_RAD));
-  // combineTransforms(xform, tmp);
-
-  // makeYRotation(tmp, lon_rad + (float)(180.0 * DEG_TO_RAD));
-  // combineTransforms(xform, tmp);
+  makeScale(tmp, scale, scale, scale);
+  combineTransforms(xform, tmp);
 
   glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
   setupGlobeShader(rsrc, xform);
-  glDrawElements(GL_TRIANGLES, TRI_COUNT, GL_UNSIGNED_INT, NULL);
+  glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
   gfx_resetShader(rsrc, programGlobe);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -172,11 +170,11 @@ static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResource
  * @returns True if successful, false otherwise.
  */
 static bool genGlobeModel(DrawResources_ *rsrc) {
-  int       idx     = 0;
+  GLushort  idx     = 0;
   int       tri     = 0;
   bool      ok      = false;
   Vertex3D *globe   = malloc(sizeof(Vertex3D) * VERTEX_COUNT);
-  GLuint   *indices = malloc(sizeof(GLuint) * INDEX_COUNT);
+  GLushort *indices = malloc(sizeof(GLushort) * INDEX_COUNT);
   GLuint    buffers[2];
 
   if (!globe || !indices) {
@@ -256,18 +254,20 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * INDEX_COUNT, indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * INDEX_COUNT, indices, GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-  rsrc->globe           = globe;
-  rsrc->globeIndices    = indices;
+#if defined _DEBUG
+  rsrc->globe        = globe;
+  rsrc->globeIndices = indices;
+  globe              = NULL;
+  indices            = NULL;
+#endif
+
   rsrc->globeBuffers[0] = buffers[0];
   rsrc->globeBuffers[1] = buffers[1];
-
-  globe      = NULL;
-  indices    = NULL;
-  buffers[0] = 0;
-  buffers[1] = 0;
+  buffers[0]            = 0;
+  buffers[1]            = 0;
 
   ok = true;
 
@@ -376,8 +376,9 @@ cleanup:
 }
 
 static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform) {
-  const ProgramInfo *program = &rsrc->programs[programGeneral];
+  const ProgramInfo *program = &rsrc->programs[programGlobe];
   GLuint viewIndex;
+  GLuint samplerIndex;
 
   glUseProgram(program->program);
 
@@ -396,9 +397,13 @@ static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform) 
 
   glEnable(GL_TEXTURE_2D);
 
+  samplerIndex = glGetUniformLocation(program->program, "dayTex");
+  glUniform1i(samplerIndex, 0);
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeDay].tex);
 
+  samplerIndex = glGetUniformLocation(program->program, "nightTex");
+  glUniform1i(samplerIndex, 1);
   glActiveTexture(GL_TEXTURE1);
   glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeNight].tex);
 

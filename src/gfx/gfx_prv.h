@@ -129,8 +129,10 @@ typedef struct {
   Texture         fonts[fontCount];              // Font textures
   Texture         icons[iconCount];              // Icon textures
   TransformMatrix proj;                          // Projection matrix
+#if defined _DEBUG
   Vertex3D       *globe;                         // Globe vertices
-  GLuint         *globeIndices;                  // Indices for globe triangles
+  GLushort       *globeIndices;                  // Indices for globe triangles
+#endif
   GLuint          globeBuffers[2];               // Vertex and Index buffers
   Texture         globeTex[globeTexCount];       // Globe textures
 } DrawResources_;
