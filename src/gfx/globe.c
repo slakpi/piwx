@@ -22,8 +22,12 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 // interval, multiply by two for the two hemispheres, and add 1 for the equator.
 #define LAT_COUNT (((90 - LAT_INTERVAL_DEG) / LAT_INTERVAL_DEG) * 2 + 1)
 
-// Simply divide by the longitude circle by the interval.
-#define LON_COUNT (360 / LON_INTERVAL_DEG)
+// Simply divide by the longitude circle by the interval. Add an extra longitude
+// iteration to duplicate the +/- 180 longitude. This prevents a seam that would
+// be created by the triangles between +170 and +180 degrees interpolating
+// between a U coordinate of 0.9722 and 0. The duplicate set of vertices create
+// triangles that instead interpolate a U coordinate between 0.9722 and 1.
+#define LON_COUNT ((360 / LON_INTERVAL_DEG) + 1)
 
 // Multiply the latitude divisons by the longitude divisions and add 2 for the
 // poles to get the vertex count.
@@ -192,7 +196,9 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   initVertex(90, 0, &globe[idx++]);
 
   for (int lat = 90 - LAT_INTERVAL_DEG; lat > -90; lat -= LAT_INTERVAL_DEG) {
-    for (int lon = -180; lon < 180; lon += LON_INTERVAL_DEG) {
+    // Use <= +180 to duplicate the -180 longitude vertices with a U coordinate
+    // of 1.
+    for (int lon = -180; lon <= 180; lon += LON_INTERVAL_DEG) {
       initVertex(lat, lon, &globe[idx++]);
     }
   }
