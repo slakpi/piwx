@@ -470,7 +470,7 @@ static void drawBackground(DrawResources resources) {
  * @param[in] station   The weather station information.
  */
 static void drawGlobe(DrawResources resources, const WxStation *station) {
-  const Point2f       topLeft     = {{GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
+  const Point2f       topLeft     = {{-GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
   const Point2f       bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
   const BoundingBox2D box         = {topLeft, bottomRight};
 
