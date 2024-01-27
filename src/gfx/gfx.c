@@ -231,8 +231,11 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     eglTerminate(rsrc->display);
   }
 
+#if defined _DEBUG
   free(rsrc->globe);
   free(rsrc->globeIndices);
+#endif
+
   glDeleteBuffers(2, rsrc->globeBuffers);
 
   for (int i = 0; i < globeTexCount; ++i) {

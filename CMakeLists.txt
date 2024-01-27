@@ -23,7 +23,7 @@ if (NOT DEFINED VAR_PREFIX)
   set(VAR_PREFIX var/piwx/)
 endif ()
 
-cmake_path(APPEND CMAKE_INSTALL_PREFIX ${SHARE_PREFIX} wxicons
+cmake_path(APPEND CMAKE_INSTALL_PREFIX ${SHARE_PREFIX} images
            OUTPUT_VARIABLE IMAGE_RESOURCES)
 cmake_path(APPEND CMAKE_INSTALL_PREFIX ${SHARE_PREFIX} fonts
            OUTPUT_VARIABLE FONT_RESOURCES)
@@ -63,7 +63,7 @@ add_subdirectory(test)
 # Setup the installation targets.
 #-------------------------------------------------------------------------------
 install(TARGETS piwx DESTINATION bin)
-install(DIRECTORY share/wxicons/ DESTINATION ${SHARE_PREFIX}wxicons FILES_MATCHING PATTERN "*.png")
+install(DIRECTORY share/images/ DESTINATION ${SHARE_PREFIX}images FILES_MATCHING PATTERN "*.png")
 install(DIRECTORY share/fonts/ DESTINATION ${SHARE_PREFIX}fonts FILES_MATCHING PATTERN "*.png")
 install(FILES etc/piwx.conf.example DESTINATION ${ETC_PREFIX})
 install(DIRECTORY DESTINATION ${VAR_PREFIX})

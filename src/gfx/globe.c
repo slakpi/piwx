@@ -69,7 +69,7 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
   TransformMatrix xform, tmp;
   time_t          now = time(NULL);
 
-  if (!rsrc->globe) {
+  if (rsrc->globeBuffers[0] == 0) {
     return;
   }
 
@@ -125,7 +125,7 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
 }
 
 bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
-  if (rsrc->globe) {
+  if (rsrc->globeBuffers[0] != 0) {
     return true;
   }
 
