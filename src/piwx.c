@@ -43,7 +43,7 @@ static const LEDColor gColorIFR     = {255, 0, 0};
 static const LEDColor gColorLIFR    = {255, 0, 255};
 static const LEDColor gColorWind    = {255, 192, 0};
 static const LEDColor gColorUnk     = {64, 64, 64};
-static const Color4f  gClearColor   = {{1.0f, 1.0f, 1.0f, 0.0f}};
+static const Color4f  gClearColor   = {{0.0f, 0.0f, 0.0f, 0.0f}};
 static const Color4f  gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
 static const Color4f  gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
 static const float    gUpperDiv     = 81.0f;
@@ -75,7 +75,8 @@ static void drawStationIdentifier(DrawResources resources, const WxStation *stat
 
 static void drawStationFlightCategory(DrawResources resources, const WxStation *station);
 
-static void drawStationScreen(DrawResources resources, const WxStation *station, bool commit);
+static void drawStationScreen(DrawResources resources, const WxStation *station, bool globe,
+                              bool commit);
 
 static void drawStationWeather(DrawResources resources, const WxStation *station);
 
@@ -286,7 +287,7 @@ static bool go(bool test, bool verbose) {
       continue;
     }
 
-    drawStationScreen(resources, curStation, !test);
+    drawStationScreen(resources, curStation, cfg->drawGlobe, !test);
 
     if (test) {
       gfx_dumpSurfaceToPng(resources, "test.png");
@@ -416,10 +417,14 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
  * @param[in] station   The weather station information.
  * @param[in] commit    Commit the surface to the screen.
  */
-static void drawStationScreen(DrawResources resources, const WxStation *station, bool commit) {
+static void drawStationScreen(DrawResources resources, const WxStation *station, bool globe,
+                              bool commit) {
   gfx_clearSurface(resources, gClearColor);
 
-  drawGlobe(resources, station);
+  if (globe) {
+    drawGlobe(resources, station);
+  }
+
   drawBackground(resources);
   drawStationIdentifier(resources, station);
   drawStationFlightCategory(resources, station);
@@ -444,16 +449,34 @@ static void drawBackground(DrawResources resources) {
                            {{0.0f, gLowerDiv}},
                            {{GFX_SCREEN_WIDTH, gLowerDiv}}};
 
+  const Point2f box[] = {{{0.0f, 0.0f}},
+                         {{GFX_SCREEN_WIDTH, 0.0f}},
+                         {{0.0f, gUpperDiv}},
+                         {{GFX_SCREEN_WIDTH, gUpperDiv}}};
+
+  const Color4f dim = {{0.0f, 0.0f, 0.0f, 0.33f}};
+
+  // Draw a translucent quad to dim the globe at the top of the screen.
+  gfx_drawQuad(resources, &box[0], dim);
+
+  // Draw the separator lines.
   gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
   gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
 }
 
+/**
+ * @brief Draw the day/night globe.
+ * @param[in] resources The gfx context.
+ * @param[in] station   The weather station information.
+ */
 static void drawGlobe(DrawResources resources, const WxStation *station) {
-  const Point2f topLeft = {{GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
-  const Point2f bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
-  const BoundingBox2D box = {topLeft, bottomRight};
+  const Point2f       topLeft     = {{GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
+  const Point2f       bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
+  const BoundingBox2D box         = {topLeft, bottomRight};
 
-  gfx_drawGlobe(resources, station->lat, station->lon, &box);
+  // Adjust the latitude down by 10 degrees to place the station within the
+  // weather phenomena box.
+  gfx_drawGlobe(resources, station->lat - 10.0f, station->lon, &box);
 }
 
 /**

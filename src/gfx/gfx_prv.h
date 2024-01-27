@@ -106,7 +106,13 @@ typedef enum {
  * @enum  Program
  * @brief Shader program handles.
  */
-typedef enum { programGeneral, programAlphaTex, programRGBATex, programGlobe, programCount } Program;
+typedef enum {
+  programGeneral,
+  programAlphaTex,
+  programRGBATex,
+  programGlobe,
+  programCount
+} Program;
 
 /**
  * @enum  GlobeTexture
@@ -134,11 +140,11 @@ typedef struct {
   Texture         icons[iconCount];              // Icon textures
   TransformMatrix proj;                          // Projection matrix
 #if defined _DEBUG
-  Vertex3D       *globe;                         // Globe vertices
-  GLushort       *globeIndices;                  // Indices for globe triangles
+  Vertex3D *globe;        // Globe vertices
+  GLushort *globeIndices; // Indices for globe triangles
 #endif
-  GLuint          globeBuffers[2];               // Vertex and Index buffers
-  Texture         globeTex[globeTexCount];       // Globe textures
+  GLuint  globeBuffers[2];         // Vertex and Index buffers
+  Texture globeTex[globeTexCount]; // Globe textures
 } DrawResources_;
 
 /**

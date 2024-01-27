@@ -22,7 +22,7 @@ typedef struct {
   char        *stationQuery;             // List of weather stations to query
   int          cycleTime;                // Airport display cycle time in sec.
   int          highWindSpeed;            // High wind threshold in knots
-  int          highWindBlink;            // High wind blink rate in sec.
+  bool         highWindBlink;            // High wind blink rate in sec.
   char        *ledAssignments[MAX_LEDS]; // Airport LED assignments
   int          ledBrightness;            // Day LED brightness, 0-255
   int          ledNightBrightness;       // Night LED brightness, 0-255
@@ -30,6 +30,7 @@ typedef struct {
   int          ledDMAChannel;            // LED Rpi DMA channel
   LogLevel     logLevel;                 // Logging output level
   DaylightSpan daylight;                 // Daylight span for night dimming
+  bool         drawGlobe;                // Draw day/night globe
 } PiwxConfig;
 
 /**

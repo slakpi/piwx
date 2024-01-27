@@ -69,6 +69,7 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
   cfg->ledDMAChannel      = DEFAULT_LED_DMA_CHANNEL;
   cfg->logLevel           = DEFAULT_LOG_LEVEL;
   cfg->daylight           = DEFAULT_DAYLIGHT;
+  cfg->drawGlobe          = DEFAULT_DRAW_GLOBE;
 
   cfgFile = fopen(configFile, "r");
 

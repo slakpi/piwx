@@ -497,7 +497,7 @@ void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
   glDisableVertexAttribArray(prg->posIndex);
   glDisableVertexAttribArray(prg->colorIndex);
   glDisableVertexAttribArray(prg->texIndex);
-  
+
   glUseProgram(rsrc->programs[programGeneral].program);
 }
 
@@ -564,9 +564,10 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMat
   textureCount = umin(textureCount, MAX_TEXTURES);
 
   for (unsigned int i = 0; i < textureCount; ++i) {
-    char samplerName[16] = {0};
+    char  samplerName[16] = {0};
     GLint samplerIndex;
 
+    // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(samplerName, COUNTOF(samplerName), "tex_%u", i);
     samplerIndex = glGetUniformLocation(prg->program, samplerName);
     glUniform1i(samplerIndex, i);

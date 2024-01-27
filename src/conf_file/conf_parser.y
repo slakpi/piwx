@@ -89,6 +89,9 @@ assignment
   case confLEDDMAChannel:
     cfg->ledDMAChannel = $3;
     break;
+  case confDrawGlobe:
+    cfg->drawGlobe = ($3 != 0);
+    break;
   default:
     YYERROR;
   }
@@ -109,6 +112,9 @@ assignment
     break;
   case confLogLevel:
     cfg->logLevel = ($3 == 0 ? logQuiet : DEFAULT_LOG_LEVEL);
+    break;
+  case confDrawGlobe:
+    cfg->drawGlobe = ($3 == 0 ? false : true);
     break;
   default:
     YYERROR;

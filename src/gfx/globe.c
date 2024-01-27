@@ -60,14 +60,14 @@ static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources);
 
 void gfx_drawGlobe(DrawResources resources, double lat, double lon, const BoundingBox2D *box) {
   const DrawResources_ *rsrc = resources;
-  
-  GLint ssIndex;
-  Point2f center;
-  Vector3f ss;
-  double sslat, sslon;
-  float width, height, scale;
+
+  GLint           index;
+  Point2f         center;
+  Vector3f        ss;
+  double          sslat, sslon;
+  float           width, height, scale;
   TransformMatrix xform, tmp;
-  time_t now = time(NULL);
+  time_t          now = time(NULL);
 
   if (!rsrc->globe) {
     return;
@@ -76,8 +76,8 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
   geo_calcSubsolarPoint(now, &sslat, &sslon);
   geo_LatLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
 
-  width = box->bottomRight.coord.x - box->topLeft.coord.x;
-  height = box->bottomRight.coord.y - box->topLeft.coord.y;
+  width          = box->bottomRight.coord.x - box->topLeft.coord.x;
+  height         = box->bottomRight.coord.y - box->topLeft.coord.y;
   center.coord.x = box->topLeft.coord.x + (width / 2.0f);
   center.coord.y = box->topLeft.coord.y + (height / 2.0f);
 
@@ -116,10 +116,10 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
   gfx_setup3DShader(rsrc, programGlobe, xform, rsrc->globeTex, globeTexCount);
- 
-  ssIndex = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
-  glUniform3fv(ssIndex, 1, ss.v);
- 
+
+  index = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
+  glUniform3fv(index, 1, ss.v);
+
   glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
   gfx_resetShader(rsrc, programGlobe);
 }
@@ -386,10 +386,10 @@ cleanup:
  */
 static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, const char *image,
                              GLuint tex, Texture *texture) {
-  Png  png            = {0};
-  char path[MAX_PATH] = {0};
+  Png    png            = {0};
+  char   path[MAX_PATH] = {0};
   GLenum color;
-  bool ok             = false;
+  bool   ok = false;
 
   conf_getPathForImage(imageResources, image, path, COUNTOF(path));
 
@@ -403,15 +403,15 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
   }
 
   switch (png.color) {
-    case PNG_COLOR_TYPE_RGB:
-      color = GL_RGB;
-      break;
-    case PNG_COLOR_TYPE_GRAY:
-      color = GL_ALPHA;
-      break;
-    default:
-      SET_ERROR(rsrc, -1, "Unsupported color type for globe.");
-      goto cleanup;
+  case PNG_COLOR_TYPE_RGB:
+    color = GL_RGB;
+    break;
+  case PNG_COLOR_TYPE_GRAY:
+    color = GL_ALPHA;
+    break;
+  default:
+    SET_ERROR(rsrc, -1, "Unsupported color type for globe.");
+    goto cleanup;
   }
 
   gfx_loadTexture(&png, tex, color, texture);

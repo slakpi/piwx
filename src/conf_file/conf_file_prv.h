@@ -19,6 +19,7 @@
 #define DEFAULT_LED_DMA_CHANNEL      10
 #define DEFAULT_LOG_LEVEL            logWarning
 #define DEFAULT_DAYLIGHT             daylightCivil
+#define DEFAULT_DRAW_GLOBE           true
 
 /**
  * @brief   Parse configuration settings from a file stream.

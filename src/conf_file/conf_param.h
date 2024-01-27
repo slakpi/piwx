@@ -20,7 +20,8 @@ typedef enum {
   confLEDDataPin,
   confLEDDMAChannel,
   confLogLevel,
-  confDaylight
+  confDaylight,
+  confDrawGlobe
 } ConfParam;
 
 #endif /* CONF_PARAM_H */

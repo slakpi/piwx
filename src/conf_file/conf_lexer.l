@@ -147,6 +147,11 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"drawglobe" {
+  yylval->p.param = confDrawGlobe;
+  return TOKEN_PARAM;
+}
+
 "=" { return '='; }
 
 ";" { return ';'; }
