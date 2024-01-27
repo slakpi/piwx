@@ -11,6 +11,7 @@
 #include "vec.h"
 #include <assert.h>
 #include <stdint.h>
+#include <time.h>
 
 #define LAT_INTERVAL_DEG 10
 _Static_assert(90 % LAT_INTERVAL_DEG == 0, "Invalid latitude interval");
@@ -38,6 +39,9 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 #define TRI_COUNT (((LAT_COUNT - 1) * LON_COUNT * 2) + (LON_COUNT * 2))
 
 // Three indices per triangle.
+//
+//   NOTE: Older OpenGL ES versions only support unsigned short indices. This is
+//         an issue when running on older Raspberry Pi models.
 #define INDEX_COUNT (TRI_COUNT * 3)
 _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 
@@ -54,17 +58,33 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
 
 static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources);
 
-static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform);
-
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, Point2f center) {
+void gfx_drawGlobe(DrawResources resources, double lat, double lon, const BoundingBox2D *box) {
   const DrawResources_ *rsrc = resources;
-  const float lat_rad = (float)(lat * DEG_TO_RAD);
-  const float lon_rad = (float)(lon * DEG_TO_RAD);
-  const float scale = (float)(GFX_SCREEN_HEIGHT / (2.0f * GEO_WGS84_SEMI_MAJOR_M));
+  
+  GLint ssIndex;
+  Point2f center;
+  Vector3f ss;
+  double sslat, sslon;
+  float width, height, scale;
   TransformMatrix xform, tmp;
+  time_t now = time(NULL);
 
   if (!rsrc->globe) {
     return;
+  }
+
+  geo_calcSubsolarPoint(now, &sslat, &sslon);
+  geo_LatLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
+
+  width = box->bottomRight.coord.x - box->topLeft.coord.x;
+  height = box->bottomRight.coord.y - box->topLeft.coord.y;
+  center.coord.x = box->topLeft.coord.x + (width / 2.0f);
+  center.coord.y = box->topLeft.coord.y + (height / 2.0f);
+
+  if (width < height) {
+    scale = (float)(width / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
+  } else {
+    scale = (float)(height / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
   }
 
   // The projection has the eye looking in the +Z direction with +Y pointing
@@ -73,12 +93,20 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, 
   // The eye is initially looking at Antarctica.
   //
   // The latitude is adjusted by a 90-degree counter clockwise rotation to bring
-  // the North pole up to -Y. The longitude is adjusted by a 180-degree counter
-  // clockwise rotation to bring the Prime Meridian around to the eye.
+  // the North pole up to -Y. The longitude is adjusted by a 90-degree clockwise
+  // rotation to bring the Prime Meridian around to the eye. The longitude is
+  // negated to account for the Western longitudes being negative.
+  //
+  // The globe is translated by PROJ_Z_MAX in the +Z direction. This moves the
+  // eye out of the center of the globe and puts the hidden half the globe
+  // outside of the projection clip space.
 
-  makeTranslation(xform, GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f, GFX_SCREEN_WIDTH);
+  makeTranslation(xform, center.coord.x, center.coord.y, PROJ_Z_MAX);
 
   makeXRotation(tmp, (90.0f + lat) * DEG_TO_RAD);
+  combineTransforms(xform, tmp);
+
+  makeZRotation(tmp, (-90.0f - lon) * DEG_TO_RAD);
   combineTransforms(xform, tmp);
 
   makeScale(tmp, scale, scale, scale);
@@ -87,13 +115,13 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, 
   glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
-  // NOTE: Older OpenGL ES versions only supported unsigned short indices.
-
-  setupGlobeShader(rsrc, xform);
+  gfx_setup3DShader(rsrc, programGlobe, xform, rsrc->globeTex, globeTexCount);
+ 
+  ssIndex = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
+  glUniform3fv(ssIndex, 1, ss.v);
+ 
   glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
   gfx_resetShader(rsrc, programGlobe);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
@@ -314,7 +342,7 @@ static void initVertex(double lat, double lon, Vertex3D *v) {
  * @returns True if successful, false otherwise.
  */
 static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources) {
-  static const char *images[] = {"daymap.png", "nightmap.png"};
+  static const char *images[] = {"daymap.png", "nightmap.png", "threshold.png"};
   _Static_assert(COUNTOF(images) == globeTexCount, "Image count must match texture count.");
 
   GLuint tex[globeTexCount] = {0};
@@ -360,6 +388,7 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
                              GLuint tex, Texture *texture) {
   Png  png            = {0};
   char path[MAX_PATH] = {0};
+  GLenum color;
   bool ok             = false;
 
   conf_getPathForImage(imageResources, image, path, COUNTOF(path));
@@ -368,12 +397,24 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
     goto cleanup;
   }
 
-  if (png.width < 1 || png.height < 1 || png.color != PNG_COLOR_TYPE_RGB) {
+  if (png.width < 1 || png.height < 1) {
     SET_ERROR(rsrc, -1, "Invalid map image.");
     goto cleanup;
   }
 
-  gfx_loadTexture(&png, tex, GL_RGB, texture);
+  switch (png.color) {
+    case PNG_COLOR_TYPE_RGB:
+      color = GL_RGB;
+      break;
+    case PNG_COLOR_TYPE_GRAY:
+      color = GL_ALPHA;
+      break;
+    default:
+      SET_ERROR(rsrc, -1, "Unsupported color type for globe.");
+      goto cleanup;
+  }
+
+  gfx_loadTexture(&png, tex, color, texture);
 
   ok = true;
 
@@ -381,41 +422,4 @@ cleanup:
   freePng(&png);
 
   return ok;
-}
-
-static void setupGlobeShader(const DrawResources_ *rsrc, TransformMatrix xform) {
-  const ProgramInfo *program = &rsrc->programs[programGlobe];
-  GLuint viewIndex;
-  GLuint samplerIndex;
-
-  glUseProgram(program->program);
-
-  glUniformMatrix4fv(program->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
-
-  viewIndex = glGetUniformLocation(program->program, "view");
-  glUniformMatrix4fv(viewIndex, 1, GL_FALSE, (const GLfloat *)xform);
-
-  glEnableVertexAttribArray(program->posIndex);
-  glVertexAttribPointer(program->posIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, pos));
-
-  glEnableVertexAttribArray(program->colorIndex);
-  glVertexAttribPointer(program->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, color));
-
-  glEnable(GL_TEXTURE_2D);
-
-  samplerIndex = glGetUniformLocation(program->program, "dayTex");
-  glUniform1i(samplerIndex, 0);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeDay].tex);
-
-  samplerIndex = glGetUniformLocation(program->program, "nightTex");
-  glUniform1i(samplerIndex, 1);
-  glActiveTexture(GL_TEXTURE1);
-  glBindTexture(GL_TEXTURE_2D, rsrc->globeTex[globeNight].tex);
-
-  glEnableVertexAttribArray(program->texIndex);
-  glVertexAttribPointer(program->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, tex));
 }

@@ -69,6 +69,8 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit);
 
 static void drawDownloadScreen(DrawResources resources, bool commit);
 
+static void drawGlobe(DrawResources resources, const WxStation *station);
+
 static void drawStationIdentifier(DrawResources resources, const WxStation *station);
 
 static void drawStationFlightCategory(DrawResources resources, const WxStation *station);
@@ -415,20 +417,17 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawStationScreen(DrawResources resources, const WxStation *station, bool commit) {
-  const Point2f center = {{0, 0}};
-
   gfx_clearSurface(resources, gClearColor);
 
-  // drawBackground(resources);
-  // drawStationIdentifier(resources, station);
-  // drawStationFlightCategory(resources, station);
-  // drawStationWeather(resources, station);
-  // drawStationWxString(resources, station);
-  // drawCloudLayers(resources, station);
-  // drawWindInfo(resources, station);
-  // drawTempDewPointVisAlt(resources, station);
-
-  gfx_drawGlobe(resources, 45, -122, 0, center);
+  drawGlobe(resources, station);
+  drawBackground(resources);
+  drawStationIdentifier(resources, station);
+  drawStationFlightCategory(resources, station);
+  drawStationWeather(resources, station);
+  drawStationWxString(resources, station);
+  drawCloudLayers(resources, station);
+  drawWindInfo(resources, station);
+  drawTempDewPointVisAlt(resources, station);
 
   if (commit) {
     gfx_commitToScreen(resources);
@@ -447,6 +446,14 @@ static void drawBackground(DrawResources resources) {
 
   gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
   gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
+}
+
+static void drawGlobe(DrawResources resources, const WxStation *station) {
+  const Point2f topLeft = {{GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
+  const Point2f bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
+  const BoundingBox2D box = {topLeft, bottomRight};
+
+  gfx_drawGlobe(resources, station->lat, station->lon, &box);
 }
 
 /**

@@ -112,6 +112,15 @@ typedef Vector3f Point3f;
 typedef Vector2f Point2f;
 
 /**
+ * @struct BoundingBox2D
+ * @brief  A rectangular bounding box in pixels.
+ */
+typedef struct {
+  Point2f topLeft;
+  Point2f bottomRight;
+} BoundingBox2D;
+
+/**
  * @brief Clears the current drawing surface with the specified color.
  * @param[in] resources The gfx context.
  * @param[in] clear     The clear color.
@@ -138,10 +147,9 @@ void gfx_cleanupGraphics(DrawResources *resources);
  * @param[in] resources The gfx context.
  * @param[in] lat       The view latitude in degrees.
  * @param[in] lon       The view longitude in degrees.
- * @param[in] alt       The view altitude in meters.
- * @param[in] center    Center of the globe in pixels.
+ * @param[in] box       The bounding box for the globe in pixels.
  */
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, double alt, Point2f center);
+void gfx_drawGlobe(DrawResources resources, double lat, double lon, const BoundingBox2D *box);
 
 /**
  * @brief Draw an icon centered on a point.

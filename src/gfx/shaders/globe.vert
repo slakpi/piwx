@@ -13,5 +13,5 @@ void main() {
   gl_Position = proj * (view * vec4(in_pos, 1.0));
   color = in_color;
   tex_coord = in_tex_coord;
-  normal = in_pos;
+  normal = normalize(in_pos);
 }

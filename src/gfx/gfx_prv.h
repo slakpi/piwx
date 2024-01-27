@@ -14,8 +14,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define FONT_ROWS 8
-#define FONT_COLS 16
+#define FONT_ROWS    8
+#define FONT_COLS    16
+#define MAX_TEXTURES 8
+#define PROJ_Z_MAX   1000
+#define PROJ_Z_MIN   -1000
 
 #define GET_EGL_ERROR(rsrc)              gfx_getEglError(rsrc, __FILE__, __LINE__)
 #define GET_SHADER_ERROR(rsrc, shader)   gfx_getShaderError(rsrc, shader, __FILE__, __LINE__);
@@ -74,10 +77,11 @@ typedef struct {
  */
 typedef struct {
   GLuint program;
-  GLuint posIndex;
-  GLuint colorIndex;
-  GLuint texIndex;
-  GLuint projIndex;
+  GLint  posIndex;
+  GLint  colorIndex;
+  GLint  texIndex;
+  GLint  projIndex;
+  GLint  viewIndex;
 } ProgramInfo;
 
 /**
@@ -108,7 +112,7 @@ typedef enum { programGeneral, programAlphaTex, programRGBATex, programGlobe, pr
  * @enum  GlobeTexture
  * @brief Indices for the globe textures.
  */
-typedef enum { globeDay, globeNight, globeTexCount } GlobeTexture;
+typedef enum { globeDay, globeNight, globeThreshold, globeTexCount } GlobeTexture;
 
 /**
  * @struct DrawResources_
@@ -198,7 +202,8 @@ void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture
 
 /**
  * @brief Reset back to the generic shader and disable all attribute arrays.
- * @param[in] rsrc The gfx context.
+ * @param[in] rsrc    The gfx context.
+ * @param[in] program The shader to reset.
  */
 void gfx_resetShader(const DrawResources_ *rsrc, Program program);
 
@@ -213,11 +218,31 @@ void gfx_resetShader(const DrawResources_ *rsrc, Program program);
 void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line);
 
 /**
- * @brief Configure a shader with the current projection matrix and a texture.
- * @param[in] rsrc The gfx context.
- * @param[in] program  The shader program to use.
- * @param[in] texture  A GL texture handle or 0 to disable textures.
+ * @brief   Configure a 2D shader.
+ * @details Sets up the position, color, and texture coordinate attribute arrays
+ *          assuming an array of @a Vertex structs will be used. Binds the
+ *          texture to texture unit 0. Sets the projection matrix to the screen
+ *          projection.
+ * @param[in] rsrc    The gfx context.
+ * @param[in] program The shader program to use.
+ * @param[in] texture A GL texture handle or 0 for no texture.
  */
 void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture);
+
+/**
+ * @brief   Configure a 3D shader.
+ * @details Sets up the position, color, and texture coordinate attribute arrays
+ *          assuming an array of @a Vertex3D structs will be used. Binds the
+ *          specified textures sequentially starting from texture unit 0. Sets
+ *          the view matrix to the specified transform and the projection matrix
+ *          to the screen projection.
+ * @param[in] rsrc         The gfx context.
+ * @param[in] program      The shader program to use.
+ * @param[in] view         The view transform to use.
+ * @param[in] textures     An array of textures to bind.
+ * @param[in] textureCount The number of textures to bind.
+ */
+void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMatrix view,
+                       const Texture *textures, unsigned int textureCount);
 
 #endif /* GFX_PRV_H */

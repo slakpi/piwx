@@ -490,12 +490,15 @@ void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture
 }
 
 void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
-  glUseProgram(rsrc->programs[programGeneral].program);
+  const ProgramInfo *prg = &rsrc->programs[program];
+
   glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glDisable(GL_TEXTURE_2D);
-  glDisableVertexAttribArray(rsrc->programs[program].posIndex);
-  glDisableVertexAttribArray(rsrc->programs[program].colorIndex);
-  glDisableVertexAttribArray(rsrc->programs[program].texIndex);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  glDisableVertexAttribArray(prg->posIndex);
+  glDisableVertexAttribArray(prg->colorIndex);
+  glDisableVertexAttribArray(prg->texIndex);
+  
+  glUseProgram(rsrc->programs[programGeneral].program);
 }
 
 void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line) {
@@ -506,33 +509,70 @@ void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *
 }
 
 void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {
-  if (program >= programGlobe) {
+  const ProgramInfo *prg = &rsrc->programs[program];
+
+  GLint samplerIndex;
+
+  if (!glIsProgram(prg->program)) {
     return;
   }
 
-  if (!glIsProgram(rsrc->programs[program].program)) {
-    return;
-  }
+  glUseProgram(prg->program);
 
-  glUseProgram(rsrc->programs[program].program);
+  glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
 
-  glUniformMatrix4fv(rsrc->programs[program].projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
-
-  glEnableVertexAttribArray(rsrc->programs[program].posIndex);
-  glVertexAttribPointer(rsrc->programs[program].posIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  glEnableVertexAttribArray(prg->posIndex);
+  glVertexAttribPointer(prg->posIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         MEMBER_OFFSET(Vertex, pos));
 
-  glEnableVertexAttribArray(rsrc->programs[program].colorIndex);
-  glVertexAttribPointer(rsrc->programs[program].colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+  glEnableVertexAttribArray(prg->colorIndex);
+  glVertexAttribPointer(prg->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                         MEMBER_OFFSET(Vertex, color));
 
-  if (texture != 0) {
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, texture);
+  glEnableVertexAttribArray(prg->texIndex);
+  glVertexAttribPointer(prg->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                        MEMBER_OFFSET(Vertex, tex));
 
-    glEnableVertexAttribArray(rsrc->programs[program].texIndex);
-    glVertexAttribPointer(rsrc->programs[program].texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                          MEMBER_OFFSET(Vertex, tex));
+  samplerIndex = glGetUniformLocation(prg->program, "tex");
+  glUniform1i(samplerIndex, 0);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, texture);
+}
+
+void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMatrix view,
+                       const Texture *textures, unsigned int textureCount) {
+  const ProgramInfo *prg = &rsrc->programs[program];
+
+  glUseProgram(prg->program);
+
+  glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
+  glUniformMatrix4fv(prg->viewIndex, 1, GL_FALSE, (const GLfloat *)view);
+
+  glEnableVertexAttribArray(prg->posIndex);
+  glVertexAttribPointer(prg->posIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, pos));
+
+  glEnableVertexAttribArray(prg->colorIndex);
+  glVertexAttribPointer(prg->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, color));
+
+  glEnableVertexAttribArray(prg->texIndex);
+  glVertexAttribPointer(prg->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        MEMBER_OFFSET(Vertex3D, tex));
+
+  textureCount = umin(textureCount, MAX_TEXTURES);
+
+  for (unsigned int i = 0; i < textureCount; ++i) {
+    char samplerName[16] = {0};
+    GLint samplerIndex;
+
+    snprintf(samplerName, COUNTOF(samplerName), "tex_%u", i);
+    samplerIndex = glGetUniformLocation(prg->program, samplerName);
+    glUniform1i(samplerIndex, i);
+
+    glActiveTexture(GL_TEXTURE0 + i);
+    glBindTexture(GL_TEXTURE_2D, textures[i].tex);
   }
 }
 
@@ -639,17 +679,20 @@ static bool initShaders(DrawResources_ *rsrc) {
   }
 
   for (int i = 0; i < programCount; ++i) {
+    ProgramInfo *prg = &rsrc->programs[i];
+
     GLuint vert = rsrc->vshaders[linkTable[i].v];
     GLuint frag = rsrc->fshaders[linkTable[i].f];
 
-    if (!makeProgram(&rsrc->programs[i].program, rsrc, vert, frag)) {
+    if (!makeProgram(&prg->program, rsrc, vert, frag)) {
       return false;
     }
 
-    rsrc->programs[i].posIndex   = glGetAttribLocation(rsrc->programs[i].program, "in_pos");
-    rsrc->programs[i].colorIndex = glGetAttribLocation(rsrc->programs[i].program, "in_color");
-    rsrc->programs[i].texIndex   = glGetAttribLocation(rsrc->programs[i].program, "in_tex_coord");
-    rsrc->programs[i].projIndex  = glGetUniformLocation(rsrc->programs[i].program, "proj");
+    prg->posIndex   = glGetAttribLocation(prg->program, "in_pos");
+    prg->colorIndex = glGetAttribLocation(prg->program, "in_color");
+    prg->texIndex   = glGetAttribLocation(prg->program, "in_tex_coord");
+    prg->projIndex  = glGetUniformLocation(prg->program, "proj");
+    prg->viewIndex  = glGetUniformLocation(prg->program, "view");
   }
 
   return true;
@@ -899,11 +942,6 @@ static void initRender(DrawResources_ *rsrc) {
  * @param[in,out] proj The projection matrix.
  */
 static void makeProjection(TransformMatrix proj) {
-  // Orthographic cuboid that just uses the largest screen dimension for the
-  // depth. This allows 3D rendering.
-  const float far  = max(GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT);
-  const float near = -far;
-
   proj[0][0] = 2.0f / GFX_SCREEN_WIDTH;
   proj[0][1] = 0.0f;
   proj[0][2] = 0.0f;
@@ -916,12 +954,12 @@ static void makeProjection(TransformMatrix proj) {
 
   proj[2][0] = 0.0f;
   proj[2][1] = 0.0f;
-  proj[2][2] = -2.0f / (float)(far - near);
+  proj[2][2] = -2.0f / (float)(PROJ_Z_MAX - PROJ_Z_MIN);
   proj[2][3] = 0.0f;
 
   proj[3][0] = -1.0f;
   proj[3][1] = -1.0f;
-  proj[3][2] = -(float)(far + near) / (float)(far - near);
+  proj[3][2] = -(float)(PROJ_Z_MAX + PROJ_Z_MIN) / (float)(PROJ_Z_MAX - PROJ_Z_MIN);
   proj[3][3] = 1.0f;
 }
 
