@@ -403,8 +403,8 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
   }
 
   switch (png.color) {
-  case PNG_COLOR_TYPE_RGB:
-    color = GL_RGB;
+  case PNG_COLOR_TYPE_RGBA:
+    color = GL_RGBA;
     break;
   case PNG_COLOR_TYPE_GRAY:
     color = GL_ALPHA;
