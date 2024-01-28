@@ -2,9 +2,8 @@
 # Setup an interface target shared between the conf and conf_parser targets.
 #-------------------------------------------------------------------------------
 add_library(conf_intf INTERFACE)
-target_include_directories(conf_intf
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${PROJECT_SOURCE_DIR}/src)
-target_link_libraries(conf_intf INTERFACE Piwx::Geo)
+target_include_directories(conf_intf INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(conf_intf INTERFACE Piwx::Geo Piwx::Log)
 
 #-------------------------------------------------------------------------------
 # Setup the configuration file parser and lexer.
@@ -29,7 +28,7 @@ target_compile_options(conf_parser PRIVATE -Wno-unused-function -Wno-unused-vari
 #-------------------------------------------------------------------------------
 # Setup the configuration library.
 #-------------------------------------------------------------------------------
-add_library(conf STATIC conf_file.c)
+add_library(conf OBJECT conf_file.c)
 target_link_libraries(conf
   PUBLIC conf_intf
   PRIVATE conf_parser Piwx::Util)

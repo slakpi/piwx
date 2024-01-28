@@ -27,11 +27,11 @@ set(rpi_gl_lib "/opt/vc/lib")
 #-------------------------------------------------------------------------------
 # Setup the graphics library.
 #-------------------------------------------------------------------------------
-add_library(gfx STATIC gfx.c draw.c globe.c img.c transform.c vec.c)
+add_library(gfx OBJECT gfx.c draw.c globe.c img.c transform.c vec.c)
 target_compile_options(gfx PRIVATE ${SIMD_C_FLAGS})
 target_include_directories(gfx
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
-  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${rpi_gl_include} ${PROJECT_SOURCE_DIR}/src)
+  PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${rpi_gl_include})
 target_link_directories(gfx PUBLIC ${rpi_gl_lib})
 target_link_libraries(gfx
   PRIVATE brcmEGL brcmGLESv2 Piwx::Conf_File Piwx::Geo Piwx::Util PNG::PNG Threads::Threads vcos)

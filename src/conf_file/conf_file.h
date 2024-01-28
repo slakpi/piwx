@@ -8,11 +8,11 @@
 #include "log.h"
 #include <stddef.h>
 
-#define MAX_LEDS 50
+#define CONF_MAX_LEDS 50
 
 /**
- * @struct  PiwxConfig
- * @brief   The configuration structure.
+ * @struct PiwxConfig
+ * @brief  The configuration structure.
  */
 typedef struct {
   char        *installPrefix;            // PiWx install prefix
@@ -23,7 +23,7 @@ typedef struct {
   int          cycleTime;                // Airport display cycle time in sec.
   int          highWindSpeed;            // High wind threshold in knots
   bool         highWindBlink;            // High wind blink rate in sec.
-  char        *ledAssignments[MAX_LEDS]; // Airport LED assignments
+  char        *ledAssignments[CONF_MAX_LEDS]; // Airport LED assignments
   int          ledBrightness;            // Day LED brightness, 0-255
   int          ledNightBrightness;       // Night LED brightness, 0-255
   int          ledDataPin;               // LED Rpi data pin

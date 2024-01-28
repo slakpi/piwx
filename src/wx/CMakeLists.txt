@@ -3,7 +3,7 @@
 #-------------------------------------------------------------------------------
 add_library(wx_intf INTERFACE)
 target_include_directories(wx_intf
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${PROJECT_SOURCE_DIR}/src)
+  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 #-------------------------------------------------------------------------------
 # Setup the weather phenomena lexer.
@@ -20,10 +20,10 @@ target_compile_options(wx_lexer PRIVATE -Wno-unused-function -Wno-unused-variabl
 #-------------------------------------------------------------------------------
 # Setup the wx library.
 #-------------------------------------------------------------------------------
-add_library(wx STATIC wx.c)
+add_library(wx OBJECT wx.c)
 target_link_libraries(wx
   PUBLIC wx_intf
-  PRIVATE wx_lexer CURL::libcurl LibXml2::LibXml2 Piwx::Geo Piwx::Util Threads::Threads)
+  PRIVATE wx_lexer CURL::libcurl LibXml2::LibXml2 Piwx::Geo Piwx::Log Piwx::Util Threads::Threads)
 
 #-------------------------------------------------------------------------------
 # Export the library.

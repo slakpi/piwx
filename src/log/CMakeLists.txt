@@ -1,10 +1,11 @@
 #-------------------------------------------------------------------------------
-# Setup the util library.
+# Setup the log library.
 #-------------------------------------------------------------------------------
-add_library(util OBJECT util.c)
-target_include_directories(util PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+add_library(log OBJECT log.c)
+target_include_directories(log PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(log PRIVATE Piwx::Util)
 
 #-------------------------------------------------------------------------------
 # Export the library.
 #-------------------------------------------------------------------------------
-add_library(Piwx::Util ALIAS util)
+add_library(Piwx::Log ALIAS log)

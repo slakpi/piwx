@@ -51,7 +51,7 @@ assignment
     cfg->stationQuery = $3;
     break;
   case confLED:
-    if ($1.n < 1 || $1.n > MAX_LEDS) {
+    if ($1.n < 1 || $1.n > CONF_MAX_LEDS) {
       break;
     }
 

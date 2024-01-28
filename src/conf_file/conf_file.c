@@ -33,7 +33,7 @@ void conf_freePiwxConfig(PiwxConfig *cfg) {
   free(cfg->configFile);
   free(cfg->stationQuery);
 
-  for (int i = 0; i < MAX_LEDS; ++i) {
+  for (int i = 0; i < CONF_MAX_LEDS; ++i) {
     free(cfg->ledAssignments[i]);
   }
 

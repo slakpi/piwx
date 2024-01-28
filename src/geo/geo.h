@@ -17,6 +17,10 @@
 #define GEO_WGS84_SEMI_MINOR_M  6356752.314245
 #define GEO_WGS84_SEMI_MINOR_M2 (GEO_WGS84_SEMI_MINOR_M * GEO_WGS84_SEMI_MINOR_M)
 
+/**
+ * @enum  DaylightSpan
+ * @brief Daylight spans.
+ */
 typedef enum {
   daylightOfficial,
   daylightCivil,

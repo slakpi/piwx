@@ -1,12 +1,12 @@
 #if !defined CONFIG_H
 #define CONFIG_H
 
-#define INSTALL_PREFIX "${INSTALL_PREFIX}"
+#define INSTALL_PREFIX  "${INSTALL_PREFIX}"
 #define IMAGE_RESOURCES "${IMAGE_RESOURCES}"
-#define FONT_RESOURCES "${FONT_RESOURCES}"
-#define CONFIG_FILE "${CONFIG_FILE}"
-#define LOG_FILE "${LOG_FILE}"
-#define RELEASE "${RELEASE}"
+#define FONT_RESOURCES  "${FONT_RESOURCES}"
+#define CONFIG_FILE     "${CONFIG_FILE}"
+#define LOG_FILE        "${LOG_FILE}"
+#define RELEASE         "${RELEASE}"
 #define GIT_COMMIT_HASH "${GIT_COMMIT_HASH}"
 
 #endif /* CONFIG_H */

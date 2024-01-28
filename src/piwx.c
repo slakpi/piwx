@@ -330,7 +330,7 @@ static void printConfiguration(const PiwxConfig *config) {
   printf("LED DMA Channel: %d\n", config->ledDMAChannel);
   printf("Log Level: %d\n", config->logLevel);
 
-  for (int i = 0; i < MAX_LEDS; ++i) {
+  for (int i = 0; i < CONF_MAX_LEDS; ++i) {
     if (config->ledAssignments[i]) {
       printf("LED %d = %s\n", i + 1, config->ledAssignments[i]);
     }
@@ -960,7 +960,7 @@ static bool updateStation(const PiwxConfig *cfg, WxStation *station, uint32_t up
  * @param[in] stations List of weather stations.
  */
 static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
-  LEDColor         colors[MAX_LEDS] = {0};
+  LEDColor         colors[CONF_MAX_LEDS] = {0};
   const WxStation *p                = stations;
 
   if (!stations) {
@@ -969,7 +969,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
   }
 
   while (p) {
-    for (int i = 0; i < MAX_LEDS; ++i) {
+    for (int i = 0; i < CONF_MAX_LEDS; ++i) {
       if (!cfg->ledAssignments[i]) {
         continue;
       }
@@ -990,7 +990,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
     }
   }
 
-  led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, colors, MAX_LEDS);
+  led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, colors, CONF_MAX_LEDS);
 }
 
 /**
