@@ -42,7 +42,7 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 set(GIT_COMMIT_HASH ${GIT_COMMIT_HASH})
-set(RELEASE "R44-dev")
+set(RELEASE "R44")
 
 #-------------------------------------------------------------------------------
 # Setup the global compile options.
