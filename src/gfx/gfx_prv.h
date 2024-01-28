@@ -207,6 +207,13 @@ bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources);
 void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture);
 
 /**
+ * @brief   Convert a PNG color type to an OpenGL color type.
+ * @param[in] color The color to convert.
+ * @returns An OpenGL color enum value.
+ */
+GLenum gfx_pngColorToGLColor(png_byte color);
+
+/**
  * @brief Reset back to the generic shader and disable all attribute arrays.
  * @param[in] rsrc    The gfx context.
  * @param[in] program The shader to reset.

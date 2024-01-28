@@ -493,6 +493,19 @@ void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture
   texture->texSize.v[1] = png->height;
 }
 
+GLenum gfx_pngColorToGLColor(png_byte color) {
+  switch (color) {
+  case PNG_COLOR_TYPE_RGB:
+    return GL_RGB;
+  case PNG_COLOR_TYPE_RGBA:
+    return GL_RGBA;
+  case PNG_COLOR_TYPE_GRAY:
+    return GL_ALPHA;
+  default:
+    return GL_INVALID_ENUM;
+  }
+}
+
 void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
   const ProgramInfo *prg = &rsrc->programs[program];
 
