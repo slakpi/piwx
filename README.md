@@ -97,6 +97,14 @@ and Astronomical Twilight.
     # Change daylight to Nautical Twilight
     daylight=nautical;
 
+The `drawglobe` option enables the display of a day/night rendering of Earth
+that centers on the currently displayed station and depicts the Civil, Nautical,
+and Astronomical twilight bands. The globe displays by default, but can be
+disabled by setting `drawglobe` to `off`.
+
+    # Disable day/night globe
+    drawglobe=off;
+
 Flight category colors, both LED and weather display, are currently fixed to
 the US National Weather Service colors: Green (VFR), Blue (Marginal VFR),
 Red (IFR), and Purple (Low IFR). The `highwindspeed` option may be used to
