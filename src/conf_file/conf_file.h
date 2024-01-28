@@ -15,22 +15,22 @@
  * @brief  The configuration structure.
  */
 typedef struct {
-  char        *installPrefix;            // PiWx install prefix
-  char        *imageResources;           // Image resources path
-  char        *fontResources;            // Font resources path
-  char        *configFile;               // Config file path
-  char        *stationQuery;             // List of weather stations to query
-  int          cycleTime;                // Airport display cycle time in sec.
-  int          highWindSpeed;            // High wind threshold in knots
-  bool         highWindBlink;            // High wind blink rate in sec.
+  char        *installPrefix;                 // PiWx install prefix
+  char        *imageResources;                // Image resources path
+  char        *fontResources;                 // Font resources path
+  char        *configFile;                    // Config file path
+  char        *stationQuery;                  // List of weather stations to query
+  int          cycleTime;                     // Airport display cycle time in sec.
+  int          highWindSpeed;                 // High wind threshold in knots
+  bool         highWindBlink;                 // High wind blink rate in sec.
   char        *ledAssignments[CONF_MAX_LEDS]; // Airport LED assignments
-  int          ledBrightness;            // Day LED brightness, 0-255
-  int          ledNightBrightness;       // Night LED brightness, 0-255
-  int          ledDataPin;               // LED Rpi data pin
-  int          ledDMAChannel;            // LED Rpi DMA channel
-  LogLevel     logLevel;                 // Logging output level
-  DaylightSpan daylight;                 // Daylight span for night dimming
-  bool         drawGlobe;                // Draw day/night globe
+  int          ledBrightness;                 // Day LED brightness, 0-255
+  int          ledNightBrightness;            // Night LED brightness, 0-255
+  int          ledDataPin;                    // LED Rpi data pin
+  int          ledDMAChannel;                 // LED Rpi DMA channel
+  LogLevel     logLevel;                      // Logging output level
+  DaylightSpan daylight;                      // Daylight span for night dimming
+  bool         drawGlobe;                     // Draw day/night globe
 } PiwxConfig;
 
 /**

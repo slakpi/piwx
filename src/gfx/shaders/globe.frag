@@ -12,6 +12,7 @@ uniform vec3 subsolarPoint;
 uniform sampler2D tex_0;  // Day map
 uniform sampler2D tex_1;  // Night map
 uniform sampler2D tex_2;  // Threshold
+uniform sampler2D tex_3;  // Clouds
 
 void main() {
   vec3 lightDir = -normalize(subsolarPoint);
@@ -19,7 +20,9 @@ void main() {
 
   vec4 dayColor = texture2D(tex_0, tex_coord);
   vec4 nightColor = texture2D(tex_1, tex_coord);
-  vec4 alpha = texture2D(tex_2, vec2(angle / ASTRONOMICAL, 0.0));
+  float alpha = texture2D(tex_2, vec2(angle / ASTRONOMICAL, 0.0)).a;
+  float cloud = clamp(1.0 - alpha, 0.15, 0.5) * texture2D(tex_3, tex_coord).a;
+  vec4 globe = mix(dayColor, nightColor, alpha);
 
-  gl_FragColor = (alpha.a * nightColor) + ((1.0 - alpha.a) * dayColor);
+  gl_FragColor = mix(globe, vec4(1.0, 1.0, 1.0, 1.0), cloud);
 }

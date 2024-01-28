@@ -342,7 +342,7 @@ static void initVertex(double lat, double lon, Vertex3D *v) {
  * @returns True if successful, false otherwise.
  */
 static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources) {
-  static const char *images[] = {"daymap.png", "nightmap.png", "threshold.png"};
+  static const char *images[] = {"daymap.png", "nightmap.png", "threshold.png", "clouds.png"};
   _Static_assert(COUNTOF(images) == globeTexCount, "Image count must match texture count.");
 
   GLuint tex[globeTexCount] = {0};

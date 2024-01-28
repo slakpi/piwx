@@ -118,7 +118,7 @@ typedef enum {
  * @enum  GlobeTexture
  * @brief Indices for the globe textures.
  */
-typedef enum { globeDay, globeNight, globeThreshold, globeTexCount } GlobeTexture;
+typedef enum { globeDay, globeNight, globeThreshold, globeClouds, globeTexCount } GlobeTexture;
 
 /**
  * @struct DrawResources_
