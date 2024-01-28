@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <png.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -526,15 +527,15 @@ void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture
 
   glEnableVertexAttribArray(prg->posIndex);
   glVertexAttribPointer(prg->posIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        MEMBER_OFFSET(Vertex, pos));
+                        (const void *)offsetof(Vertex, pos));
 
   glEnableVertexAttribArray(prg->colorIndex);
   glVertexAttribPointer(prg->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        MEMBER_OFFSET(Vertex, color));
+                        (const void *)offsetof(Vertex, color));
 
   glEnableVertexAttribArray(prg->texIndex);
   glVertexAttribPointer(prg->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-                        MEMBER_OFFSET(Vertex, tex));
+                        (const void *)offsetof(Vertex, tex));
 
   samplerIndex = glGetUniformLocation(prg->program, "tex");
   glUniform1i(samplerIndex, 0);
@@ -554,15 +555,15 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMat
 
   glEnableVertexAttribArray(prg->posIndex);
   glVertexAttribPointer(prg->posIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, pos));
+                        (const void *)offsetof(Vertex3D, pos));
 
   glEnableVertexAttribArray(prg->colorIndex);
   glVertexAttribPointer(prg->colorIndex, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, color));
+                        (const void *)offsetof(Vertex3D, color));
 
   glEnableVertexAttribArray(prg->texIndex);
   glVertexAttribPointer(prg->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
-                        MEMBER_OFFSET(Vertex3D, tex));
+                        (const void *)offsetof(Vertex3D, tex));
 
   textureCount = umin(textureCount, MAX_TEXTURES);
 
