@@ -133,8 +133,6 @@ typedef struct {
   char            errorFile[256];                // File where the last error occurred
   long            errorLine;                     // Line number of last error occurred
   int             major, minor;                  // EGL API version
-  GLuint          vshaders[vertexShaderCount];   // Vertex shaders
-  GLuint          fshaders[fragmentShaderCount]; // Fragment shaders
   ProgramInfo     programs[programCount];        // Shader programs
   Texture         fonts[fontCount];              // Font textures
   Texture         icons[iconCount];              // Icon textures

@@ -208,14 +208,6 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     glDeleteProgram(rsrc->programs[i].program);
   }
 
-  for (int i = 0; i < vertexShaderCount; ++i) {
-    glDeleteShader(rsrc->vshaders[i]);
-  }
-
-  for (int i = 0; i < fragmentShaderCount; ++i) {
-    glDeleteShader(rsrc->fshaders[i]);
-  }
-
   for (int i = 0; i < fontCount; ++i) {
     glDeleteTextures(1, &rsrc->fonts[i].tex);
   }
@@ -676,34 +668,38 @@ static bool initShaders(DrawResources_ *rsrc) {
     GLuint v, f;
   } Link;
 
-  static const char *vshaders[]  = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
-  static const char *fshaders[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
+  static const char *vsrc[]  = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
+  static const char *fsrc[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
                                     GLOBE_FRAG_SRC};
   static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
                                     {vertexGeneral, fragmentAlphaTex},
                                     {vertexGeneral, fragmentRGBATex},
                                     {vertexGlobe, fragmentGlobe}};
 
+  GLuint vshaders[vertexShaderCount]   = {0};
+  GLuint fshaders[fragmentShaderCount] = {0};
+  bool   ok                            = false;
+
   for (int i = 0; i < vertexShaderCount; ++i) {
-    if (!makeShader(&rsrc->vshaders[i], rsrc, GL_VERTEX_SHADER, vshaders[i])) {
-      return false;
+    if (!makeShader(&vshaders[i], rsrc, GL_VERTEX_SHADER, vsrc[i])) {
+      goto cleanup;
     }
   }
 
   for (int i = 0; i < fragmentShaderCount; ++i) {
-    if (!makeShader(&rsrc->fshaders[i], rsrc, GL_FRAGMENT_SHADER, fshaders[i])) {
-      return false;
+    if (!makeShader(&fshaders[i], rsrc, GL_FRAGMENT_SHADER, fsrc[i])) {
+      goto cleanup;
     }
   }
 
   for (int i = 0; i < programCount; ++i) {
     ProgramInfo *prg = &rsrc->programs[i];
 
-    GLuint vert = rsrc->vshaders[linkTable[i].v];
-    GLuint frag = rsrc->fshaders[linkTable[i].f];
+    GLuint vert = vshaders[linkTable[i].v];
+    GLuint frag = fshaders[linkTable[i].f];
 
     if (!makeProgram(&prg->program, rsrc, vert, frag)) {
-      return false;
+      goto cleanup;
     }
 
     prg->posIndex   = glGetAttribLocation(prg->program, "in_pos");
@@ -713,7 +709,18 @@ static bool initShaders(DrawResources_ *rsrc) {
     prg->viewIndex  = glGetUniformLocation(prg->program, "view");
   }
 
-  return true;
+  ok = true;
+
+cleanup:
+  for (int i = 0; i < vertexShaderCount; ++i) {
+    glDeleteShader(vshaders[i]);
+  }
+
+  for (int i = 0; i < fragmentShaderCount; ++i) {
+    glDeleteShader(fshaders[i]);
+  }
+
+  return ok;
 }
 
 /**
