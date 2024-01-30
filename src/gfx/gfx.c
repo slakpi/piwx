@@ -668,8 +668,8 @@ static bool initShaders(DrawResources_ *rsrc) {
     GLuint v, f;
   } Link;
 
-  static const char *vsrc[]  = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
-  static const char *fsrc[]  = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
+  static const char *vsrc[]      = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
+  static const char *fsrc[]      = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
                                     GLOBE_FRAG_SRC};
   static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
                                     {vertexGeneral, fragmentAlphaTex},

@@ -125,18 +125,18 @@ typedef enum { globeDay, globeNight, globeThreshold, globeClouds, globeTexCount 
  * @brief  Private implementation of the gfx DrawResources context.
  */
 typedef struct {
-  EGLDisplay      display;                       // EGL display object
-  EGLContext      context;                       // EGL context
-  EGLSurface      surface;                       // EGL surface
-  int             error;                         // Last error code
-  char            errorMsg[256];                 // Last error message
-  char            errorFile[256];                // File where the last error occurred
-  long            errorLine;                     // Line number of last error occurred
-  int             major, minor;                  // EGL API version
-  ProgramInfo     programs[programCount];        // Shader programs
-  Texture         fonts[fontCount];              // Font textures
-  Texture         icons[iconCount];              // Icon textures
-  TransformMatrix proj;                          // Projection matrix
+  EGLDisplay      display;                // EGL display object
+  EGLContext      context;                // EGL context
+  EGLSurface      surface;                // EGL surface
+  int             error;                  // Last error code
+  char            errorMsg[256];          // Last error message
+  char            errorFile[256];         // File where the last error occurred
+  long            errorLine;              // Line number of last error occurred
+  int             major, minor;           // EGL API version
+  ProgramInfo     programs[programCount]; // Shader programs
+  Texture         fonts[fontCount];       // Font textures
+  Texture         icons[iconCount];       // Icon textures
+  TransformMatrix proj;                   // Projection matrix
 #if defined _DEBUG
   Vertex3D *globe;        // Globe vertices
   GLushort *globeIndices; // Indices for globe triangles
