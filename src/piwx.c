@@ -35,6 +35,9 @@
 #define BLINK_INTERVAL_SEC     1
 #define NIGHT_INTERVAL_SEC     120
 
+#define UPPER_DIV 81.0f
+#define LOWER_DIV 122.0f
+
 #define MIX_BRIGHTNESS(c, b) (((uint16_t)(c) * (b)) >> 8)
 
 static const LEDColor gColorVFR     = {0, 255, 0};
@@ -46,8 +49,6 @@ static const LEDColor gColorUnk     = {64, 64, 64};
 static const Color4f  gClearColor   = {{0.0f, 0.0f, 0.0f, 0.0f}};
 static const Color4f  gWhite        = {{1.0f, 1.0f, 1.0f, 1.0f}};
 static const Color4f  gRed          = {{1.0f, 0.0f, 0.0f, 1.0f}};
-static const float    gUpperDiv     = 81.0f;
-static const float    gLowerDiv     = 122.0f;
 static const int      gButtonPins[] = {17, 22, 23, 27};
 static const char    *gShortArgs    = "tVv";
 // clang-format off
@@ -444,20 +445,27 @@ static void drawStationScreen(DrawResources resources, const WxStation *station,
  * @param[in] resources The gfx context.
  */
 static void drawBackground(DrawResources resources) {
-  const Point2f lines[] = {{{0.0f, gUpperDiv}},
-                           {{GFX_SCREEN_WIDTH, gUpperDiv}},
-                           {{0.0f, gLowerDiv}},
-                           {{GFX_SCREEN_WIDTH, gLowerDiv}}};
+  const Point2f lines[] = {{{0.0f, UPPER_DIV}},
+                           {{GFX_SCREEN_WIDTH, UPPER_DIV}},
+                           {{0.0f, LOWER_DIV}},
+                           {{GFX_SCREEN_WIDTH, LOWER_DIV}}};
 
-  const Point2f box[] = {{{0.0f, 0.0f}},
-                         {{GFX_SCREEN_WIDTH, 0.0f}},
-                         {{0.0f, gUpperDiv}},
-                         {{GFX_SCREEN_WIDTH, gUpperDiv}}};
+  const Point2f upperBox[] = {{{0.0f, 0.0f}},
+                              {{GFX_SCREEN_WIDTH, 0.0f}},
+                              {{0.0f, UPPER_DIV}},
+                              {{GFX_SCREEN_WIDTH, UPPER_DIV}}};
 
-  const Color4f dim = {{0.0f, 0.0f, 0.0f, 0.33f}};
+  const Point2f lowerBox[] = {{{0.0f, LOWER_DIV}},
+                              {{GFX_SCREEN_WIDTH, LOWER_DIV}},
+                              {{0.0f, GFX_SCREEN_HEIGHT}},
+                              {{GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}}};
 
-  // Draw a translucent quad to dim the globe at the top of the screen.
-  gfx_drawQuad(resources, &box[0], dim);
+  const Color4f dim = {{0.0f, 0.0f, 0.0f, 0.2f}};
+
+  // Draw a translucent quads to dim the globe at the top and bottom of the
+  // screen.
+  gfx_drawQuad(resources, &upperBox[0], dim);
+  gfx_drawQuad(resources, &lowerBox[0], dim);
 
   // Draw the separator lines.
   gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
@@ -611,7 +619,7 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
 
   len                = strlen(station->wxString);
   bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
-  bottomLeft.coord.y = gUpperDiv + info.cellSize.v[1];
+  bottomLeft.coord.y = UPPER_DIV + info.cellSize.v[1];
   gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gWhite, vertAlignCell);
 }
 
@@ -624,7 +632,7 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
  * @param[in] station   The weather station information.
  */
 static void drawCloudLayers(DrawResources *resources, const WxStation *station) {
-  Point2f       bottomLeft = {{172.0f, gLowerDiv + 10.0f}};
+  Point2f       bottomLeft = {{172.0f, LOWER_DIV + 10.0f}};
   CharInfo      info       = {0};
   SkyCondition *sky        = station->layers;
   char          buf[33]    = {0};
@@ -723,7 +731,7 @@ static void getCloudLayerText(const SkyCondition *sky, char *buf, size_t len) {
  */
 static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   char     buf[33]    = {0};
-  Point2f  bottomLeft = {{84.0f, gLowerDiv + 10.0f}};
+  Point2f  bottomLeft = {{84.0f, LOWER_DIV + 10.0f}};
   CharInfo fontInfo   = {0};
   Vector2f iconInfo   = {0};
   Icon     icon       = getWindIcon(station->windDir);
@@ -869,7 +877,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   }
 
   bottomLeft.coord.x = 172.0f;
-  bottomLeft.coord.y = gLowerDiv + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
+  bottomLeft.coord.y = LOWER_DIV + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
 
   if (station->hasTemp && station->hasDewPoint) {
@@ -885,7 +893,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
     strncpy_safe(buf, "---/---", COUNTOF(buf));
   }
 
-  bottomLeft.coord.x = 0.0f;
+  bottomLeft.coord.x = 5.0f;
   bottomLeft.coord.y += info.cellSize.v[1];
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
 
