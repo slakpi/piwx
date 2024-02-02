@@ -17,6 +17,10 @@
 #define GEO_WGS84_SEMI_MINOR_M  6356752.314245
 #define GEO_WGS84_SEMI_MINOR_M2 (GEO_WGS84_SEMI_MINOR_M * GEO_WGS84_SEMI_MINOR_M)
 
+typedef struct {
+  double lat, lon;
+} Position;
+
 /**
  * @enum  DaylightSpan
  * @brief Daylight spans.
