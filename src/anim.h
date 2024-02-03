@@ -1,3 +1,6 @@
+/**
+ * @file anim.h
+ */
 #if !defined ANIM_H
 #define ANIM_H
 
@@ -15,7 +18,9 @@ typedef void *Animation;
  */
 typedef void (*PositionUpdateFn)(Position pos, void *param);
 
-/* General Animation Functions -----------------------------------------------*/
+/*------------------------------------------------------------------------------
+General Animation Functions
+------------------------------------------------------------------------------*/
 
 /**
  * @brief Free an animation object and its data.
@@ -30,7 +35,9 @@ void freeAnimation(Animation anim);
  */
 bool stepAnimation(Animation anim);
 
-/* Position Animation Functions ----------------------------------------------*/
+/*------------------------------------------------------------------------------
+Position Animation Functions
+------------------------------------------------------------------------------*/
 
 /**
  * @brief Create a position animation.

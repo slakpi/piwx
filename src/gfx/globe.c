@@ -58,7 +58,8 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
 
 static bool loadGlobeTextures(DrawResources_ *rsrc, const char *imageResources);
 
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, const BoundingBox2D *box) {
+void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
+                   const BoundingBox2D *box) {
   const DrawResources_ *rsrc = resources;
 
   GLint           index;
@@ -67,13 +68,12 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
   double          sslat, sslon;
   float           width, height, scale;
   TransformMatrix xform, tmp;
-  time_t          now = time(NULL);
 
   if (rsrc->globeBuffers[0] == 0) {
     return;
   }
 
-  geo_calcSubsolarPoint(now, &sslat, &sslon);
+  geo_calcSubsolarPoint(curTime, &sslat, &sslon);
   geo_LatLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
 
   width          = box->bottomRight.coord.x - box->topLeft.coord.x;
@@ -103,10 +103,10 @@ void gfx_drawGlobe(DrawResources resources, double lat, double lon, const Boundi
 
   makeTranslation(xform, center.coord.x, center.coord.y, PROJ_Z_MAX);
 
-  makeXRotation(tmp, (90.0f + lat) * DEG_TO_RAD);
+  makeXRotation(tmp, (90.0f + pos.lat) * DEG_TO_RAD);
   combineTransforms(xform, tmp);
 
-  makeZRotation(tmp, (-90.0f - lon) * DEG_TO_RAD);
+  makeZRotation(tmp, (-90.0f - pos.lon) * DEG_TO_RAD);
   combineTransforms(xform, tmp);
 
   makeScale(tmp, scale, scale, scale);

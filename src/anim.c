@@ -1,3 +1,6 @@
+/**
+ * @file anim.c
+ */
 #include "anim.h"
 #include <math.h>
 #include <stdbool.h>

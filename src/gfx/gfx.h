@@ -4,6 +4,7 @@
 #if !defined GFX_H
 #define GFX_H
 
+#include "geo.h"
 #include "vec.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -145,11 +146,11 @@ void gfx_cleanupGraphics(DrawResources *resources);
 /**
  * @brief Draw the Earth centered on the given latitude and longitude.
  * @param[in] resources The gfx context.
- * @param[in] lat       The view latitude in degrees.
- * @param[in] lon       The view longitude in degrees.
+ * @param[in] pos       Eye position over the globe.
+ * @param[in] curTime   The current system time.
  * @param[in] box       The bounding box for the globe in pixels.
  */
-void gfx_drawGlobe(DrawResources resources, double lat, double lon, const BoundingBox2D *box);
+void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime, const BoundingBox2D *box);
 
 /**
  * @brief Draw an icon centered on a point.

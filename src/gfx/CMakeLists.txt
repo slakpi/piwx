@@ -34,7 +34,8 @@ target_include_directories(gfx
   PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${rpi_gl_include})
 target_link_directories(gfx PUBLIC ${rpi_gl_lib})
 target_link_libraries(gfx
-  PRIVATE brcmEGL brcmGLESv2 Piwx::Conf_File Piwx::Geo Piwx::Util PNG::PNG Threads::Threads vcos)
+  PUBLIC Piwx::Geo
+  PRIVATE brcmEGL brcmGLESv2 Piwx::Conf_File Piwx::Util PNG::PNG Threads::Threads vcos)
 
 #-------------------------------------------------------------------------------
 # Make shader headers.

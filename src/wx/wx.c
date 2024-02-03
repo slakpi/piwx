@@ -190,7 +190,7 @@ void wx_freeStations(WxStation *stations) {
   }
 }
 
-WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
+WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTime, int *err) {
   CURL             *curlLib;
   CURLcode          res;
   char              url[4096];
@@ -201,8 +201,7 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
   Tag               tag;
   WxStation        *start = NULL, *cur;
   int               count, len;
-  bool              ok  = false;
-  time_t            now = time(NULL);
+  bool              ok = false;
 
   *err = 0;
 
@@ -305,7 +304,7 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
 
     // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight    = geo_isNight(newStation->pos.lat, newStation->pos.lon, daylight, now);
+    newStation->isNight = geo_isNight(newStation->pos.lat, newStation->pos.lon, daylight, curTime);
     newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
