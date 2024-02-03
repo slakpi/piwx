@@ -244,7 +244,9 @@ static bool go(bool test, bool verbose) {
       nextBlink    = now + BLINK_INTERVAL_SEC;
       nextDayNight = now + NIGHT_INTERVAL_SEC;
 
-      if (!wx) {
+      if (wx) {
+        updateLEDs(cfg, wx);
+      } else {
         drawDownloadErrorScreen(resources, !test);
         updateLEDs(cfg, NULL);
 

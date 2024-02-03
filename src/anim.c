@@ -108,7 +108,7 @@ Animation makePositionAnimation(Position origin, Position target, unsigned int s
     goto cleanup;
   }
 
-  calcPositionDeltas(&data->delta, origin, target);
+  calcPositionDelta(&data->delta, origin, target);
   data->origin      = origin;
   data->updateFn    = updateFn;
   data->updateParam = param;
@@ -143,7 +143,7 @@ void resetPositionAnimation(Animation anim, Position origin, Position target) {
   }
 
   data = a->data;
-  calcPositionDeltas(&data->delta, origin, target);
+  calcPositionDelta(&data->delta, origin, target);
   data->origin = origin;
   a->curStep   = 0;
 }
