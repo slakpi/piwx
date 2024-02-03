@@ -1,6 +1,7 @@
 /**
  * @file piwx.c
  */
+#include "anim.h"
 #include "conf_file.h"
 #include "config.h"
 #include "gfx.h"
@@ -70,14 +71,14 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit);
 
 static void drawDownloadScreen(DrawResources resources, bool commit);
 
-static void drawGlobe(DrawResources resources, const WxStation *station);
+static void drawGlobe(DrawResources resources, Position pos);
 
 static void drawStationIdentifier(DrawResources resources, const WxStation *station);
 
 static void drawStationFlightCategory(DrawResources resources, const WxStation *station);
 
 static void drawStationScreen(DrawResources resources, const WxStation *station, bool globe,
-                              bool commit);
+                              Position globePos, bool commit);
 
 static void drawStationWeather(DrawResources resources, const WxStation *station);
 
@@ -101,11 +102,16 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len);
 
+static void globePositionUpdate(Position pos, void *param);
+
 static bool go(bool test, bool verbose);
 
 static void printConfiguration(const PiwxConfig *config);
 
 static unsigned int scanButtons(void);
+
+static void setupGlobeAnimation(Animation *anim, Position origin, Position target, float duration,
+                                Position *param);
 
 static int setupGpio(void);
 
@@ -176,6 +182,8 @@ static bool go(bool test, bool verbose) {
   time_t        nextUpdate = 0, nextBlink = 0, nextDayNight = 0, nextWx = 0;
   bool          first = true, ret = false;
   DrawResources resources = GFX_INVALID_RESOURCES;
+  Animation     globeAnim = NULL;
+  Position      globePos;
 
   if (verbose) {
     printConfiguration(cfg);
@@ -228,6 +236,7 @@ static bool go(bool test, bool verbose) {
 
       wx           = wx_queryWx(cfg->stationQuery, cfg->daylight, &err);
       curStation   = wx;
+      globePos     = curStation->pos;
       first        = false;
       draw         = (wx != NULL);
       nextUpdate   = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
@@ -235,9 +244,7 @@ static bool go(bool test, bool verbose) {
       nextBlink    = now + BLINK_INTERVAL_SEC;
       nextDayNight = now + NIGHT_INTERVAL_SEC;
 
-      if (wx) {
-        updateLEDs(cfg, wx);
-      } else {
+      if (!wx) {
         drawDownloadErrorScreen(resources, !test);
         updateLEDs(cfg, NULL);
 
@@ -252,6 +259,8 @@ static bool go(bool test, bool verbose) {
     }
 
     if (wx) {
+      WxStation *lastStation = curStation;
+
       // Check the following:
       //   * Timeout expired? Move forward in the circular list.
       //   * Button 3 pressed? Move forward in the circular list.
@@ -265,6 +274,14 @@ static bool go(bool test, bool verbose) {
         draw       = true;
         nextWx     = now + cfg->cycleTime;
       }
+
+      if (curStation != lastStation) {
+        globePos = lastStation->pos;
+        setupGlobeAnimation(&globeAnim, lastStation->pos, curStation->pos, cfg->cycleTime * 0.5f,
+                            &globePos);
+      }
+
+      draw |= stepAnimation(globeAnim);
 
       // If the blink timeout expired, update the LEDs.
       if (now > nextBlink) {
@@ -288,7 +305,7 @@ static bool go(bool test, bool verbose) {
       continue;
     }
 
-    drawStationScreen(resources, curStation, cfg->drawGlobe, !test);
+    drawStationScreen(resources, curStation, cfg->drawGlobe, globePos, !test);
 
     if (test) {
       gfx_dumpSurfaceToPng(resources, "test.png");
@@ -309,6 +326,7 @@ cleanup:
   updateLEDs(cfg, NULL);
   gfx_cleanupGraphics(&resources);
   wx_freeStations(wx);
+  freeAnimation(globeAnim);
   gpioTerminate();
   closeLog();
 
@@ -419,11 +437,11 @@ static void drawDownloadErrorScreen(DrawResources resources, bool commit) {
  * @param[in] commit    Commit the surface to the screen.
  */
 static void drawStationScreen(DrawResources resources, const WxStation *station, bool globe,
-                              bool commit) {
+                              Position globePos, bool commit) {
   gfx_clearSurface(resources, gClearColor);
 
   if (globe) {
-    drawGlobe(resources, station);
+    drawGlobe(resources, globePos);
   }
 
   drawBackground(resources);
@@ -477,14 +495,14 @@ static void drawBackground(DrawResources resources) {
  * @param[in] resources The gfx context.
  * @param[in] station   The weather station information.
  */
-static void drawGlobe(DrawResources resources, const WxStation *station) {
+static void drawGlobe(DrawResources resources, Position pos) {
   const Point2f       topLeft     = {{-GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
   const Point2f       bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
   const BoundingBox2D box         = {topLeft, bottomRight};
 
   // Adjust the latitude down by 10 degrees to place the station within the
   // weather phenomena box.
-  gfx_drawGlobe(resources, station->lat - 10.0f, station->lon, &box);
+  gfx_drawGlobe(resources, pos.lat - 10.0f, pos.lon, &box);
 }
 
 /**
@@ -1040,4 +1058,37 @@ static LEDColor getLEDColor(const PiwxConfig *cfg, const WxStation *station) {
   color.b = MIX_BRIGHTNESS(color.b, (uint8_t)brightness);
 
   return color;
+}
+
+/**
+ * @brief Create or reset a globe animation.
+ * @param[in,out] anim     Pointer to an @a Animation object. If the object
+ *                         itself is null, a new object is create. Otherwise,
+ *                         the existing object is reset.
+ * @param[in]     origin   The origin position.
+ * @param[in]     target   The target position.
+ * @param[in]     duration The animation duration in seconds.
+ * @param[in]     param    The position to animate.
+ */
+static void setupGlobeAnimation(Animation *anim, Position origin, Position target, float duration,
+                                Position *param) {
+  unsigned int steps;
+
+  if (*anim) {
+    resetPositionAnimation(*anim, origin, target);
+    return;
+  }
+
+  steps = (unsigned int)((duration * 1000000.0f) / SLEEP_INTERVAL_USEC);
+  *anim = makePositionAnimation(origin, target, steps, globePositionUpdate, param);
+}
+
+/**
+ * @brief Globe position update callback.
+ * @param[in] pos   The updated position.
+ * @param[in] param The callback parameter.
+ */
+static void globePositionUpdate(Position pos, void *param) {
+  Position *outPos = param;
+  *outPos          = pos;
 }

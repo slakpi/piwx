@@ -78,7 +78,7 @@ typedef struct WxStation_ {
   char              *localId;
   char              *raw;
   time_t             obsTime;
-  double             lat, lon;
+  Position           pos;
   bool               isNight;
   DominantWeather    wx;
   char              *wxString;

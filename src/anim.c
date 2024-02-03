@@ -3,30 +3,50 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+/**
+ * @typedef AnimationData
+ * @brief   Opaque type for animation-specific data.
+ */
 typedef void *AnimationData;
 
+/**
+ * @typedef AnimationStepFn
+ * @brief   Callback to handle the animation-specific step operation.
+ */
 typedef void (*AnimationStepFn)(unsigned int step, AnimationData data);
 
+/**
+ * @typedef AnimationCleanFn
+ * @brief   Callback to handle animation-specific data cleanup.
+ */
 typedef void (*AnimationCleanFn)(AnimationData data);
 
+/**
+ * @struct Animation_
+ * @brief  The concrete definition of @a Animation.
+ */
 typedef struct {
-  AnimationStepFn stepFn;
+  AnimationStepFn  stepFn;
   AnimationCleanFn cleanFn;
-  AnimationData data;
-  unsigned int steps;
-  unsigned int curStep;
+  AnimationData    data;
+  unsigned int     steps;
+  unsigned int     curStep;
+  bool             loop;
 } Animation_;
 
+/**
+ * @struct PositionAnimationData
+ * @brief  Data specific to a position animation.
+ */
 typedef struct {
-  Position origin;
-  double latDelta;
-  double lonDelta;
+  Position         origin;
+  Position         delta;
   PositionUpdateFn updateFn;
-  void *updateParam;
-  double *curve;
+  void            *updateParam;
+  double          *curve;
 } PositionAnimationData;
 
-static void calcPositionDeltas(Position a, Position b, double *latDelta, double *lonDelta);
+static void calcPositionDelta(Position *delta, Position origin, Position target);
 
 static void cleanPositionAnimation(void *data);
 
@@ -41,15 +61,34 @@ void freeAnimation(Animation anim) {
     return;
   }
 
+  // Animation-specific cleanup.
   a->cleanFn(a->data);
 
   free(a);
 }
 
+bool stepAnimation(Animation anim) {
+  Animation_ *a = anim;
+
+  if (!a) {
+    return false;
+  }
+
+  if (!a->loop && a->curStep >= a->steps) {
+    return false;
+  }
+
+  // Animation-specific step.
+  a->stepFn(a->curStep++, a->data);
+
+  return true;
+}
+
 Animation makePositionAnimation(Position origin, Position target, unsigned int steps,
                                 PositionUpdateFn updateFn, void *param) {
+  Animation_            *a;
   PositionAnimationData *data = NULL;
-  Animation_ *a;
+  bool                   ok   = false;
 
   a = malloc(sizeof(Animation_));
 
@@ -69,27 +108,34 @@ Animation makePositionAnimation(Position origin, Position target, unsigned int s
     goto cleanup;
   }
 
-  calcPositionDeltas(origin, target, &data->latDelta, &data->lonDelta);
-  data->origin = origin;
-  data->updateFn = updateFn;
+  calcPositionDeltas(&data->delta, origin, target);
+  data->origin      = origin;
+  data->updateFn    = updateFn;
   data->updateParam = param;
 
-  a->stepFn = stepPositionAnimation;
+  a->stepFn  = stepPositionAnimation;
   a->cleanFn = cleanPositionAnimation;
-  a->data = data;
-  a->steps = steps;
+  a->data    = data;
+  a->steps   = steps;
   a->curStep = 0;
+  a->loop    = false;
 
-  return a;
+  data = NULL;
+  ok   = true;
 
 cleanup:
   cleanPositionAnimation(data);
-  free(a);
-  return NULL;
+
+  if (!ok) {
+    free(a);
+    a = NULL;
+  }
+
+  return a;
 }
 
 void resetPositionAnimation(Animation anim, Position origin, Position target) {
-  Animation_ *a = anim;
+  Animation_            *a = anim;
   PositionAnimationData *data;
 
   if (!a) {
@@ -97,33 +143,43 @@ void resetPositionAnimation(Animation anim, Position origin, Position target) {
   }
 
   data = a->data;
-  calcPositionDeltas(origin, target, &data->latDelta, &data->lonDelta);
-  a->curStep = 0;
+  calcPositionDeltas(&data->delta, origin, target);
+  data->origin = origin;
+  a->curStep   = 0;
 }
 
-bool stepAnimation(Animation anim) {
-  Animation_ *a = anim;
+/**
+ * @brief Calculation the latitude and longitude deltas for two positions.
+ * @param[out] delta  The latitude and longitude deltas.
+ * @param[in]  origin The origin position.
+ * @param[in]  target The target position.
+ */
+static void calcPositionDelta(Position *delta, Position origin, Position target) {
+  delta->lat = target.lat - origin.lat;
+  delta->lon = target.lon - origin.lon;
 
-  if (!a) {
-    return false;
+  // Handle the anti-meridian. The shortest longitudal distance between two
+  // points cannot be larger than 180 degrees. If it is, normalize it and switch
+  // the sign.
+  //
+  // For example, W 170 -> E 170 has a delta of 170 - -170 = 340. Subtracting
+  // 360 gives a new delta of -20 degrees which would cause the animation to
+  // step from W 170 to W 190 (E 170).
+  //
+  // The reverse case would be E 170 -> W 170 = -170 - 170 = -340. Adding 360
+  // gives a new delta of 20 degrees which would cause the animation to step
+  // from E 170 to E 190 (W 170).
+  if (delta->lon > 180.0) {
+    delta->lon -= 360.0;
+  } else if (delta->lon < -180.0) {
+    delta->lon += 360.0;
   }
-
-  a->stepFn(a->curStep, a->data);
-
-  return (++(a->curStep) == a->steps);
 }
 
-static void calcPositionDeltas(Position a, Position b, double *latDelta, double *lonDelta) {
-  *latDelta = b.lat - a.lat;
-  *lonDelta = b.lon - a.lon;
-
-  if (*lonDelta > 180.0) {
-    *lonDelta -= 360.0;
-  } else if (*lonDelta < -180.0) {
-    *lonDelta += 360.0;
-  }
-}
-
+/**
+ * @brief Cleanup a position animation's data.
+ * @param[in] data The position animation data.
+ */
 static void cleanPositionAnimation(void *data) {
   PositionAnimationData *d = data;
 
@@ -135,6 +191,21 @@ static void cleanPositionAnimation(void *data) {
   free(d);
 }
 
+/**
+ * @brief   Generate an easing curve between [0, 1].
+ * @details Generates a cosine curve from 0 to 1 over the specified number of
+ *          steps.
+ *
+ *          1                 ____
+ *          |              --
+ *          |            /
+ *          |          /
+ *          |       __
+ *          0  ----
+ *
+ * @param[in] steps Number of steps in the animation.
+ * @returns An array of @a steps curve values.
+ */
 static double *generateEasingCurve(unsigned int steps) {
   double *curve;
 
@@ -155,15 +226,20 @@ static double *generateEasingCurve(unsigned int steps) {
   return curve;
 }
 
+/**
+ * @brief Step a position animation.
+ * @param[in] step The current step.
+ * @param[in] data The animation data.
+ */
 static void stepPositionAnimation(unsigned int step, void *data) {
   PositionAnimationData *d = data;
-  Position pos;
+  Position               pos;
 
   if (!d) {
     return;
   }
 
-  pos.lat = d->origin.lat + (d->latDelta * d->curve[step]);
-  pos.lon = d->origin.lon + (d->lonDelta * d->curve[step]);
+  pos.lat = d->origin.lat + (d->delta.lat * d->curve[step]);
+  pos.lon = d->origin.lon + (d->delta.lon * d->curve[step]);
   d->updateFn(pos, d->updateParam);
 }

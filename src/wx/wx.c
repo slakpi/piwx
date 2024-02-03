@@ -305,7 +305,7 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, int *err) {
 
     // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight    = geo_isNight(newStation->lat, newStation->lon, daylight, now);
+    newStation->isNight    = geo_isNight(newStation->pos.lat, newStation->pos.lon, daylight, now);
     newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
@@ -333,7 +333,7 @@ cleanup:
 }
 
 void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t now) {
-  station->isNight = geo_isNight(station->lat, station->lon, daylight, now);
+  station->isNight = geo_isNight(station->pos.lat, station->pos.lon, daylight, now);
 
   // Update icons that have day/night variants.
   switch (station->wx) {
@@ -662,10 +662,10 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       station->obsTime = timegm(&obs);
       break;
     case tagLat:
-      station->lat = strtod((char *)c->children->content, NULL);
+      station->pos.lat = strtod((char *)c->children->content, NULL);
       break;
     case tagLon:
-      station->lon = strtod((char *)c->children->content, NULL);
+      station->pos.lon = strtod((char *)c->children->content, NULL);
       break;
     case tagTemp:
       station->hasTemp = true;
