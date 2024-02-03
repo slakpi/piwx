@@ -1,5 +1,5 @@
 /**
- * @file draw.h
+ * @file display.h
  */
 #if !defined DRAW_H
 #define DRAW_H

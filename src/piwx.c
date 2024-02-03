@@ -4,7 +4,7 @@
 #include "anim.h"
 #include "conf_file.h"
 #include "config.h"
-#include "draw.h"
+#include "display.h"
 #include "gfx.h"
 #include "led.h"
 #include "log.h"

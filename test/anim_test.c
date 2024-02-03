@@ -1,6 +1,6 @@
 #include "anim.h"
 #include "config.h"
-#include "draw.h"
+#include "display.h"
 #include "geo.h"
 #include "gfx.h"
 #include "util.h"

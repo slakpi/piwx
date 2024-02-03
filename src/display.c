@@ -1,7 +1,7 @@
 /**
- * @file draw.c
+ * @file display.c
  */
-#include "draw.h"
+#include "display.h"
 #include "geo.h"
 #include "gfx.h"
 #include "util.h"

@@ -17,7 +17,7 @@ configure_file(config.h.in config.h)
 add_executable(anim_test
   anim_test.c
   "${PROJECT_SOURCE_DIR}/src/anim.c"
-  "${PROJECT_SOURCE_DIR}/src/draw.c")
+  "${PROJECT_SOURCE_DIR}/src/display.c")
 target_include_directories(anim_test
   PRIVATE "${PROJECT_SOURCE_DIR}/src" "${CMAKE_CURRENT_BINARY_DIR}")
 target_link_libraries(anim_test

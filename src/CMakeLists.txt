@@ -29,7 +29,7 @@ add_subdirectory(wx)
 #-------------------------------------------------------------------------------
 # Setup the piwx target.
 #-------------------------------------------------------------------------------
-add_executable(piwx anim.c draw.c piwx.c)
+add_executable(piwx anim.c display.c piwx.c)
 target_include_directories(piwx PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(
   piwx PRIVATE PiGPIO::PiGPIO Piwx::Conf_File Piwx::Geo Piwx::Gfx Piwx::Led Piwx::Log Piwx::Util
