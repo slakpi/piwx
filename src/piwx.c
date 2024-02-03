@@ -265,6 +265,7 @@ static bool go(bool test, bool verbose) {
       continue;
     }
 
+    clearScreen(resources, false);
     drawStationScreen(resources, curStation, now, cfg->drawGlobe, globePos, !test);
 
     if (test) {

@@ -4,7 +4,6 @@
 #include "draw.h"
 #include "geo.h"
 #include "gfx.h"
-#include "led.h"
 #include "util.h"
 #include "wx.h"
 #include <stdbool.h>
@@ -81,8 +80,6 @@ void drawDownloadErrorScreen(DrawResources resources, bool commit) {
 
 void drawStationScreen(DrawResources resources, const WxStation *station, time_t curTime,
                        bool globe, Position globePos, bool commit) {
-  gfx_clearSurface(resources, gClearColor);
-
   if (globe) {
     drawGlobe(resources, curTime, globePos);
   }
