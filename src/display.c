@@ -22,8 +22,6 @@ static void drawBackground(DrawResources resources);
 
 static void drawCloudLayers(DrawResources *resources, const WxStation *station);
 
-static void drawGlobe(DrawResources resources, time_t curTime, Position pos);
-
 static void drawStationIdentifier(DrawResources resources, const WxStation *station);
 
 static void drawStationFlightCategory(DrawResources resources, const WxStation *station);
@@ -48,42 +46,35 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len);
 
-void clearScreen(DrawResources resources, bool commit) {
-  gfx_clearSurface(resources, gClearColor);
+void clearFrame(DrawResources resources) { gfx_clearSurface(resources, gClearColor); }
 
-  if (commit) {
-    gfx_commitToScreen(resources);
-  }
-}
-
-void drawDownloadScreen(DrawResources resources, bool commit) {
+void drawDownloadInProgress(DrawResources resources) {
   Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
   gfx_drawIcon(resources, iconDownloading, center);
-
-  if (commit) {
-    gfx_commitToScreen(resources);
-  }
 }
 
-void drawDownloadErrorScreen(DrawResources resources, bool commit) {
+void drawDownloadError(DrawResources resources) {
   Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
   gfx_clearSurface(resources, gClearColor);
   gfx_drawIcon(resources, iconDownloadErr, center);
-
-  if (commit) {
-    gfx_commitToScreen(resources);
-  }
 }
 
-void drawStationScreen(DrawResources resources, const WxStation *station, time_t curTime,
-                       bool globe, Position globePos, bool commit) {
-  if (globe) {
-    drawGlobe(resources, curTime, globePos);
-  }
+void drawGlobe(DrawResources resources, time_t curTime, Position pos) {
+  const Point2f       topLeft     = {{-GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
+  const Point2f       bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
+  const BoundingBox2D box         = {topLeft, bottomRight};
 
+  // Adjust the latitude down by 10 degrees to place the station within the
+  // weather phenomena box.
+  Position eyePos = {pos.lat - 10.0f, pos.lon};
+
+  gfx_drawGlobe(resources, eyePos, curTime, &box);
+}
+
+void drawStation(DrawResources resources, time_t curTime, const WxStation *station) {
   drawBackground(resources);
   drawStationIdentifier(resources, station);
   drawStationFlightCategory(resources, station);
@@ -92,10 +83,6 @@ void drawStationScreen(DrawResources resources, const WxStation *station, time_t
   drawCloudLayers(resources, station);
   drawWindInfo(resources, station);
   drawTempDewPointVisAlt(resources, station);
-
-  if (commit) {
-    gfx_commitToScreen(resources);
-  }
 }
 
 /**
@@ -122,30 +109,12 @@ static void drawBackground(DrawResources resources) {
 
   // Draw a translucent quads to dim the globe at the top and bottom of the
   // screen.
-  gfx_drawQuad(resources, &upperBox[0], dim);
-  gfx_drawQuad(resources, &lowerBox[0], dim);
+  gfx_drawQuad(resources, upperBox, dim);
+  gfx_drawQuad(resources, lowerBox, dim);
 
   // Draw the separator lines.
-  gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
-  gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
-}
-
-/**
- * @brief Draw the day/night globe.
- * @param[in] resources The gfx context.
- * @param[in] curTime   The current system time.
- * @param[in] pos       Eye position over the globe.
- */
-static void drawGlobe(DrawResources resources, time_t curTime, Position pos) {
-  const Point2f       topLeft     = {{-GFX_SCREEN_WIDTH * 0.25f, 0.0f}};
-  const Point2f       bottomRight = {{topLeft.coord.x + GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}};
-  const BoundingBox2D box         = {topLeft, bottomRight};
-
-  // Adjust the latitude down by 10 degrees to place the station within the
-  // weather phenomena box.
-  Position eyePos = {pos.lat - 10.0f, pos.lon};
-
-  gfx_drawGlobe(resources, eyePos, curTime, &box);
+  gfx_drawLine(resources, lines, gWhite, 2.0f);
+  gfx_drawLine(resources, lines, gWhite, 2.0f);
 }
 
 /**

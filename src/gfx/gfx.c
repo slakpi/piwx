@@ -153,6 +153,30 @@ static bool makeShader(GLuint *shader, DrawResources_ *rsrc, GLenum type, const 
 
 static bool readPixelsToPng(Png *png);
 
+void gfx_beginLayer(DrawResources resources, Layer layer) {
+  DrawResources_ *rsrc = resources;
+
+  if (rsrc->framebuffer == 0) {
+    glGenFramebuffers(1, &rsrc->framebuffer);
+  }
+
+  if (rsrc->layers[layer] == 0) {
+    glGenTextures(1, &rsrc->layers[layer]);
+    glBindTexture(GL_TEXTURE_2D, rsrc->layers[layer]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT, 0, GL_RGBA,
+                 GL_UNSIGNED_BYTE, NULL);
+    glBindTexture(GL_TEXTURE_2D, 0);
+  }
+
+  glBindFramebuffer(GL_FRAMEBUFFER, rsrc->framebuffer);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rsrc->layers[layer],
+                         0);
+}
+
 void gfx_clearSurface(DrawResources resources, Color4f clear) {
   UNUSED(resources);
 
@@ -235,6 +259,9 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     glDeleteTextures(1, &rsrc->globeTex[i].tex);
   }
 
+  glDeleteTextures(layerCount, rsrc->layers);
+  glDeleteFramebuffers(1, &rsrc->framebuffer);
+
   free(rsrc);
 
   *resources = NULL;
@@ -256,6 +283,8 @@ bool gfx_dumpSurfaceToPng(DrawResources resources, const char *path) {
 
   return ok;
 }
+
+void gfx_endLayer(DrawResources resources) { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
 
 bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
                                 const Point2f *bottomLeft, const CharInfo *info,

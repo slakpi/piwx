@@ -55,7 +55,8 @@ int main() {
     snprintf(image, COUNTOF(image), "anim%02d.png", i);
 
     gfx_clearSurface(resources, clearColor);
-    drawStationScreen(resources, &gKbdn, gKbdn.obsTime, true, globePos, false);
+    drawGlobe(resources, gKbdn.obsTime, globePos);
+    drawStation(resources, gKbdn.obsTime, &gKbdn);
     gfx_dumpSurfaceToPng(resources, image);
   }
 

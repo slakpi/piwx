@@ -165,7 +165,7 @@ static bool go(bool test, bool verbose) {
   }
 
   do {
-    bool         draw = false;
+    bool         updateFgnd = false, updateBkgnd = false;
     unsigned int b = 0, bl = 0, bc;
     int          err;
     time_t       now    = time(NULL);
@@ -190,13 +190,18 @@ static bool go(bool test, bool verbose) {
 
       wx_freeStations(wx);
 
-      drawDownloadScreen(resources, !test);
+      drawDownloadInProgress(resources);
+
+      if (!test) {
+        gfx_commitToScreen(resources);
+      }
 
       wx           = wx_queryWx(cfg->stationQuery, cfg->daylight, now, &err);
       curStation   = wx;
       globePos     = curStation->pos;
       first        = false;
-      draw         = (wx != NULL);
+      updateFgnd   = (wx != NULL);
+      updateBkgnd  = updateFgnd;
       nextUpdate   = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
       nextWx       = now + cfg->cycleTime;
       nextBlink    = now + BLINK_INTERVAL_SEC;
@@ -205,7 +210,12 @@ static bool go(bool test, bool verbose) {
       if (wx) {
         updateLEDs(cfg, wx);
       } else {
-        drawDownloadErrorScreen(resources, !test);
+        drawDownloadError(resources);
+
+        if (!test) {
+          gfx_commitToScreen(resources);
+        }
+
         updateLEDs(cfg, NULL);
 
         // Try again at the retry interval rather than on the update interval
@@ -226,13 +236,15 @@ static bool go(bool test, bool verbose) {
       //   * Button 3 pressed? Move forward in the circular list.
       //   * Button 2 pressed? Move backward in the circular list.
       if (now >= nextWx || (bc & BUTTON_3)) {
-        curStation = curStation->next;
-        draw       = true;
-        nextWx     = now + cfg->cycleTime;
+        curStation  = curStation->next;
+        updateFgnd  = true;
+        updateBkgnd = true;
+        nextWx      = now + cfg->cycleTime;
       } else if (bc & BUTTON_2) {
-        curStation = curStation->prev;
-        draw       = true;
-        nextWx     = now + cfg->cycleTime;
+        curStation  = curStation->prev;
+        updateFgnd  = true;
+        updateBkgnd = true;
+        nextWx      = now + cfg->cycleTime;
       }
 
       if (curStation != lastStation) {
@@ -241,7 +253,7 @@ static bool go(bool test, bool verbose) {
                             &globePos);
       }
 
-      draw |= stepAnimation(globeAnim);
+      updateBkgnd |= stepAnimation(globeAnim);
 
       // If the blink timeout expired, update the LEDs.
       if (now > nextBlink) {
@@ -260,18 +272,37 @@ static bool go(bool test, bool verbose) {
     }
 
     // Nothing to do, sleep.
-    if (!draw) {
+    if (!updateFgnd && !updateBkgnd) {
       usleep(SLEEP_INTERVAL_USEC);
       continue;
     }
 
-    clearScreen(resources, false);
-    drawStationScreen(resources, curStation, now, cfg->drawGlobe, globePos, !test);
+    clearFrame(resources);
+
+    if (updateBkgnd && cfg->drawGlobe) {
+      gfx_beginLayer(resources, layerBackground);
+      clearFrame(resources);
+      drawGlobe(resources, now, globePos);
+      gfx_endLayer(resources);
+    }
+
+    gfx_drawLayer(resources, layerBackground);
+
+    if (updateFgnd) {
+      gfx_beginLayer(resources, layerForeground);
+      clearFrame(resources);
+      drawStation(resources, now, curStation);
+      gfx_endLayer(resources);
+    }
+
+    gfx_drawLayer(resources, layerForeground);
 
     if (test) {
       gfx_dumpSurfaceToPng(resources, "test.png");
       break;
     }
+
+    gfx_commitToScreen(resources);
   } while (gRun);
 
   ret = true;
@@ -280,7 +311,8 @@ cleanup:
   writeLog(logInfo, "Shutting down.");
 
   if (!test) {
-    clearScreen(resources, true);
+    clearFrame(resources);
+    gfx_commitToScreen(resources);
   }
 
   updateLEDs(cfg, NULL);

@@ -143,6 +143,8 @@ typedef struct {
 #endif
   GLuint  globeBuffers[2];         // Vertex and Index buffers
   Texture globeTex[globeTexCount]; // Globe textures
+  GLuint  layers[layerCount];      // Cache layer textures
+  GLuint  framebuffer;             // Cache framebuffer
 } DrawResources_;
 
 /**

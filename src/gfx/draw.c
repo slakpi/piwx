@@ -64,6 +64,34 @@ void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center) {
   drawTriangles(rsrc, buf, COUNTOF(buf), programRGBATex, tex->tex);
 }
 
+void gfx_drawLayer(DrawResources resources, Layer layer) {
+  // clang-format off
+  static const Vertex vertices[4] = {
+    {
+      {{0, 0}},
+      {{1, 1, 1, 1}},
+      {{0, 0}}},
+    {
+      {{GFX_SCREEN_WIDTH, 0}},
+      {{1, 1, 1, 1}},
+      {{1, 0}}},
+    {
+      {{0, GFX_SCREEN_HEIGHT}},
+      {{1, 1, 1, 1}},
+      {{0, 1}}},
+    {
+      {{GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}},
+      {{1, 1, 1, 1}},
+      {{1, 1}}
+    }
+  };
+  // clang-format on
+
+  const DrawResources_ *rsrc = resources;
+
+  drawTriangles(rsrc, vertices, COUNTOF(vertices), programRGBATex, rsrc->layers[layer]);
+}
+
 void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f color, float width) {
   const DrawResources_ *rsrc   = resources;
   Point2f               offset = {0};

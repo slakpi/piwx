@@ -95,6 +95,19 @@ typedef enum {
 } Icon;
 
 /**
+ * @enum  Layer
+ * @brief Cached layer identifier.
+ */
+typedef enum {
+  layer0,
+  layerForeground = layer0,
+  layer1,
+  layer2,
+  layerBackground = layer2,
+  layerCount
+} Layer;
+
+/**
  * @typedef Color4f
  * @brief   Floating-point RGBA.
  */
@@ -120,6 +133,16 @@ typedef struct {
   Point2f topLeft;
   Point2f bottomRight;
 } BoundingBox2D;
+
+/**
+ * @brief   Begin drawing to the specified cache layer.
+ * @details If necessary, creates the framebuffer and texture objects to receive
+ *          the draw commands. Draw commands must be followed by `gfx_endLayer`.
+ *          The cached texture can be drawn with `gfx_drawLayer`.
+ * @param[in] resources The gfx context.
+ * @param[in] layer     The layer cache.
+ */
+void gfx_beginLayer(DrawResources resources, Layer layer);
 
 /**
  * @brief Clears the current drawing surface with the specified color.
@@ -159,6 +182,13 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime, const 
  * @param[in] center    The center of the icon in pixels.
  */
 void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center);
+
+/**
+ * @brief Draws the cached layer.
+ * @param[in] resources The gfx context.
+ * @param[in] layer     The cached layer to draw.
+ */
+void gfx_drawLayer(DrawResources resources, Layer layer);
 
 /**
  * @brief Draws a solid line with the given color and width.
@@ -205,6 +235,12 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
  * @returns True if write succeeds, false otherwise.
  */
 bool gfx_dumpSurfaceToPng(DrawResources resources, const char *path);
+
+/**
+ * @brief Ends cached layer drawing.
+ * @param[in] resources The gfx context.
+ */
+void gfx_endLayer(DrawResources resources);
 
 /**
  * @brief Get the character information for a font.
