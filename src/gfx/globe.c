@@ -209,15 +209,15 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   bool      ok      = false;
   Vertex3D *globe   = malloc(sizeof(Vertex3D) * VERTEX_COUNT);
   GLushort *indices = malloc(sizeof(GLushort) * INDEX_COUNT);
-  GLuint    buffers[2];
+  GLuint    buffers[bufferCount];
 
   if (!globe || !indices) {
     goto cleanup;
   }
 
-  glGenBuffers(2, buffers);
+  glGenBuffers(bufferCount, buffers);
 
-  if (buffers[0] == 0 || buffers[1] == 0) {
+  if (!buffers[bufferVBO] || !buffers[bufferIBO]) {
     goto cleanup;
   }
 
@@ -285,11 +285,11 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   indices[tri++] = idx;
   indices[tri++] = VERTEX_COUNT - LON_COUNT - 1;
 
-  glBindBuffer(GL_ARRAY_BUFFER, buffers[0]);
+  glBindBuffer(GL_ARRAY_BUFFER, buffers[bufferVBO]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex3D) * VERTEX_COUNT, globe, GL_STATIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[1]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[bufferIBO]);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * INDEX_COUNT, indices, GL_STATIC_DRAW);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -300,17 +300,15 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   indices            = NULL;
 #endif
 
-  rsrc->globeBuffers[0] = buffers[0];
-  rsrc->globeBuffers[1] = buffers[1];
-  buffers[0]            = 0;
-  buffers[1]            = 0;
+  memcpy(rsrc->globeBuffers, buffers, sizeof(buffers));
+  memset(buffers, 0, sizeof(buffers));
 
   ok = true;
 
 cleanup:
   free(globe);
   free(indices);
-  glDeleteBuffers(2, buffers);
+  glDeleteBuffers(bufferCount, buffers);
 
   return ok;
 }

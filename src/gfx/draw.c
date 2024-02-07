@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define MAX_STRING_LEN 16
+
 static void drawTriangles(const DrawResources_ *rsrc, const Vertex *vertices, size_t count,
                           Program program, GLuint texture);
 
@@ -72,15 +74,15 @@ void gfx_drawLayer(DrawResources resources, Layer layer) {
       {{1, 1, 1, 1}},
       {{0, 0}}},
     {
-      {{GFX_SCREEN_WIDTH, 0}},
+      {{GFX_SCREEN_WIDTH - 1, 0}},
       {{1, 1, 1, 1}},
       {{1, 0}}},
     {
-      {{0, GFX_SCREEN_HEIGHT}},
+      {{0, GFX_SCREEN_HEIGHT - 1}},
       {{1, 1, 1, 1}},
       {{0, 1}}},
     {
-      {{GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}},
+      {{GFX_SCREEN_WIDTH - 1, GFX_SCREEN_HEIGHT - 1}},
       {{1, 1, 1, 1}},
       {{1, 1}}
     }
@@ -131,10 +133,16 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
 
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
                   size_t len, Color4f textColor, CharVertAlign valign) {
-  const DrawResources_ *rsrc   = resources;
-  CharInfo              info   = {0};
-  Point2f               cur    = bottomLeft;
-  Vertex                buf[4] = {0};
+  static Vertex         vertices[MAX_STRING_LEN * 4];
+  static unsigned short indices[MAX_STRING_LEN * 6];
+
+  const DrawResources_ *rsrc = resources;
+  CharInfo              info = {0};
+  Point2f               cur  = bottomLeft;
+  int                   vidx = 0;
+  int                   iidx = 0;
+  int                   slen = len;
+  GLuint                buf[bufferCount];
 
   if (!rsrc) {
     return;
@@ -144,15 +152,46 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
     return;
   }
 
-  for (size_t i = 0; i < len; ++i) {
-    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, buf)) {
+  glGenBuffers(bufferCount, buf);
+
+  if (!buf[bufferVBO] || !buf[bufferIBO]) {
+    glDeleteBuffers(bufferCount, buf);
+    return;
+  }
+
+  if (slen > MAX_STRING_LEN) {
+    slen = MAX_STRING_LEN;
+  }
+
+  for (size_t i = 0; i < slen; ++i) {
+    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, &vertices[vidx])) {
       continue;
     }
 
-    drawTriangles(rsrc, buf, 4, programAlphaTex, rsrc->fonts[font].tex);
+    indices[iidx++] = vidx;
+    indices[iidx++] = vidx + 1;
+    indices[iidx++] = vidx + 2;
+
+    indices[iidx++] = vidx + 1;
+    indices[iidx++] = vidx + 2;
+    indices[iidx++] = vidx + 3;
+
+    vidx += 4;
 
     cur.coord.x += info.cellSize.v[0];
   }
+
+  glBindBuffer(GL_ARRAY_BUFFER, buf[bufferVBO]);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vidx, vertices, GL_STATIC_DRAW);
+
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf[bufferIBO]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * iidx, indices, GL_STATIC_DRAW);
+
+  gfx_setupShader(rsrc, programAlphaTex, rsrc->fonts[font].tex);
+  glDrawElements(GL_TRIANGLES, iidx, GL_UNSIGNED_SHORT, NULL);
+  gfx_resetShader(rsrc, programAlphaTex);
+
+  glDeleteBuffers(bufferCount, buf);
 }
 
 /**
@@ -221,7 +260,7 @@ static void drawTriangles(const DrawResources_ *rsrc, const Vertex *vertices, si
 
   glGenBuffers(1, &vbo);
 
-  if (vbo == 0) {
+  if (!vbo) {
     return;
   }
 

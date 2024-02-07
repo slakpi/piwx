@@ -253,7 +253,7 @@ void gfx_cleanupGraphics(DrawResources *resources) {
   free(rsrc->globeIndices);
 #endif
 
-  glDeleteBuffers(2, rsrc->globeBuffers);
+  glDeleteBuffers(bufferCount, rsrc->globeBuffers);
 
   for (int i = 0; i < globeTexCount; ++i) {
     glDeleteTextures(1, &rsrc->globeTex[i].tex);
@@ -463,42 +463,52 @@ void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, l
 bool gfx_initGraphics(const char *fontResources, const char *imageResources,
                       DrawResources *resources) {
   DrawResources_ *rsrc = NULL;
+  bool            ok   = false;
 
-  if (!fontResources || !imageResources || !resources) {
+  if (!resources) {
     return false;
   }
 
   *resources = NULL;
 
+  if (!fontResources || !imageResources) {
+    return false;
+  }
+
   if (!allocResources(&rsrc)) {
     return false;
   }
 
-  *resources = rsrc;
-
   if (!initEgl(rsrc)) {
-    return false;
+    goto cleanup;
   }
 
   if (!initShaders(rsrc)) {
-    return false;
+    goto cleanup;
   }
 
   if (!loadFonts(rsrc, fontResources)) {
-    return false;
+    goto cleanup;
   }
 
   if (!loadIcons(rsrc, imageResources)) {
-    return false;
+    goto cleanup;
   }
 
   if (!gfx_initGlobe(rsrc, imageResources)) {
-    return false;
+    goto cleanup;
   }
 
   initRender(rsrc);
 
-  return true;
+  *resources = rsrc;
+  rsrc       = NULL;
+  ok         = true;
+
+cleanup:
+  gfx_cleanupGraphics((DrawResources *)&rsrc);
+
+  return ok;
 }
 
 void gfx_loadTexture(const Png *png, GLuint tex, GLenum format, Texture *texture) {

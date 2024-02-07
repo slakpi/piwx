@@ -105,7 +105,7 @@ static void drawBackground(DrawResources resources) {
                               {{0.0f, GFX_SCREEN_HEIGHT}},
                               {{GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT}}};
 
-  const Color4f dim = {{0.0f, 0.0f, 0.0f, 0.2f}};
+  const Color4f dim = {{0.0f, 0.0f, 0.0f, 0.25f}};
 
   // Draw a translucent quads to dim the globe at the top and bottom of the
   // screen.
@@ -113,8 +113,8 @@ static void drawBackground(DrawResources resources) {
   gfx_drawQuad(resources, lowerBox, dim);
 
   // Draw the separator lines.
-  gfx_drawLine(resources, lines, gWhite, 2.0f);
-  gfx_drawLine(resources, lines, gWhite, 2.0f);
+  gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
+  gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
 }
 
 /**

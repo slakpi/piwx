@@ -121,6 +121,12 @@ typedef enum {
 typedef enum { globeDay, globeNight, globeThreshold, globeClouds, globeTexCount } GlobeTexture;
 
 /**
+ * @enum  Buffer
+ * @brief Indices for buffer arrays.
+ */
+typedef enum { bufferVBO, bufferIBO, bufferCount } Buffer;
+
+/**
  * @struct DrawResources_
  * @brief  Private implementation of the gfx DrawResources context.
  */
@@ -141,7 +147,7 @@ typedef struct {
   Vertex3D *globe;        // Globe vertices
   GLushort *globeIndices; // Indices for globe triangles
 #endif
-  GLuint  globeBuffers[2];         // Vertex and Index buffers
+  GLuint  globeBuffers[bufferCount];         // Vertex and Index buffers
   Texture globeTex[globeTexCount]; // Globe textures
   GLuint  layers[layerCount];      // Cache layer textures
   GLuint  framebuffer;             // Cache framebuffer
