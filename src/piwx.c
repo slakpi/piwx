@@ -249,7 +249,7 @@ static bool go(bool test, bool verbose) {
 
       if (curStation != lastStation) {
         globePos = lastStation->pos;
-        setupGlobeAnimation(&globeAnim, lastStation->pos, curStation->pos, cfg->cycleTime * 0.5f,
+        setupGlobeAnimation(&globeAnim, lastStation->pos, curStation->pos, cfg->cycleTime * 0.75f,
                             &globePos);
       }
 
