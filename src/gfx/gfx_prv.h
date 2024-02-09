@@ -147,10 +147,10 @@ typedef struct {
   Vertex3D *globe;        // Globe vertices
   GLushort *globeIndices; // Indices for globe triangles
 #endif
-  GLuint  globeBuffers[bufferCount];         // Vertex and Index buffers
-  Texture globeTex[globeTexCount]; // Globe textures
-  GLuint  layers[layerCount];      // Cache layer textures
-  GLuint  framebuffer;             // Cache framebuffer
+  GLuint  globeBuffers[bufferCount]; // Vertex and Index buffers
+  Texture globeTex[globeTexCount];   // Globe textures
+  GLuint  layers[layerCount];        // Cache layer textures
+  GLuint  framebuffer;               // Cache framebuffer
 } DrawResources_;
 
 /**
