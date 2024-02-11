@@ -2,6 +2,7 @@
  * @file sun.c
  * @see https://github.com/buelowp/sunset/blob/master/src/sunset.cpp
  * @see https://en.wikipedia.org/wiki/Subsolar_point
+ * @see https://gml.noaa.gov/grad/solcalc/calcdetails.html
  */
 #include "geo.h"
 #include "util.h"
@@ -9,8 +10,10 @@
 #include <stdbool.h>
 #include <time.h>
 
-#define SEC_PER_DAY  86400
 #define SEC_PER_HOUR 3600
+#define SEC_PER_DAY  86400
+#define MIN_PER_DAY  1400
+#define HOUR_PER_DAY 24
 
 static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
                         double *absTime);
@@ -79,15 +82,12 @@ bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
   double    jd, t, eqTime;
   double    hrs = ((double)(obsTime % SEC_PER_DAY)) / SEC_PER_HOUR;
 
-  // NOTE: The subsolar point calculation seems to be off by several minutes.
-  //       This may be due to the Equation of Time which seems to be slightly
-  //       off compared to online sources. It seems to be off by less than 10
-  //       minutes of latitude, so within roughly 10 nm of the real point.
-
   gmtime_r(&obsTime, &date);
 
   jd = calcJD(date.tm_year + 1900, date.tm_mon + 1, date.tm_mday);
-  t  = calcTimeJulianCentury(jd);
+  jd += ((double)date.tm_hour / HOUR_PER_DAY) + ((double)date.tm_min / MIN_PER_DAY) +
+        ((double)date.tm_sec / SEC_PER_DAY);
+  t = calcTimeJulianCentury(jd);
 
   if (!calcSunDeclination(t, lat)) {
     return false;

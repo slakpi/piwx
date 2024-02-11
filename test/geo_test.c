@@ -9,8 +9,8 @@
 // Allows up to a tenth of a millimeter of error in ECEF calculations.
 #define ECEF_EPSILON 1e-4
 
-// Allows up to a second of error in subsolar calculations.
-#define SUBSOLAR_EPSILON (1.0 / 3600.0)
+// Allows up to a minute of error in subsolar calculations.
+#define SUBSOLAR_EPSILON (1.0 / 60.0)
 
 typedef struct {
   time_t start;
@@ -200,22 +200,16 @@ static const LatLonToECEFCase gECEFCases[] = {
 };
 // clang-format on
 
-// Coodinates are to the nearest minute.
-//
-//   NOTE: These test cases fail with the current calculation. The equation of
-//         time calculation is slightly off and may be pushing these coordinates
-//         off as well. There's an error of less than 10 minutes of longitude
-//         though.
-//
+// Subsolar coodinates are to the nearest minute.
 // clang-format off
-// static const SubsolarTestCase gSubsolarCases[] = {
-//   // 2024 Jan. 18 at 14:40:00 UTC
-//   {1705588800, -20.5666666667, -37.4166666667},
-//   // 1979 Apr. 22 at 09:00:00 UTC
-//   {293619600, 12.05, 44.6666666667},
-//   // 2019 Oct. 10 at 19:00:00 UTC
-//   {1570734000, -6.75, -108.25},
-// };
+static const SubsolarTestCase gSubsolarCases[] = {
+  // 2024 Jan. 18 at 14:40:00 UTC
+  {1705588800, -20.5666666667, -37.4166666667},
+  // 1979 Apr. 22 at 09:00:00 UTC
+  {293619600, 12.05, 44.6666666667},
+  // 2019 Oct. 10 at 19:00:00 UTC
+  {1570734000, -6.75, -108.25},
+};
 // clang-format on
 
 static bool floatsEqual(double a, double b, double eps);
@@ -326,22 +320,22 @@ static bool testLatLonToECEF(void) {
 bool testSubsolarPoint(void) {
   bool ok = true;
 
-  // for (int i = 0; i < COUNTOF(gSubsolarCases); ++i) {
-  //   const SubsolarTestCase *testCase = &gSubsolarCases[i];
-  //   double                  lat, lon;
+  for (int i = 0; i < COUNTOF(gSubsolarCases); ++i) {
+    const SubsolarTestCase *testCase = &gSubsolarCases[i];
+    double                  lat, lon;
 
-  //   geo_calcSubsolarPoint(testCase->obsTime, &lat, &lon);
+    geo_calcSubsolarPoint(testCase->obsTime, &lat, &lon);
 
-  //   if (ok && !floatsEqual(lat, testCase->lat, SUBSOLAR_EPSILON)) {
-  //     fprintf(stderr, "Subsolar test case %d, Lat %f != %f\n", i, lat, testCase->lat);
-  //     ok = false;
-  //   }
+    if (ok && !floatsEqual(lat, testCase->lat, SUBSOLAR_EPSILON)) {
+      fprintf(stderr, "Subsolar test case %d, Lat %f != %f\n", i, lat, testCase->lat);
+      ok = false;
+    }
 
-  //   if (ok && !floatsEqual(lon, testCase->lon, SUBSOLAR_EPSILON)) {
-  //     fprintf(stderr, "Subsolar test case %d, Lon %f != %f\n", i, lon, testCase->lon);
-  //     ok = false;
-  //   }
-  // }
+    if (ok && !floatsEqual(lon, testCase->lon, SUBSOLAR_EPSILON)) {
+      fprintf(stderr, "Subsolar test case %d, Lon %f != %f\n", i, lon, testCase->lon);
+      ok = false;
+    }
+  }
 
   return ok;
 }
