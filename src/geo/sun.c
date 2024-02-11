@@ -316,14 +316,14 @@ static bool calcEquationOfTime(double t, double *Etime) {
  */
 static bool calcSunDeclination(double t, double *decl) {
   double e = calcObliquityCorrection(t);
-  double lambda;
+  double lon;
   double sint;
 
-  if (!calcSunApparentLon(t, &lambda)) {
+  if (!calcSunApparentLon(t, &lon)) {
     return false;
   }
 
-  sint  = sin(e * DEG_TO_RAD) * sin(lambda * DEG_TO_RAD);
+  sint  = sin(e * DEG_TO_RAD) * sin(lon * DEG_TO_RAD);
   *decl = asin(sint) * RAD_TO_DEG;
 
   return true;
@@ -355,9 +355,7 @@ static double calcObliquityCorrection(double t) {
 static double calcHourAngleSunrise(double lat, double solarDec, double offset) {
   double latRad = lat * DEG_TO_RAD;
   double sdRad  = solarDec * DEG_TO_RAD;
-  double HA =
-      (acos(cos(offset * DEG_TO_RAD) / (cos(latRad) * cos(sdRad)) - tan(latRad) * tan(sdRad)));
-  return HA;
+  return (acos(cos(offset * DEG_TO_RAD) / (cos(latRad) * cos(sdRad)) - tan(latRad) * tan(sdRad)));
 }
 
 /**
@@ -432,14 +430,14 @@ static double calcGeomMeanAnomalySun(double t) {
  *          otherwise.
  */
 static bool calcGeomMeanLonSun(double t, double *lon) {
-  double L;
+  double l0;
 
   if (isnan(t)) {
     return false;
   }
 
-  L    = 280.46646 + t * (36000.76983 + t * 0.0003032);
-  *lon = fmod(L, 360.0);
+  l0   = 280.46646 + t * (36000.76983 + t * 0.0003032);
+  *lon = fmod(l0, 360.0);
 
   return true;
 }
@@ -453,13 +451,13 @@ static bool calcGeomMeanLonSun(double t, double *lon) {
  */
 static bool calcSunApparentLon(double t, double *decl) {
   double omega = 125.04 - 1934.136 * t;
-  double o;
+  double lon;
 
-  if (!calcSunTrueLon(t, &o)) {
+  if (!calcSunTrueLon(t, &lon)) {
     return false;
   }
 
-  *decl = o - 0.00569 - 0.00478 * sin(omega * DEG_TO_RAD);
+  *decl = lon - 0.00569 - 0.00478 * sin(omega * DEG_TO_RAD);
 
   return true;
 }
@@ -496,8 +494,6 @@ static double calcSunEqOfCenter(double t) {
   double sinm  = sin(mrad);
   double sin2m = sin(mrad + mrad);
   double sin3m = sin(mrad + mrad + mrad);
-  double C = sinm * (1.914602 - t * (0.004817 + 0.000014 * t)) + sin2m * (0.019993 - 0.000101 * t) +
-             sin3m * 0.000289;
-
-  return C;
+  return sinm * (1.914602 - t * (0.004817 + 0.000014 * t)) + sin2m * (0.019993 - 0.000101 * t) +
+         sin3m * 0.000289;
 }
