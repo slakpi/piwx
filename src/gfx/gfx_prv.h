@@ -17,8 +17,8 @@
 #define FONT_ROWS    8
 #define FONT_COLS    16
 #define MAX_TEXTURES 8
-#define PROJ_Z_MAX   1000
-#define PROJ_Z_MIN   -1000
+#define PROJ_Z_FAR   1000
+#define PROJ_Z_NEAR  0
 
 #define GET_EGL_ERROR(rsrc)              gfx_getEglError(rsrc, __FILE__, __LINE__)
 #define GET_SHADER_ERROR(rsrc, shader)   gfx_getShaderError(rsrc, shader, __FILE__, __LINE__);
@@ -150,6 +150,7 @@ typedef struct {
   GLuint  globeBuffers[bufferCount]; // Vertex and Index buffers
   Texture globeTex[globeTexCount];   // Globe textures
   GLuint  layers[layerCount];        // Cache layer textures
+  GLuint  layerBuffers[layerCount];  // Cache layer render buffers
   GLuint  framebuffer;               // Cache framebuffer
 } DrawResources_;
 

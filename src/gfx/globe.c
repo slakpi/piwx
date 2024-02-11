@@ -66,7 +66,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   Point2f         center;
   Vector3f        ss;
   double          sslat, sslon;
-  float           width, height, scale;
+  float           width, height, scale, zoff;
   TransformMatrix xform, tmp;
 
   if (rsrc->globeBuffers[0] == 0) {
@@ -83,30 +83,27 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
 
   if (width < height) {
     scale = (float)(width / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
+    zoff  = -width;
   } else {
     scale = (float)(height / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
+    zoff  = -height;
   }
 
-  // The projection has the eye looking in the +Z direction with +Y pointing
+  // The projection has the eye looking in the -Z direction with +Y pointing
   // down and +X pointing right. The globe is ECEF with the North pole on +Z,
   // the South pole on -Z, the Prime Meridian on +X and the antimeridian on -X.
-  // The eye is initially looking at Antarctica.
+  // The eye is initially looking at Antarctica from inside the globe.
   //
-  // The latitude is adjusted by a 90-degree counter clockwise rotation to bring
-  // the North pole up to -Y. The longitude is adjusted by a 90-degree clockwise
-  // rotation to bring the Prime Meridian around to the eye. The longitude is
-  // negated to account for the Western longitudes being negative.
-  //
-  // The globe is translated by PROJ_Z_MAX in the +Z direction. This moves the
-  // eye out of the center of the globe and puts the hidden half the globe
-  // outside of the projection clip space.
+  // The latitude is adjusted by a 90-degree clockwise rotation to bring the
+  // North pole up to -Y. The longitude is adjusted by a 90-degree clockwise
+  // rotation to bring the Prime Meridian around to the eye.
 
-  makeTranslation(xform, center.coord.x, center.coord.y, PROJ_Z_MAX);
+  makeTranslation(xform, center.coord.x, center.coord.y, zoff);
 
-  makeXRotation(tmp, (90.0f + pos.lat) * DEG_TO_RAD);
+  makeXRotation(tmp, (90.0f - pos.lat) * DEG_TO_RAD);
   combineTransforms(xform, tmp);
 
-  makeZRotation(tmp, (-90.0f - pos.lon) * DEG_TO_RAD);
+  makeZRotation(tmp, (90.0f - pos.lon) * DEG_TO_RAD);
   combineTransforms(xform, tmp);
 
   makeScale(tmp, scale, scale, scale);
@@ -277,13 +274,13 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 
   for (; idx < VERTEX_COUNT - 2; ++idx) {
     indices[tri++] = VERTEX_COUNT - 1;
-    indices[tri++] = idx;
     indices[tri++] = idx + 1;
+    indices[tri++] = idx;
   }
 
   indices[tri++] = VERTEX_COUNT - 1;
-  indices[tri++] = idx;
   indices[tri++] = VERTEX_COUNT - LON_COUNT - 1;
+  indices[tri++] = idx;
 
   glBindBuffer(GL_ARRAY_BUFFER, buffers[bufferVBO]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex3D) * VERTEX_COUNT, globe, GL_STATIC_DRAW);

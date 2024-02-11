@@ -58,15 +58,21 @@ typedef struct {
   const char *name;
 } IconImage;
 
-static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_BLUE_SIZE, 8,
-                                        EGL_GREEN_SIZE, 8, EGL_RED_SIZE, 8, EGL_ALPHA_SIZE, 8,
-                                        EGL_DEPTH_SIZE, 8,
+// clang-format off
+static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE,
+                                        EGL_PBUFFER_BIT,
+                                        EGL_BLUE_SIZE, 8,
+                                        EGL_GREEN_SIZE, 8,
+                                        EGL_RED_SIZE, 8,
+                                        EGL_ALPHA_SIZE, 8,
+                                        EGL_DEPTH_SIZE, 16,
 
-                                        EGL_SAMPLE_BUFFERS, 1, EGL_SAMPLES, 4,
+                                        EGL_SAMPLE_BUFFERS, 1,
+                                        EGL_SAMPLES, 4,
 
-                                        // EGL_STENCIL_SIZE, 1,
-
-                                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE};
+                                        EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
+                                        EGL_NONE};
+// clang-format on
 
 static const EGLint gPbufferAttribs[] = {
     EGL_WIDTH, GFX_SCREEN_WIDTH, EGL_HEIGHT, GFX_SCREEN_HEIGHT, EGL_NONE,
@@ -172,17 +178,25 @@ void gfx_beginLayer(DrawResources resources, Layer layer) {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
+  if (rsrc->layerBuffers[layer] == 0) {
+    glGenRenderbuffers(1, &rsrc->layerBuffers[layer]);
+    glBindRenderbuffer(GL_RENDERBUFFER, rsrc->layerBuffers[layer]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, GFX_SCREEN_WIDTH,
+                          GFX_SCREEN_HEIGHT);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+  }
+
   glBindFramebuffer(GL_FRAMEBUFFER, rsrc->framebuffer);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rsrc->layers[layer],
                          0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                            rsrc->layerBuffers[layer]);
 }
 
 void gfx_clearSurface(DrawResources resources, Color4f clear) {
   UNUSED(resources);
 
   glClearColor(clear.color.r, clear.color.g, clear.color.b, clear.color.a);
-  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-  glDepthMask(GL_TRUE);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -260,6 +274,7 @@ void gfx_cleanupGraphics(DrawResources *resources) {
   }
 
   glDeleteTextures(layerCount, rsrc->layers);
+  glDeleteRenderbuffers(layerCount, rsrc->layerBuffers);
   glDeleteFramebuffers(1, &rsrc->framebuffer);
 
   free(rsrc);
@@ -540,6 +555,8 @@ GLenum gfx_pngColorToGLColor(png_byte color) {
 void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
   const ProgramInfo *prg = &rsrc->programs[program];
 
+  glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
   glDisableVertexAttribArray(prg->posIndex);
@@ -566,7 +583,6 @@ void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture
   }
 
   glUseProgram(prg->program);
-
   glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
 
   glEnableVertexAttribArray(prg->posIndex);
@@ -592,8 +608,9 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMat
                        const Texture *textures, unsigned int textureCount) {
   const ProgramInfo *prg = &rsrc->programs[program];
 
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_CULL_FACE);
   glUseProgram(prg->program);
-
   glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
   glUniformMatrix4fv(prg->viewIndex, 1, GL_FALSE, (const GLfloat *)view);
 
@@ -1018,12 +1035,12 @@ static void makeProjection(TransformMatrix proj) {
 
   proj[2][0] = 0.0f;
   proj[2][1] = 0.0f;
-  proj[2][2] = -2.0f / (float)(PROJ_Z_MAX - PROJ_Z_MIN);
+  proj[2][2] = -2.0f / (float)(PROJ_Z_FAR - PROJ_Z_NEAR);
   proj[2][3] = 0.0f;
 
   proj[3][0] = -1.0f;
   proj[3][1] = -1.0f;
-  proj[3][2] = -(float)(PROJ_Z_MAX + PROJ_Z_MIN) / (float)(PROJ_Z_MAX - PROJ_Z_MIN);
+  proj[3][2] = -(float)(PROJ_Z_FAR + PROJ_Z_NEAR) / (float)(PROJ_Z_FAR - PROJ_Z_NEAR);
   proj[3][3] = 1.0f;
 }
 
