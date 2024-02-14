@@ -74,7 +74,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   }
 
   geo_calcSubsolarPoint(curTime, &sslat, &sslon);
-  geo_LatLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
+  geo_latLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
 
   width          = box->bottomRight.coord.x - box->topLeft.coord.x;
   height         = box->bottomRight.coord.y - box->topLeft.coord.y;
@@ -320,7 +320,7 @@ cleanup:
  * @param[out] v   The vertex.
  */
 static void initVertex(double lat, double lon, Vertex3D *v) {
-  geo_LatLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.y, &v->pos.coord.z);
+  geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.y, &v->pos.coord.z);
   v->tex.texCoord.u = (float)((lon + 180.0) / 360.0);
   v->tex.texCoord.v = (float)((-lat + 90.0) / 180.0);
   v->color.color.r  = 1.0f;

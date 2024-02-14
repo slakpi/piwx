@@ -78,6 +78,6 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime);
  * @param[out] y   ECEF Y coordinate in meters.
  * @param[out] z   ECEF Z coordinate in meters.
  */
-void geo_LatLonToECEF(double lat, double lon, float *x, float *y, float *z);
+void geo_latLonToECEF(double lat, double lon, float *x, float *y, float *z);
 
 #endif

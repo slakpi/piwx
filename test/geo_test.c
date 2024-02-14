@@ -296,7 +296,7 @@ static bool testLatLonToECEF(void) {
     const LatLonToECEFCase *testCase = &gECEFCases[i];
     float                   x, y, z;
 
-    geo_LatLonToECEF(testCase->lat, testCase->lon, &x, &y, &z);
+    geo_latLonToECEF(testCase->lat, testCase->lon, &x, &y, &z);
 
     if (ok && !floatsEqual(x, testCase->x, ECEF_EPSILON)) {
       fprintf(stderr, "ECEF test case %d, X %f != %f\n", i, x, testCase->x);

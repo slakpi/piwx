@@ -6,7 +6,7 @@
 #include "util.h"
 #include <math.h>
 
-void geo_LatLonToECEF(double lat, double lon, float *x, float *y, float *z) {
+void geo_latLonToECEF(double lat, double lon, float *x, float *y, float *z) {
   double lat_rad = lat * DEG_TO_RAD;
   double lon_rad = lon * DEG_TO_RAD;
   double cos_phi = cos(lat_rad);
