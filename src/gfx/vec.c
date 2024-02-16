@@ -100,12 +100,31 @@ void vectorInvMagnitude2f(float *invMag, const float *vec) {
   }
 }
 
+void vectorInvMagnitude3f(float *invMag, const float *vec) {
+  vectorMagnitude3f(invMag, vec);
+
+  if (*invMag < TINY_VALUE) {
+    *invMag = 0.0f;
+  } else {
+    *invMag = 1.0f / *invMag;
+  }
+}
+
 void vectorMagnitude2f(float *mag, const float *vec) {
   *mag = sqrtf(vec[0] * vec[0] + vec[1] * vec[1]);
 }
 
+void vectorMagnitude3f(float *mag, const float *vec) {
+  vectorMagnitudeSq3f(mag, vec);
+  *mag = sqrtf(*mag);
+}
+
 void vectorMagnitudeSq2f(float *magSq, const float *vec) {
   *magSq = vec[0] * vec[0] + vec[1] * vec[1];
+}
+
+void vectorMagnitudeSq3f(float *magSq, const float *vec) {
+  *magSq = (vec[0] * vec[0]) + (vec[1] * vec[1]) + (vec[2] * vec[2]);
 }
 
 void vectorOrthogonal2f(float *out, const float *vec) {
@@ -131,4 +150,14 @@ void vectorUnit2f(float *out, const float *vec) {
 
   out[0] = vec[0] * invMag;
   out[1] = vec[1] * invMag;
+}
+
+void vectorUnit3f(float *out, const float *vec) {
+  float invMag = 0.0f;
+
+  vectorInvMagnitude3f(&invMag, vec);
+
+  out[0] = vec[0] * invMag;
+  out[1] = vec[1] * invMag;
+  out[2] = vec[2] * invMag;
 }

@@ -49,6 +49,7 @@ typedef struct {
   Point3f     pos;
   Color4f     color;
   TexCoords2f tex;
+  Point3f     normal;
 } Vertex3D;
 
 /**
@@ -80,15 +81,15 @@ typedef struct {
   GLint  posIndex;
   GLint  colorIndex;
   GLint  texIndex;
-  GLint  projIndex;
-  GLint  viewIndex;
+  GLint  normalIndex;
+  GLint  mvpIndex;
 } ProgramInfo;
 
 /**
  * @enum  VertexShader
  * @brief Vertex shader handles.
  */
-typedef enum { vertexGeneral, vertexGlobe, vertexShaderCount } VertexShader;
+typedef enum { vertexGeneral, vertexGeneral3d, vertexShaderCount } VertexShader;
 
 /**
  * @enum  FragmentShader
@@ -108,6 +109,7 @@ typedef enum {
  */
 typedef enum {
   programGeneral,
+  programGeneral3d,
   programAlphaTex,
   programRGBATex,
   programGlobe,

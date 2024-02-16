@@ -30,7 +30,7 @@
 #include "globe.frag.h"
 #include "rgba_tex.frag.h"
 #include "general.vert.h"
-#include "globe.vert.h"
+#include "general3d.vert.h"
 // clang-format on
 
 #if defined __ARM_NEON
@@ -583,7 +583,7 @@ void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture
   }
 
   glUseProgram(prg->program);
-  glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
+  glUniformMatrix4fv(prg->mvpIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
 
   glEnableVertexAttribArray(prg->posIndex);
   glVertexAttribPointer(prg->posIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
@@ -608,11 +608,15 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMat
                        const Texture *textures, unsigned int textureCount) {
   const ProgramInfo *prg = &rsrc->programs[program];
 
+  TransformMatrix mvp;
+
+  memcpy(mvp, rsrc->proj, sizeof(rsrc->proj));
+  combineTransforms(mvp, view);
+
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
   glUseProgram(prg->program);
-  glUniformMatrix4fv(prg->projIndex, 1, GL_FALSE, (const GLfloat *)rsrc->proj);
-  glUniformMatrix4fv(prg->viewIndex, 1, GL_FALSE, (const GLfloat *)view);
+  glUniformMatrix4fv(prg->mvpIndex, 1, GL_FALSE, (const GLfloat *)mvp);
 
   glEnableVertexAttribArray(prg->posIndex);
   glVertexAttribPointer(prg->posIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
@@ -625,6 +629,10 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMat
   glEnableVertexAttribArray(prg->texIndex);
   glVertexAttribPointer(prg->texIndex, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
                         (const void *)offsetof(Vertex3D, tex));
+
+  glEnableVertexAttribArray(prg->normalIndex);
+  glVertexAttribPointer(prg->normalIndex, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex3D),
+                        (const void *)offsetof(Vertex3D, normal));
 
   textureCount = umin(textureCount, MAX_TEXTURES);
 
@@ -724,13 +732,15 @@ static bool initShaders(DrawResources_ *rsrc) {
     GLuint v, f;
   } Link;
 
-  static const char *vsrc[]      = {GENERAL_VERT_SRC, GLOBE_VERT_SRC};
+  static const char *vsrc[]      = {GENERAL_VERT_SRC, GENERAL3D_VERT_SRC};
   static const char *fsrc[]      = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
                                     GLOBE_FRAG_SRC};
   static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
+                                    {vertexGeneral3d, fragmentGeneral},
                                     {vertexGeneral, fragmentAlphaTex},
                                     {vertexGeneral, fragmentRGBATex},
-                                    {vertexGlobe, fragmentGlobe}};
+                                    {vertexGeneral3d, fragmentGlobe}};
+  _Static_assert(COUNTOF(linkTable) == programCount, "Link table length must match program count.");
 
   GLuint vshaders[vertexShaderCount]   = {0};
   GLuint fshaders[fragmentShaderCount] = {0};
@@ -761,8 +771,7 @@ static bool initShaders(DrawResources_ *rsrc) {
     prg->posIndex   = glGetAttribLocation(prg->program, "in_pos");
     prg->colorIndex = glGetAttribLocation(prg->program, "in_color");
     prg->texIndex   = glGetAttribLocation(prg->program, "in_tex_coord");
-    prg->projIndex  = glGetUniformLocation(prg->program, "proj");
-    prg->viewIndex  = glGetUniformLocation(prg->program, "view");
+    prg->mvpIndex   = glGetUniformLocation(prg->program, "mvp");
   }
 
   ok = true;

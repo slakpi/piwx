@@ -42,10 +42,10 @@ target_link_libraries(gfx
 #-------------------------------------------------------------------------------
 add_shader(gfx "alpha_tex.frag")
 add_shader(gfx "general.frag")
+add_shader(gfx "globe.frag")
 add_shader(gfx "rgba_tex.frag")
 add_shader(gfx "general.vert")
-add_shader(gfx "globe.vert")
-add_shader(gfx "globe.frag")
+add_shader(gfx "general3d.vert")
 
 #-------------------------------------------------------------------------------
 # Export the library.

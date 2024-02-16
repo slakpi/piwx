@@ -173,10 +173,10 @@ static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResource
     fprintf(obj, "vt %f %f\n", rsrc->globe[i].tex.texCoord.u, rsrc->globe[i].tex.texCoord.v);
   }
 
-  // Dump the vertex normals. The normal is just the ECEF position vector.
+  // Dump the vertex normals.
   for (int i = 0; i < VERTEX_COUNT; ++i) {
-    fprintf(obj, "vn %f %f %f\n", rsrc->globe[i].pos.coord.x, rsrc->globe[i].pos.coord.y,
-            rsrc->globe[i].pos.coord.z);
+    fprintf(obj, "vn %f %f %f\n", rsrc->globe[i].normal.coord.x, rsrc->globe[i].normal.coord.y,
+            rsrc->globe[i].normal.coord.z);
   }
 
   // Dump the triangles using vertex/texture/normal format. The OBJ file uses
@@ -321,6 +321,7 @@ cleanup:
  */
 static void initVertex(double lat, double lon, Vertex3D *v) {
   geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.y, &v->pos.coord.z);
+  vectorUnit3f(v->normal.v, v->pos.v);
   v->tex.texCoord.u = (float)((lon + 180.0) / 360.0);
   v->tex.texCoord.v = (float)((-lat + 90.0) / 180.0);
   v->color.color.r  = 1.0f;

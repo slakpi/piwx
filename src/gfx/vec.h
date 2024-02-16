@@ -125,6 +125,14 @@ void vectorAdd2f(float *out, const float *a, const float *b);
 void vectorInvMagnitude2f(float *invMag, const float *vec);
 
 /**
+ * @brief   Calculate the inverse magnitude of a vector; || @a vec ||^-1.
+ * @details If || @a vec || < TINY_VALUE, @a invMag will be zero.
+ * @param[out] invMag Inverse magnitude output.
+ * @param[in]  vec    The 3D vector.
+ */
+void vectorInvMagnitude3f(float *invMag, const float *vec);
+
+/**
  * @brief Calculate the magnitude of a vector; ||vec||.
  * @param[out] mag Magnitude output.
  * @param[in] vec  The 2D vector.
@@ -132,11 +140,25 @@ void vectorInvMagnitude2f(float *invMag, const float *vec);
 void vectorMagnitude2f(float *mag, const float *vec);
 
 /**
+ * @brief Calculate the magnitude of a vector; ||vec||.
+ * @param[out] mag Magnitude output.
+ * @param[in]  vec The 3D vector.
+ */
+void vectorMagnitude3f(float *mag, const float *vec);
+
+/**
  * @brief Calculate the squared magnitude of a vector; ||vec||^2.
  * @param[out] magSq Squared magnitude output.
  * @param[in] vec    The 2D vector.
  */
 void vectorMagnitudeSq2f(float *magSq, const float *vec);
+
+/**
+ * @brief Calculate the squared magnitude of a vector; ||vec||^2.
+ * @param[out] magSq Squared magnitude output.
+ * @param[in]  vec   The 3D vector.
+ */
+void vectorMagnitudeSq3f(float *magSq, const float *vec);
 
 /**
  * @brief   Calculate a 2D vector orthogonal to the given 2D vector.
@@ -168,5 +190,12 @@ void vectorSubtract2f(float *out, const float *a, const float *b);
  * @param[in] vec   The 2D vector.
  */
 void vectorUnit2f(float *unit, const float *vec);
+
+/**
+ * @brief Calculate the unit direction of a 3D vector.
+ * @param[out] unit The unit direction of @a vec. May point to @a vec.
+ * @param[in]  vec  The 3D vector.
+ */
+void vectorUnit3f(float *unit, const float *vec);
 
 #endif /* VEC_H */
