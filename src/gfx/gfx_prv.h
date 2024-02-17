@@ -261,10 +261,12 @@ void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture
  * @param[in] rsrc         The gfx context.
  * @param[in] program      The shader program to use.
  * @param[in] view         The view transform to use.
+ * @param[in] model        The model transform to use.
  * @param[in] textures     An array of textures to bind.
  * @param[in] textureCount The number of textures to bind.
  */
-void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMatrix view,
-                       const Texture *textures, unsigned int textureCount);
+void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, const TransformMatrix view,
+                       const TransformMatrix model, const Texture *textures,
+                       unsigned int textureCount);
 
 #endif /* GFX_PRV_H */

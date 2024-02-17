@@ -67,7 +67,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   Vector3f        ss;
   double          sslat, sslon;
   float           width, height, scale, zoff;
-  TransformMatrix xform, tmp;
+  TransformMatrix view, model, tmp;
 
   if (rsrc->globeBuffers[0] == 0) {
     return;
@@ -98,21 +98,20 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   // North pole up to -Y. The longitude is adjusted by a 90-degree clockwise
   // rotation to bring the Prime Meridian around to the eye.
 
-  makeTranslation(xform, center.coord.x, center.coord.y, zoff);
+  makeTranslation(view, center.coord.x, center.coord.y, zoff);
 
   makeXRotation(tmp, (90.0f - pos.lat) * DEG_TO_RAD);
-  combineTransforms(xform, tmp);
+  combineTransforms(view, tmp);
 
   makeZRotation(tmp, (90.0f - pos.lon) * DEG_TO_RAD);
-  combineTransforms(xform, tmp);
+  combineTransforms(view, tmp);
 
-  makeScale(tmp, scale, scale, scale);
-  combineTransforms(xform, tmp);
+  makeScale(model, scale, scale, scale);
 
   glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
-  gfx_setup3DShader(rsrc, programGlobe, xform, rsrc->globeTex, globeTexCount);
+  gfx_setup3DShader(rsrc, programGlobe, view, model, rsrc->globeTex, globeTexCount);
 
   index = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
   glUniform3fv(index, 1, ss.v);

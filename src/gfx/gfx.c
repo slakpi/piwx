@@ -604,14 +604,16 @@ void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture
   glBindTexture(GL_TEXTURE_2D, texture);
 }
 
-void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, TransformMatrix view,
-                       const Texture *textures, unsigned int textureCount) {
+void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, const TransformMatrix view,
+                       const TransformMatrix model, const Texture *textures,
+                       unsigned int textureCount) {
   const ProgramInfo *prg = &rsrc->programs[program];
 
   TransformMatrix mvp;
 
   memcpy(mvp, rsrc->proj, sizeof(rsrc->proj));
   combineTransforms(mvp, view);
+  combineTransforms(mvp, model);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_CULL_FACE);
