@@ -13,6 +13,10 @@ typedef float TransformMatrix[4][4];
  */
 void combineTransforms(TransformMatrix a, const TransformMatrix b);
 
+/**
+ * @brief Initialize an identity matrix.
+ * @param[out] mat The transform to initialize.
+ */
 void makeIdentity(TransformMatrix mat);
 
 /**

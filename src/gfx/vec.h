@@ -177,6 +177,14 @@ void vectorOrthogonal2f(float *out, const float *vec);
 void vectorScale2f(float *out, const float *vec, float scale);
 
 /**
+ * @brief Scale a 3D vector by a scalar value.
+ * @param[out] out   The scaled vector. May point to @a vec.
+ * @param[in]  vec   The 2D vector to scale.
+ * @param[in]  scale The scalar multiple to use.
+ */
+void vectorScale3f(float *out, const float *vec, float scale);
+
+/**
  * @brief Subtract two 2D vectors.
  * @param[out] out Output vector. May point to @a a or @a b.
  * @param[in] a LHS 2D vector.

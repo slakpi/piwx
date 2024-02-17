@@ -1,4 +1,3 @@
-varying vec4 color;
 varying vec2 tex_coord;
 
 uniform sampler2D tex;

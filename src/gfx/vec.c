@@ -138,6 +138,12 @@ void vectorScale2f(float *out, const float *vec, float scale) {
   out[1] = vec[1] * scale;
 }
 
+void vectorScale3f(float *out, const float *vec, float scale) {
+  out[0] = vec[0] * scale;
+  out[1] = vec[1] * scale;
+  out[2] = vec[2] * scale;
+}
+
 void vectorSubtract2f(float *out, const float *a, const float *b) {
   out[0] = a[0] - b[0];
   out[1] = a[1] - b[1];

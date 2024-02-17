@@ -46,6 +46,18 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 
 #if defined _DEBUG
+#define DRAW_AXES 1
+#endif
+
+#if DRAW_AXES
+static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
+                     const TransformMatrix model, const Vector3f *subsolarPoint);
+#endif
+
+static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
+                      const TransformMatrix model, const Vector3f *subsolarPoint);
+
+#if defined _DEBUG
 static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResources);
 #endif
 
@@ -62,7 +74,6 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
                    const BoundingBox2D *box) {
   const DrawResources_ *rsrc = resources;
 
-  GLint           index;
   Point2f         center;
   Vector3f        ss;
   double          sslat, sslon;
@@ -92,32 +103,49 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   // The projection has the eye looking in the -Z direction with +Y pointing
   // down and +X pointing right. The globe is ECEF with the North pole on +Z,
   // the South pole on -Z, the Prime Meridian on +X and the antimeridian on -X.
-  // The eye is initially looking at Antarctica from inside the globe.
+  // Because the projection flips the Y axis, we need to negate the scale on the
+  // globe's Y axis to flip the coordinates.
+  //
+  // Once the Y axis is flipped, the default view is for the camera to be in the
+  // center of the globe looking at Antarctica with the North Pole out of the
+  // screen. The East longitudes are counter clockwise up from the +X axis and
+  // the West longitudes are clockwise down from the +X axis.
   //
   // The latitude is adjusted by a 90-degree clockwise rotation to bring the
-  // North pole up to -Y. The longitude is adjusted by a 90-degree clockwise
-  // rotation to bring the Prime Meridian around to the eye.
+  // North pole up to -Y. The negated latitude is used to rotate the globe in
+  // the opposite direction of the view movement.
+  //
+  // The longitude is adjusted by a 90-degree clockwise rotation to bring the
+  // Prime Meridian around to the eye. Because the Y axis is flipped, a positive
+  // angle around the Z axis is clockwise instead of counter clockwise. Thus,
+  // +90 degrees is used to adjust the Prime Meridian and the longitude is added
+  // instead of subtracted. For example, to view a West longitude, the view has
+  // to rotate clockwise from the Prime Meridian, which means the globe has to
+  // rotate counter clockwise, so the rotation angle is negative and West
+  // longitudes are negative.
 
   makeTranslation(view, center.coord.x, center.coord.y, zoff);
 
   makeXRotation(tmp, (90.0f - pos.lat) * DEG_TO_RAD);
   combineTransforms(view, tmp);
 
-  makeZRotation(tmp, (90.0f - pos.lon) * DEG_TO_RAD);
+  makeZRotation(tmp, (90.0f + pos.lon) * DEG_TO_RAD);
   combineTransforms(view, tmp);
 
-  makeScale(model, scale, scale, scale);
+  // Flip the Y axis scale.
+  makeScale(model, scale, -scale, scale);
 
-  glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
+  // After flipping the Y axis, the counter clockwise wound faces become
+  // clockwise wound. Temporarily change the front face winding to clockwise.
+  glFrontFace(GL_CW);
 
-  gfx_setup3DShader(rsrc, programGlobe, view, model, rsrc->globeTex, globeTexCount);
+  drawGlobe(rsrc, view, model, &ss);
+#if DRAW_AXES
+  drawAxes(rsrc, view, model, &ss);
+#endif
 
-  index = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
-  glUniform3fv(index, 1, ss.v);
-
-  glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
-  gfx_resetShader(rsrc, programGlobe);
+  // Restore the winding.
+  glFrontFace(GL_CCW);
 }
 
 bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
@@ -134,6 +162,57 @@ bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
 #endif
 
   return true;
+}
+
+#if DRAW_AXES
+/**
+ * @brief Draw the globe's axes and the subsolar point.
+ * @param[in] rsrc          The gfx context.
+ * @param[in] view          The view transform.
+ * @param[in] model         The model transform.
+ * @param[in] subsolarPoint The subsolar point.
+ */
+static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
+                     const TransformMatrix model, const Vector3f *subsolarPoint) {
+  GLuint   vbo;
+  Vertex3D axes[] = {{{{0, 0, 0}}, gfx_Red},    {{{2 * GEO_WGS84_SEMI_MAJOR_M, 0, 0}}, gfx_Red},
+                     {{{0, 0, 0}}, gfx_Green},  {{{0, 2 * GEO_WGS84_SEMI_MAJOR_M, 0}}, gfx_Green},
+                     {{{0, 0, 0}}, gfx_Blue},   {{{0, 0, 2 * GEO_WGS84_SEMI_MAJOR_M}}, gfx_Blue},
+                     {{{0, 0, 0}}, gfx_Yellow}, {{{0, 0, 0}}, gfx_Yellow}};
+
+  axes[7].pos = *subsolarPoint;
+  vectorScale3f(axes[7].pos.v, axes[7].pos.v, 2.0f);
+
+  glGenBuffers(1, &vbo);
+  glBindBuffer(GL_ARRAY_BUFFER, vbo);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(axes), axes, GL_STATIC_DRAW);
+
+  gfx_setup3DShader(rsrc, programGeneral3d, view, model, NULL, 0);
+  glDrawArrays(GL_LINES, 0, COUNTOF(axes));
+  gfx_resetShader(rsrc, programGeneral3d);
+
+  glDeleteBuffers(1, &vbo);
+}
+#endif
+
+/**
+ * @brief Draw the globe.
+ * @param[in] rsrc          The gfx context.
+ * @param[in] view          The view transform.
+ * @param[in] model         The model transform.
+ * @param[in] subsolarPoint The subsolar point.
+ */
+static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
+                      const TransformMatrix model, const Vector3f *subsolarPoint) {
+  GLint index = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
+
+  glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
+
+  gfx_setup3DShader(rsrc, programGlobe, view, model, rsrc->globeTex, globeTexCount);
+  glUniform3fv(index, 1, subsolarPoint->v);
+  glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
+  gfx_resetShader(rsrc, programGlobe);
 }
 
 #if defined _DEBUG
