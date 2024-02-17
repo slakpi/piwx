@@ -58,6 +58,16 @@ typedef struct {
   const char *name;
 } IconImage;
 
+const Color4f gfx_Clear   = {{0.0f, 0.0f, 0.0f, 0.0f}};
+const Color4f gfx_Red     = {{1.0f, 0.0f, 0.0f, 1.0f}};
+const Color4f gfx_Green   = {{0.0f, 1.0f, 0.0f, 1.0f}};
+const Color4f gfx_Blue    = {{0.0f, 0.0f, 1.0f, 1.0f}};
+const Color4f gfx_Magenta = {{1.0f, 0.0f, 1.0f, 1.0f}};
+const Color4f gfx_Yellow  = {{1.0f, 1.0f, 0.0f, 1.0f}};
+const Color4f gfx_Cyan    = {{0.0f, 1.0f, 1.0f, 1.0f}};
+const Color4f gfx_White   = {{1.0f, 1.0f, 1.0f, 1.0f}};
+const Color4f gfx_Black   = {{0.0f, 0.0f, 0.0f, 1.0f}};
+
 // clang-format off
 static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE,
                                         EGL_PBUFFER_BIT,

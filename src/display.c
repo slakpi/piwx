@@ -14,10 +14,6 @@
 #define UPPER_DIV 81.0f
 #define LOWER_DIV 122.0f
 
-static const Color4f gClearColor = {{0.0f, 0.0f, 0.0f, 0.0f}};
-static const Color4f gWhite      = {{1.0f, 1.0f, 1.0f, 1.0f}};
-static const Color4f gRed        = {{1.0f, 0.0f, 0.0f, 1.0f}};
-
 static void drawBackground(DrawResources resources);
 
 static void drawCloudLayers(DrawResources *resources, const WxStation *station);
@@ -46,19 +42,19 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 
 static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len);
 
-void clearFrame(DrawResources resources) { gfx_clearSurface(resources, gClearColor); }
+void clearFrame(DrawResources resources) { gfx_clearSurface(resources, gfx_Clear); }
 
 void drawDownloadInProgress(DrawResources resources) {
   Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
-  gfx_clearSurface(resources, gClearColor);
+  gfx_clearSurface(resources, gfx_Clear);
   gfx_drawIcon(resources, iconDownloading, center);
 }
 
 void drawDownloadError(DrawResources resources) {
   Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};
 
-  gfx_clearSurface(resources, gClearColor);
+  gfx_clearSurface(resources, gfx_Clear);
   gfx_drawIcon(resources, iconDownloadErr, center);
 }
 
@@ -113,8 +109,8 @@ static void drawBackground(DrawResources resources) {
   gfx_drawQuad(resources, lowerBox, dim);
 
   // Draw the separator lines.
-  gfx_drawLine(resources, &lines[0], gWhite, 2.0f);
-  gfx_drawLine(resources, &lines[2], gWhite, 2.0f);
+  gfx_drawLine(resources, &lines[0], gfx_White, 2.0f);
+  gfx_drawLine(resources, &lines[2], gfx_White, 2.0f);
 }
 
 /**
@@ -132,8 +128,8 @@ static void drawStationIdentifier(DrawResources resources, const WxStation *stat
 
   bottomLeft.coord.y = info.cellSize.v[1];
 
-  gfx_drawText(resources, font16pt, bottomLeft, station->localId, strlen(station->localId), gWhite,
-               vertAlignCell);
+  gfx_drawText(resources, font16pt, bottomLeft, station->localId, strlen(station->localId),
+               gfx_White, vertAlignCell);
 }
 
 /**
@@ -250,7 +246,7 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
   len                = strlen(station->wxString);
   bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
   bottomLeft.coord.y = UPPER_DIV + info.cellSize.v[1];
-  gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gWhite, vertAlignCell);
+  gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gfx_White, vertAlignCell);
 }
 
 /**
@@ -280,7 +276,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
   switch (sky->coverage) {
   case skyClear:
     strncpy_safe(buf, "Clear", COUNTOF(buf));
-    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
     return;
   case skyOvercastSurface:
     if (station->vertVis < 0) {
@@ -290,7 +286,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
       snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
     }
 
-    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
     return;
   default:
     break;
@@ -317,12 +313,12 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
   // Draw the next highest layer if there is one.
   if (sky->next) {
     getCloudLayerText(sky->next, buf, COUNTOF(buf));
-    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+    gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
     bottomLeft.coord.y += info.capHeight + info.leading;
   }
 
   getCloudLayerText(sky, buf, COUNTOF(buf));
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 }
 
 /**
@@ -380,15 +376,15 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
 
   getWindDirectionText(station, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight;
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
   getWindSpeedText(station, false, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
   getWindSpeedText(station, true, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gRed, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Red, vertAlignBaseline);
 }
 
 /**
@@ -508,7 +504,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
 
   bottomLeft.coord.x = 172.0f;
   bottomLeft.coord.y = LOWER_DIV + 10.0f + (info.capHeight * 3.0f) + (info.leading * 2.0f);
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
   if (station->hasTemp && station->hasDewPoint) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -525,7 +521,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
 
   bottomLeft.coord.x = 5.0f;
   bottomLeft.coord.y += info.cellSize.v[1];
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
   if (station->alt < 0) {
     strncpy_safe(buf, "---", COUNTOF(buf));
@@ -535,5 +531,5 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   }
 
   bottomLeft.coord.x = 172.0f;
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gWhite, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 }

@@ -134,6 +134,16 @@ typedef struct {
   Point2f bottomRight;
 } BoundingBox2D;
 
+extern const Color4f gfx_Clear;
+extern const Color4f gfx_Red;
+extern const Color4f gfx_Blue;
+extern const Color4f gfx_Green;
+extern const Color4f gfx_Magenta;
+extern const Color4f gfx_Yellow;
+extern const Color4f gfx_Cyan;
+extern const Color4f gfx_White;
+extern const Color4f gfx_Black;
+
 /**
  * @brief   Begin drawing to the specified cache layer.
  * @details If necessary, creates the framebuffer and texture objects to receive
