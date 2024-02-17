@@ -780,10 +780,11 @@ static bool initShaders(DrawResources_ *rsrc) {
       goto cleanup;
     }
 
-    prg->posIndex   = glGetAttribLocation(prg->program, "in_pos");
-    prg->colorIndex = glGetAttribLocation(prg->program, "in_color");
-    prg->texIndex   = glGetAttribLocation(prg->program, "in_tex_coord");
-    prg->mvpIndex   = glGetUniformLocation(prg->program, "mvp");
+    prg->posIndex    = glGetAttribLocation(prg->program, "in_pos");
+    prg->colorIndex  = glGetAttribLocation(prg->program, "in_color");
+    prg->texIndex    = glGetAttribLocation(prg->program, "in_tex_coord");
+    prg->normalIndex = glGetAttribLocation(prg->program, "in_normal");
+    prg->mvpIndex    = glGetUniformLocation(prg->program, "mvp");
   }
 
   ok = true;

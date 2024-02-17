@@ -46,16 +46,16 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 
 #if defined _DEBUG
-#define DRAW_AXES 1
+#define DRAW_AXES 0
 #endif
 
 #if DRAW_AXES
 static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
-                     const TransformMatrix model, const Vector3f *subsolarPoint);
+                     const TransformMatrix model, const Vector3f *lightDir);
 #endif
 
 static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
-                      const TransformMatrix model, const Vector3f *subsolarPoint);
+                      const TransformMatrix model, const Vector3f *lightDir);
 
 #if defined _DEBUG
 static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResources);
@@ -75,7 +75,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   const DrawResources_ *rsrc = resources;
 
   Point2f         center;
-  Vector3f        ss;
+  Vector3f        lightDir;
   double          sslat, sslon;
   float           width, height, scale, zoff;
   TransformMatrix view, model, tmp;
@@ -84,8 +84,12 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
     return;
   }
 
+  // Calculate the subsolar point, convert it to ECEF, then make it a unit
+  // direction vector and flip its direction to point back at the Earth.
   geo_calcSubsolarPoint(curTime, &sslat, &sslon);
-  geo_latLonToECEF(sslat, sslon, &ss.v[0], &ss.v[1], &ss.v[2]);
+  geo_latLonToECEF(sslat, sslon, &lightDir.v[0], &lightDir.v[1], &lightDir.v[2]);
+  vectorUnit3f(lightDir.v, lightDir.v);
+  vectorScale3f(lightDir.v, lightDir.v, -1.0f);
 
   width          = box->bottomRight.coord.x - box->topLeft.coord.x;
   height         = box->bottomRight.coord.y - box->topLeft.coord.y;
@@ -139,9 +143,9 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   // clockwise wound. Temporarily change the front face winding to clockwise.
   glFrontFace(GL_CW);
 
-  drawGlobe(rsrc, view, model, &ss);
+  drawGlobe(rsrc, view, model, &lightDir);
 #if DRAW_AXES
-  drawAxes(rsrc, view, model, &ss);
+  drawAxes(rsrc, view, model, &lightDir);
 #endif
 
   // Restore the winding.
@@ -167,21 +171,21 @@ bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
 #if DRAW_AXES
 /**
  * @brief Draw the globe's axes and the subsolar point.
- * @param[in] rsrc          The gfx context.
- * @param[in] view          The view transform.
- * @param[in] model         The model transform.
- * @param[in] subsolarPoint The subsolar point.
+ * @param[in] rsrc     The gfx context.
+ * @param[in] view     The view transform.
+ * @param[in] model    The model transform.
+ * @param[in] lightDir The light direction.
  */
 static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
-                     const TransformMatrix model, const Vector3f *subsolarPoint) {
+                     const TransformMatrix model, const Vector3f *lightDir) {
   GLuint   vbo;
   Vertex3D axes[] = {{{{0, 0, 0}}, gfx_Red},    {{{2 * GEO_WGS84_SEMI_MAJOR_M, 0, 0}}, gfx_Red},
                      {{{0, 0, 0}}, gfx_Green},  {{{0, 2 * GEO_WGS84_SEMI_MAJOR_M, 0}}, gfx_Green},
                      {{{0, 0, 0}}, gfx_Blue},   {{{0, 0, 2 * GEO_WGS84_SEMI_MAJOR_M}}, gfx_Blue},
                      {{{0, 0, 0}}, gfx_Yellow}, {{{0, 0, 0}}, gfx_Yellow}};
 
-  axes[7].pos = *subsolarPoint;
-  vectorScale3f(axes[7].pos.v, axes[7].pos.v, 2.0f);
+  axes[7].pos = *lightDir;
+  vectorScale3f(axes[7].pos.v, axes[7].pos.v, -2.0f * GEO_WGS84_SEMI_MAJOR_M);
 
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -197,20 +201,20 @@ static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
 
 /**
  * @brief Draw the globe.
- * @param[in] rsrc          The gfx context.
- * @param[in] view          The view transform.
- * @param[in] model         The model transform.
- * @param[in] subsolarPoint The subsolar point.
+ * @param[in] rsrc     The gfx context.
+ * @param[in] view     The view transform.
+ * @param[in] model    The model transform.
+ * @param[in] lightDir The light direction.
  */
 static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
-                      const TransformMatrix model, const Vector3f *subsolarPoint) {
-  GLint index = glGetUniformLocation(rsrc->programs[programGlobe].program, "subsolarPoint");
+                      const TransformMatrix model, const Vector3f *lightDir) {
+  GLint index = glGetUniformLocation(rsrc->programs[programGlobe].program, "lightDir");
 
   glBindBuffer(GL_ARRAY_BUFFER, rsrc->globeBuffers[0]);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rsrc->globeBuffers[1]);
 
   gfx_setup3DShader(rsrc, programGlobe, view, model, rsrc->globeTex, globeTexCount);
-  glUniform3fv(index, 1, subsolarPoint->v);
+  glUniform3fv(index, 1, lightDir->v);
   glDrawElements(GL_TRIANGLES, INDEX_COUNT, GL_UNSIGNED_SHORT, NULL);
   gfx_resetShader(rsrc, programGlobe);
 }

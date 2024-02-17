@@ -8,14 +8,13 @@ varying vec4 color;
 varying vec2 tex_coord;
 varying vec3 normal;
 
-uniform vec3 subsolarPoint;
+uniform vec3 lightDir;
 uniform sampler2D tex_0;  // Day map
 uniform sampler2D tex_1;  // Night map
 uniform sampler2D tex_2;  // Threshold
 uniform sampler2D tex_3;  // Clouds
 
 void main() {
-  vec3 lightDir = -normalize(subsolarPoint);
   float angle = clamp(-acos(dot(lightDir, normal)) + M_PI_2, 0.0, ASTRONOMICAL);
 
   vec4 dayColor = texture2D(tex_0, tex_coord);
