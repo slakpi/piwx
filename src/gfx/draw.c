@@ -61,7 +61,7 @@ void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center) {
   buf[3].tex.texCoord.u = 1.0f;
   buf[3].tex.texCoord.v = 1.0f;
 
-  vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
+  vectorSet4f(&buf[0].color, sizeof(Vertex), &color, COUNTOF(buf));
 
   drawTriangles(rsrc, buf, COUNTOF(buf), programRGBATex, tex->tex);
 }
@@ -103,17 +103,17 @@ void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f colo
     return;
   }
 
-  vectorSubtract2f(offset.v, vertices[1].v, vertices[0].v);
-  vectorOrthogonal2f(offset.v, offset.v);
-  vectorUnit2f(offset.v, offset.v);
-  vectorScale2f(offset.v, offset.v, width / 2.0f);
+  vectorSubtract2f(&offset, &vertices[1], &vertices[0]);
+  vectorOrthogonal2f(&offset, &offset);
+  vectorUnit2f(&offset, &offset);
+  vectorScale2f(&offset, &offset, width / 2.0f);
 
-  vectorAdd2f(buf[0].pos.v, vertices[0].v, offset.v);
-  vectorSubtract2f(buf[1].pos.v, vertices[0].v, offset.v);
-  vectorAdd2f(buf[2].pos.v, vertices[1].v, offset.v);
-  vectorSubtract2f(buf[3].pos.v, vertices[1].v, offset.v);
+  vectorAdd2f(&buf[0].pos, &vertices[0], &offset);
+  vectorSubtract2f(&buf[1].pos, &vertices[0], &offset);
+  vectorAdd2f(&buf[2].pos, &vertices[1], &offset);
+  vectorSubtract2f(&buf[3].pos, &vertices[1], &offset);
 
-  vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
+  vectorSet4f(&buf[0].color, sizeof(Vertex), &color, COUNTOF(buf));
 
   drawTriangles(rsrc, buf, COUNTOF(buf), programGeneral, 0);
 }
@@ -126,8 +126,8 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
     return;
   }
 
-  vectorFill2f(buf[0].pos.v, sizeof(Vertex), vertices, COUNTOF(buf));
-  vectorSet4f(buf[0].color.v, sizeof(Vertex), &color, COUNTOF(buf));
+  vectorFill2f(&buf[0].pos, sizeof(Vertex), vertices, COUNTOF(buf));
+  vectorSet4f(&buf[0].color, sizeof(Vertex), &color, COUNTOF(buf));
   drawTriangles(rsrc, buf, COUNTOF(buf), programGeneral, 0);
 }
 
@@ -237,7 +237,7 @@ static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const C
   vertices[3].tex.texCoord.u = vertices[1].tex.texCoord.u;
   vertices[3].tex.texCoord.v = vertices[2].tex.texCoord.v;
 
-  vectorSet4f(vertices[0].color.v, sizeof(Vertex), textColor, 4);
+  vectorSet4f(&vertices[0].color, sizeof(Vertex), textColor, 4);
 
   return true;
 }

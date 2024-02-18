@@ -7,8 +7,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void vectorFill2f(float *out, size_t stride, const Vector2f *in, int count) {
-  uint8_t     *out_p = (uint8_t *)out;
+void vectorAdd2f(Vector2f *out, const Vector2f *a, const Vector2f *b) {
+  out->v[0] = a->v[0] + b->v[0];
+  out->v[1] = a->v[1] + b->v[1];
+}
+
+void vectorFill2f(Vector2f *out, size_t stride, const Vector2f *in, int count) {
+  uint8_t     *out_p = (uint8_t *)out->v;
   const float *in_p  = in->v;
 
   for (int i = 0; i < count; ++i) {
@@ -19,78 +24,7 @@ void vectorFill2f(float *out, size_t stride, const Vector2f *in, int count) {
   }
 }
 
-void vectorSet2f(float *out, size_t stride, const Vector2f *in, int count) {
-  uint8_t *out_p = (uint8_t *)out;
-
-  for (int i = 0; i < count; ++i) {
-    float       *out_tmp = (float *)out_p;
-    const float *in_tmp  = in->v;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    out_p += stride;
-  }
-}
-
-void vectorFill3f(float *out, size_t stride, const Vector3f *in, int count) {
-  uint8_t     *out_p = (uint8_t *)out;
-  const float *in_p  = in->v;
-
-  for (int i = 0; i < count; ++i) {
-    float *out_tmp = (float *)out_p;
-    *out_tmp++     = *in_p++;
-    *out_tmp++     = *in_p++;
-    *out_tmp++     = *in_p++;
-    out_p += stride;
-  }
-}
-
-void vectorSet3f(float *out, size_t stride, const Vector3f *in, int count) {
-  uint8_t *out_p = (uint8_t *)out;
-
-  for (int i = 0; i < count; ++i) {
-    float       *out_tmp = (float *)out_p;
-    const float *in_tmp  = in->v;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    out_p += stride;
-  }
-}
-
-void vectorFill4f(float *out, size_t stride, const Vector4f *in, int count) {
-  uint8_t     *out_p = (uint8_t *)out;
-  const float *in_p  = in->v;
-
-  for (int i = 0; i < count; ++i) {
-    float *out_tmp = (float *)out_p;
-    *out_tmp++     = *in_p++;
-    *out_tmp++     = *in_p++;
-    *out_tmp++     = *in_p++;
-    *out_tmp++     = *in_p++;
-    out_p += stride;
-  }
-}
-
-void vectorSet4f(float *out, size_t stride, const Vector4f *in, int count) {
-  uint8_t *out_p = (uint8_t *)out;
-
-  for (int i = 0; i < count; ++i) {
-    float       *out_tmp = (float *)out_p;
-    const float *in_tmp  = in->v;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    *out_tmp++           = *in_tmp++;
-    out_p += stride;
-  }
-}
-
-void vectorAdd2f(float *out, const float *a, const float *b) {
-  out[0] = a[0] + b[0];
-  out[1] = a[1] + b[1];
-}
-
-void vectorInvMagnitude2f(float *invMag, const float *vec) {
+void vectorInvMagnitude2f(float *invMag, const Vector2f *vec) {
   vectorMagnitude2f(invMag, vec);
 
   if (*invMag < TINY_VALUE) {
@@ -100,7 +34,7 @@ void vectorInvMagnitude2f(float *invMag, const float *vec) {
   }
 }
 
-void vectorInvMagnitude3f(float *invMag, const float *vec) {
+void vectorInvMagnitude3f(float *invMag, const Vector3f *vec) {
   vectorMagnitude3f(invMag, vec);
 
   if (*invMag < TINY_VALUE) {
@@ -110,60 +44,75 @@ void vectorInvMagnitude3f(float *invMag, const float *vec) {
   }
 }
 
-void vectorMagnitude2f(float *mag, const float *vec) {
-  *mag = sqrtf(vec[0] * vec[0] + vec[1] * vec[1]);
+void vectorMagnitude2f(float *mag, const Vector2f *vec) {
+  vectorMagnitudeSq2f(mag, vec);
+  *mag = sqrtf(*mag);
 }
 
-void vectorMagnitude3f(float *mag, const float *vec) {
+void vectorMagnitude3f(float *mag, const Vector3f *vec) {
   vectorMagnitudeSq3f(mag, vec);
   *mag = sqrtf(*mag);
 }
 
-void vectorMagnitudeSq2f(float *magSq, const float *vec) {
-  *magSq = vec[0] * vec[0] + vec[1] * vec[1];
+void vectorMagnitudeSq2f(float *magSq, const Vector2f *vec) {
+  *magSq = (vec->v[0] * vec->v[0]) + (vec->v[1] * vec->v[1]);
 }
 
-void vectorMagnitudeSq3f(float *magSq, const float *vec) {
-  *magSq = (vec[0] * vec[0]) + (vec[1] * vec[1]) + (vec[2] * vec[2]);
+void vectorMagnitudeSq3f(float *magSq, const Vector3f *vec) {
+  *magSq = (vec->v[0] * vec->v[0]) + (vec->v[1] * vec->v[1]) + (vec->v[2] * vec->v[2]);
 }
 
-void vectorOrthogonal2f(float *out, const float *vec) {
-  float tmp = vec[0];
-  out[0]    = -vec[1];
-  out[1]    = tmp;
+void vectorOrthogonal2f(Vector2f *out, const Vector2f *vec) {
+  float tmp = vec->v[0];
+  out->v[0] = -vec->v[1];
+  out->v[1] = tmp;
 }
 
-void vectorScale2f(float *out, const float *vec, float scale) {
-  out[0] = vec[0] * scale;
-  out[1] = vec[1] * scale;
+void vectorScale2f(Vector2f *out, const Vector2f *vec, float scale) {
+  out->v[0] = vec->v[0] * scale;
+  out->v[1] = vec->v[1] * scale;
 }
 
-void vectorScale3f(float *out, const float *vec, float scale) {
-  out[0] = vec[0] * scale;
-  out[1] = vec[1] * scale;
-  out[2] = vec[2] * scale;
+void vectorScale3f(Vector3f *out, const Vector3f *vec, float scale) {
+  out->v[0] = vec->v[0] * scale;
+  out->v[1] = vec->v[1] * scale;
+  out->v[2] = vec->v[2] * scale;
 }
 
-void vectorSubtract2f(float *out, const float *a, const float *b) {
-  out[0] = a[0] - b[0];
-  out[1] = a[1] - b[1];
+void vectorSet4f(Vector4f *out, size_t stride, const Vector4f *in, int count) {
+  uint8_t *out_p = (uint8_t *)out->v;
+
+  for (int i = 0; i < count; ++i) {
+    float       *out_tmp = (float *)out_p;
+    const float *in_tmp  = in->v;
+    *out_tmp++           = *in_tmp++;
+    *out_tmp++           = *in_tmp++;
+    *out_tmp++           = *in_tmp++;
+    *out_tmp++           = *in_tmp++;
+    out_p += stride;
+  }
 }
 
-void vectorUnit2f(float *out, const float *vec) {
+void vectorSubtract2f(Vector2f *out, const Vector2f *a, const Vector2f *b) {
+  out->v[0] = a->v[0] - b->v[0];
+  out->v[1] = a->v[1] - b->v[1];
+}
+
+void vectorUnit2f(Vector2f *out, const Vector2f *vec) {
   float invMag = 0.0f;
 
   vectorInvMagnitude2f(&invMag, vec);
 
-  out[0] = vec[0] * invMag;
-  out[1] = vec[1] * invMag;
+  out->v[0] = vec->v[0] * invMag;
+  out->v[1] = vec->v[1] * invMag;
 }
 
-void vectorUnit3f(float *out, const float *vec) {
+void vectorUnit3f(Vector3f *out, const Vector3f *vec) {
   float invMag = 0.0f;
 
   vectorInvMagnitude3f(&invMag, vec);
 
-  out[0] = vec[0] * invMag;
-  out[1] = vec[1] * invMag;
-  out[2] = vec[2] * invMag;
+  out->v[0] = vec->v[0] * invMag;
+  out->v[1] = vec->v[1] * invMag;
+  out->v[2] = vec->v[2] * invMag;
 }
