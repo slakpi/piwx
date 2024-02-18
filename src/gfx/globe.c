@@ -46,7 +46,7 @@ _Static_assert(360 % LON_INTERVAL_DEG == 0, "Invalid longitude interval");
 _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 
 #if defined _DEBUG
-#define DRAW_AXES 0
+#define DRAW_AXES 1
 #endif
 
 #if DRAW_AXES
@@ -88,8 +88,8 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   // direction vector and flip its direction to point back at the Earth.
   geo_calcSubsolarPoint(curTime, &sslat, &sslon);
   geo_latLonToECEF(sslat, sslon, &lightDir.v[0], &lightDir.v[1], &lightDir.v[2]);
-  vectorUnit3f(lightDir.v, lightDir.v);
-  vectorScale3f(lightDir.v, lightDir.v, -1.0f);
+  vectorUnit3f(&lightDir, &lightDir);
+  vectorScale3f(&lightDir, &lightDir, -1.0f);
 
   width          = box->bottomRight.coord.x - box->topLeft.coord.x;
   height         = box->bottomRight.coord.y - box->topLeft.coord.y;
@@ -185,7 +185,7 @@ static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
                      {{{0, 0, 0}}, gfx_Yellow}, {{{0, 0, 0}}, gfx_Yellow}};
 
   axes[7].pos = *lightDir;
-  vectorScale3f(axes[7].pos.v, axes[7].pos.v, -2.0f * GEO_WGS84_SEMI_MAJOR_M);
+  vectorScale3f(&axes[7].pos, &axes[7].pos, -2.0f * GEO_WGS84_SEMI_MAJOR_M);
 
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -403,7 +403,7 @@ cleanup:
  */
 static void initVertex(double lat, double lon, Vertex3D *v) {
   geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.y, &v->pos.coord.z);
-  vectorUnit3f(v->normal.v, v->pos.v);
+  vectorUnit3f(&v->normal, &v->pos);
   v->tex.texCoord.u = (float)((lon + 180.0) / 360.0);
   v->tex.texCoord.v = (float)((-lat + 90.0) / 180.0);
   v->color.color.r  = 1.0f;
