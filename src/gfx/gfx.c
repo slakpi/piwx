@@ -622,7 +622,7 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, const Transf
 
   TransformMatrix mvp;
 
-  memcpy(mvp, rsrc->proj, sizeof(rsrc->proj));
+  memcpy(mvp, rsrc->proj, sizeof(rsrc->proj)); // NOLINT -- Size known.
   combineTransforms(mvp, view);
   combineTransforms(mvp, model);
 

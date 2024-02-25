@@ -24,12 +24,12 @@ static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const C
                           Vertex *vertices);
 
 void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center, bool shadow) {
-  const DrawResources_ *rsrc   = resources;
+  const DrawResources_ *rsrc = resources;
 
-  Vertex                vertices[4];
-  GLushort              indices[] = {0, 2, 1, 1, 2, 3};
-  GLuint                buf[bufferCount];
-  const Texture        *tex = NULL;
+  Vertex         vertices[4];
+  GLushort       indices[] = {0, 2, 1, 1, 2, 3};
+  GLuint         buf[bufferCount];
+  const Texture *tex = NULL;
 
   if (!rsrc) {
     return;
@@ -259,7 +259,7 @@ static bool makeCharacter(const DrawResources_ *rsrc, Font font, char c, const C
 /**
  * @brief   Blurs the texture and draws it in black.
  * @details Assumes the VBO and IBO are already bound.
- * 
+ *
  *          The shader discards color information and applies blurred alpha to
  *          black to allow reusing the same VBO and IBO that will be used to
  *          draw the texture over the shadow. If setting the shadow color is

@@ -379,8 +379,8 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   indices            = NULL;
 #endif
 
-  memcpy(rsrc->globeBuffers, buffers, sizeof(buffers));
-  memset(buffers, 0, sizeof(buffers));
+  memcpy(rsrc->globeBuffers, buffers, sizeof(buffers)); // NOLINT -- Size known.
+  memset(buffers, 0, sizeof(buffers)); // NOLINT -- Size known.
 
   ok = true;
 
