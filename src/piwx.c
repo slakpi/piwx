@@ -35,7 +35,7 @@
 #define WX_RETRY_INTERVAL_SEC  300
 #define SLEEP_INTERVAL_USEC    50000
 #define BLINK_INTERVAL_SEC     1
-#define NIGHT_INTERVAL_SEC     120
+#define NIGHT_INTERVAL_SEC     60
 
 #define MIX_BRIGHTNESS(c, b) (((uint16_t)(c) * (b)) >> 8)
 
