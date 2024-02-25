@@ -190,8 +190,9 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime, const 
  * @param[in] resources The gfx context.
  * @param[in] icon      The icon to draw.
  * @param[in] center    The center of the icon in pixels.
+ * @param[in] shadow    Include a shadow around the icon.
  */
-void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center);
+void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center, bool shadow);
 
 /**
  * @brief Draws the cached layer.
@@ -210,22 +211,6 @@ void gfx_drawLayer(DrawResources resources, Layer layer);
 void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f color, float width);
 
 /**
- * @brief   Draw a solid quadrilateral with the given color.
- * @details The quad's vertices should be ordered as follows:
- *
- *          0 +---+ 1
- *            |  /|
- *            | / |
- *            |/  |
- *          2 +---+ 3
- *
- * @param[in] resources The gfx context.
- * @param[in] vertices  An array of four points that comprise the quad.
- * @param[in] color     The color of the rectangle.
- */
-void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f color);
-
-/**
  * @brief Draw a string of text with the given color.
  * @param[in] resources  The gfx context.
  * @param[in] font       The font to use.
@@ -233,11 +218,11 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
  * @param[in] text       The text string.
  * @param[in] len        Length of the text string in characters.
  * @param[in] textColor  The character color.
- * @param[in] shadowColor The shadow color or gfx_Clear for no shadow.
+ * @param[in] shadow     Include a shadow around the text.
  * @param[in] valign     Character vertical alignment
  */
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
-                  size_t len, Color4f textColor, Color4f shadowColor, CharVertAlign valign);
+                  size_t len, Color4f textColor, bool shadow, CharVertAlign valign);
 
 /**
  * @brief   Dumps the current drawing surface to a PNG image.
