@@ -98,6 +98,7 @@ typedef enum { vertexGeneral, vertexGeneral3d, vertexShaderCount } VertexShader;
 typedef enum {
   fragmentGeneral,
   fragmentAlphaTex,
+  fragmentAlphaTexBlur,
   fragmentRGBATex,
   fragmentGlobe,
   fragmentShaderCount
@@ -111,6 +112,7 @@ typedef enum {
   programGeneral,
   programGeneral3d,
   programAlphaTex,
+  programAlphaTexBlur,
   programRGBATex,
   programGlobe,
   programCount

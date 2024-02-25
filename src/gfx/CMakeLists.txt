@@ -41,6 +41,7 @@ target_link_libraries(gfx
 # Make shader headers.
 #-------------------------------------------------------------------------------
 add_shader(gfx "alpha_tex.frag")
+add_shader(gfx "alpha_tex_blur.frag")
 add_shader(gfx "general.frag")
 add_shader(gfx "globe.frag")
 add_shader(gfx "rgba_tex.frag")

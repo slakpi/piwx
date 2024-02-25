@@ -233,10 +233,11 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
  * @param[in] text       The text string.
  * @param[in] len        Length of the text string in characters.
  * @param[in] textColor  The character color.
+ * @param[in] shadowColor The shadow color or gfx_Clear for no shadow.
  * @param[in] valign     Character vertical alignment
  */
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
-                  size_t len, Color4f textColor, CharVertAlign valign);
+                  size_t len, Color4f textColor, Color4f shadowColor, CharVertAlign valign);
 
 /**
  * @brief   Dumps the current drawing surface to a PNG image.

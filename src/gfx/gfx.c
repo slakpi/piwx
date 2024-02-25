@@ -26,6 +26,7 @@
 
 // clang-format off
 #include "alpha_tex.frag.h"
+#include "alpha_tex_blur.frag.h"
 #include "general.frag.h"
 #include "globe.frag.h"
 #include "rgba_tex.frag.h"
@@ -744,14 +745,17 @@ static bool initShaders(DrawResources_ *rsrc) {
     GLuint v, f;
   } Link;
 
-  static const char *vsrc[]      = {GENERAL_VERT_SRC, GENERAL3D_VERT_SRC};
-  static const char *fsrc[]      = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, RGBA_TEX_FRAG_SRC,
-                                    GLOBE_FRAG_SRC};
-  static const Link  linkTable[] = {{vertexGeneral, fragmentGeneral},
-                                    {vertexGeneral3d, fragmentGeneral},
-                                    {vertexGeneral, fragmentAlphaTex},
-                                    {vertexGeneral, fragmentRGBATex},
-                                    {vertexGeneral3d, fragmentGlobe}};
+  static const char *vsrc[] = {GENERAL_VERT_SRC, GENERAL3D_VERT_SRC};
+  _Static_assert(COUNTOF(vsrc) == vertexShaderCount, "Vertex table missing shader(s).");
+
+  static const char *fsrc[] = {GENERAL_FRAG_SRC, ALPHA_TEX_FRAG_SRC, ALPHA_TEX_BLUR_FRAG_SRC,
+                               RGBA_TEX_FRAG_SRC, GLOBE_FRAG_SRC};
+  _Static_assert(COUNTOF(fsrc) == fragmentShaderCount, "Fragment table missing shader(s).");
+
+  static const Link linkTable[] = {
+      {vertexGeneral, fragmentGeneral},  {vertexGeneral3d, fragmentGeneral},
+      {vertexGeneral, fragmentAlphaTex}, {vertexGeneral, fragmentAlphaTexBlur},
+      {vertexGeneral, fragmentRGBATex},  {vertexGeneral3d, fragmentGlobe}};
   _Static_assert(COUNTOF(linkTable) == programCount, "Link table length must match program count.");
 
   GLuint vshaders[vertexShaderCount]   = {0};

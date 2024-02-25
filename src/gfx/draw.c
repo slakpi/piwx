@@ -132,17 +132,16 @@ void gfx_drawQuad(DrawResources resources, const Point2f *vertices, Color4f colo
 }
 
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
-                  size_t len, Color4f textColor, CharVertAlign valign) {
-  static Vertex         vertices[MAX_STRING_LEN * 4];
-  static unsigned short indices[MAX_STRING_LEN * 6];
-
+                  size_t len, Color4f textColor, Color4f shadowColor, CharVertAlign valign) {
   const DrawResources_ *rsrc = resources;
   CharInfo              info = {0};
   Point2f               cur  = bottomLeft;
   int                   vidx = 0;
   int                   iidx = 0;
   int                   slen = len;
-  GLuint                buf[bufferCount];
+  GLuint                buf[3];
+  Vertex                vertices[MAX_STRING_LEN * 4];
+  unsigned short        indices[MAX_STRING_LEN * 6];
 
   if (!rsrc) {
     return;
@@ -152,7 +151,7 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
     return;
   }
 
-  glGenBuffers(bufferCount, buf);
+  glGenBuffers(COUNTOF(buf), buf);
 
   if (!buf[bufferVBO] || !buf[bufferIBO]) {
     glDeleteBuffers(bufferCount, buf);
@@ -164,7 +163,7 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
   }
 
   for (size_t i = 0; i < slen; ++i) {
-    if (!makeCharacter(rsrc, font, text[i], &textColor, &cur, &info, valign, &vertices[vidx])) {
+    if (!makeCharacter(rsrc, font, text[i], &shadowColor, &cur, &info, valign, &vertices[vidx])) {
       continue;
     }
 
@@ -181,11 +180,44 @@ void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const 
     cur.coord.x += info.cellSize.v[0];
   }
 
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf[bufferIBO]);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * iidx, indices, GL_STATIC_DRAW);
+
+  if (memcmp(&shadowColor, &gfx_Clear, sizeof(shadowColor)) != 0) {
+    GLint index;
+
+    glBindBuffer(GL_ARRAY_BUFFER, buf[bufferVBO]);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vidx, vertices, GL_STATIC_DRAW);
+
+    gfx_setupShader(rsrc, programAlphaTexBlur, rsrc->fonts[font].tex);
+
+    index = glGetUniformLocation(rsrc->programs[programAlphaTexBlur].program, "texSize");
+    glUniform2f(index, rsrc->fonts[font].texSize.v[0], rsrc->fonts[font].texSize.v[1]);
+
+    index = glGetUniformLocation(rsrc->programs[programAlphaTexBlur].program, "direction");
+
+    glUniform2f(index, 1.0f, 0.0f);
+    glDrawElements(GL_TRIANGLES, iidx, GL_UNSIGNED_SHORT, NULL);
+    glUniform2f(index, 0.0f, 1.0f);
+    glDrawElements(GL_TRIANGLES, iidx, GL_UNSIGNED_SHORT, NULL);
+
+    gfx_resetShader(rsrc, programAlphaTexBlur);
+
+    glDeleteBuffers(1, &buf[bufferVBO]);
+    glGenBuffers(1, &buf[bufferVBO]);
+
+    if (!buf[bufferVBO]) {
+      glDeleteBuffers(bufferCount, buf);
+      return;
+    }
+  }
+
+  vectorSet4f(&vertices[0].color, sizeof(Vertex), &textColor, vidx);
+
   glBindBuffer(GL_ARRAY_BUFFER, buf[bufferVBO]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vidx, vertices, GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buf[bufferIBO]);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * iidx, indices, GL_STATIC_DRAW);
 
   gfx_setupShader(rsrc, programAlphaTex, rsrc->fonts[font].tex);
   glDrawElements(GL_TRIANGLES, iidx, GL_UNSIGNED_SHORT, NULL);
