@@ -1,9 +1,11 @@
-#define C0 0.19859610213125314
-#define C1 0.17571363439579307
-#define C2 0.12170274650962626
-#define C3 0.06598396774984912
-#define C4 0.028001560233780885
-#define C5 0.009300040045324049
+// Averaging filter coefficients for a 5-pixel radius. Averaging gives a
+// slightly stronger appearance to the blur than a Gaussian filter.
+#define C0 0.090909090909
+#define C1 0.090909090909
+#define C2 0.090909090909
+#define C3 0.090909090909
+#define C4 0.090909090909
+#define C5 0.090909090909
 
 varying vec2 tex_coord;
 
