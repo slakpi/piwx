@@ -49,7 +49,11 @@ _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 #define DRAW_AXES 1
 #endif
 
-#if DRAW_AXES
+#if defined _DEBUG
+#define DUMP_GLOBE_MODEL 0
+#endif
+
+#if DRAW_AXES == 1
 static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
                      const TransformMatrix model, const Vector3f *lightDir);
 #endif
@@ -57,7 +61,7 @@ static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
 static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
                       const TransformMatrix model, const Vector3f *lightDir);
 
-#if defined _DEBUG
+#if DUMP_GLOBE_MODEL == 1
 static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResources);
 #endif
 
@@ -76,7 +80,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
 
   Point2f         center;
   Vector3f        lightDir;
-  double          sslat, sslon;
+  double          sunLat, sunLon;
   float           width, height, scale, zoff;
   TransformMatrix view, model, tmp;
 
@@ -86,8 +90,10 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
 
   // Calculate the subsolar point, convert it to ECEF, then make it a unit
   // direction vector and flip its direction to point back at the Earth.
-  geo_calcSubsolarPoint(curTime, &sslat, &sslon);
-  geo_latLonToECEF(sslat, sslon, &lightDir.v[0], &lightDir.v[1], &lightDir.v[2]);
+  //
+  //   NOTE: The Y/Z swap. See `initVertex`.
+  geo_calcSubsolarPoint(curTime, &sunLat, &sunLon);
+  geo_latLonToECEF(sunLat, sunLon, &lightDir.coord.x, &lightDir.coord.z, &lightDir.coord.y);
   vectorUnit3f(&lightDir, &lightDir);
   vectorScale3f(&lightDir, &lightDir, -1.0f);
 
@@ -96,60 +102,57 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   center.coord.x = box->topLeft.coord.x + (width / 2.0f);
   center.coord.y = box->topLeft.coord.y + (height / 2.0f);
 
+  // Scale the globe so that its semi-major diameter matches the smaller
+  // dimension of the target rectangle. Set the Z offset for the view to the new
+  // semi-major radius.
+
   if (width < height) {
     scale = (float)(width / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
-    zoff  = -width;
+    zoff  = -width * 0.5f;
   } else {
     scale = (float)(height / (2.0 * GEO_WGS84_SEMI_MAJOR_M));
-    zoff  = -height;
+    zoff  = -height * 0.5f;
   }
 
   // The projection has the eye looking in the -Z direction with +Y pointing
-  // down and +X pointing right. The globe is ECEF with the North pole on +Z,
-  // the South pole on -Z, the Prime Meridian on +X and the antimeridian on -X.
-  // Because the projection flips the Y axis, we need to negate the scale on the
-  // globe's Y axis to flip the coordinates.
+  // up and +X pointing right. The viewport has +Y pointing down.
   //
-  // Once the Y axis is flipped, the default view is for the camera to be in the
-  // center of the globe looking at Antarctica with the North Pole out of the
-  // screen. The East longitudes are counter clockwise up from the +X axis and
-  // the West longitudes are clockwise down from the +X axis.
+  // The globe is modified ECEF using the Y axis as the polar axis instead of
+  // the Z axis. The North Pole is on the +Y axis, the Prime Meridian is on the
+  // +X axis, +90 degrees longitude is on the +Z axis.
   //
-  // The latitude is adjusted by a 90-degree clockwise rotation to bring the
-  // North pole up to -Y. The negated latitude is used to rotate the globe in
-  // the opposite direction of the view movement.
-  //
-  // The longitude is adjusted by a 90-degree clockwise rotation to bring the
-  // Prime Meridian around to the eye. Because the Y axis is flipped, a positive
-  // angle around the Z axis is clockwise instead of counter clockwise. Thus,
-  // +90 degrees is used to adjust the Prime Meridian and the longitude is added
-  // instead of subtracted. For example, to view a West longitude, the view has
-  // to rotate clockwise from the Prime Meridian, which means the globe has to
-  // rotate counter clockwise, so the rotation angle is negative and West
-  // longitudes are negative.
+  // Initially, the eye is in the center of the Earth looking at the -90 degree
+  // longitude and, visually, the Earth is upside down. The model transform
+  // performs a 180 degree rotation on the Z axis to bring the North Pole to
+  // screen up, followed by a 90 degree rotation on the Y axis to bring the
+  // Prime Meridian to screen forward. The globe is then scaled down.
+
+  makeZRotation(model, 180.0f * DEG_TO_RAD);
+
+  makeYRotation(tmp, -90.0f * DEG_TO_RAD);
+  combineTransforms(model, tmp);
+
+  makeScale(tmp, scale, scale, scale);
+  combineTransforms(model, tmp);
+
+  // The view transform moves the scene in the -Z direction to bring the eye out
+  // of the Earth. The performs X and Y rotations to the desired latitude and
+  // longitude.
 
   makeTranslation(view, center.coord.x, center.coord.y, zoff);
 
-  makeXRotation(tmp, (90.0f - pos.lat) * DEG_TO_RAD);
+  makeXRotation(tmp, -pos.lat * DEG_TO_RAD);
   combineTransforms(view, tmp);
 
-  makeZRotation(tmp, (90.0f + pos.lon) * DEG_TO_RAD);
+  makeYRotation(tmp, -pos.lon * DEG_TO_RAD);
   combineTransforms(view, tmp);
 
-  // Flip the Y axis scale.
-  makeScale(model, scale, -scale, scale);
-
-  // After flipping the Y axis, the counter clockwise wound faces become
-  // clockwise wound. Temporarily change the front face winding to clockwise.
-  glFrontFace(GL_CW);
+  // Draw the globe.
 
   drawGlobe(rsrc, view, model, &lightDir);
-#if DRAW_AXES
+#if DRAW_AXES == 1
   drawAxes(rsrc, view, model, &lightDir);
 #endif
-
-  // Restore the winding.
-  glFrontFace(GL_CCW);
 }
 
 bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
@@ -161,14 +164,14 @@ bool gfx_initGlobe(DrawResources_ *rsrc, const char *imageResources) {
     return false;
   }
 
-#if defined _DEBUG
+#if DUMP_GLOBE_MODEL == 1
   dumpGlobeModel(rsrc, imageResources);
 #endif
 
   return true;
 }
 
-#if DRAW_AXES
+#if DRAW_AXES == 1
 /**
  * @brief Draw the globe's axes and the subsolar point.
  * @param[in] rsrc     The gfx context.
@@ -219,7 +222,7 @@ static void drawGlobe(const DrawResources_ *rsrc, const TransformMatrix view,
   gfx_resetShader(rsrc, programGlobe);
 }
 
-#if defined _DEBUG
+#if DUMP_GLOBE_MODEL == 1
 /**
  * @brief   Dump the globe model to a Wavefront OBJ file.
  * @param[in] rsrc           The gfx context.
@@ -318,13 +321,13 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 
   for (idx = 1; idx < LON_COUNT; ++idx) {
     indices[tri++] = 0;
-    indices[tri++] = idx;
     indices[tri++] = idx + 1;
+    indices[tri++] = idx;
   }
 
   indices[tri++] = 0;
-  indices[tri++] = idx++;
   indices[tri++] = 1;
+  indices[tri++] = idx++;
 
   // Generate the quad triangles. `lat` and `lon` are just counts for the
   // iterations. The actual degrees no longer matter.
@@ -332,21 +335,21 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   for (int lat = 0; lat < LAT_COUNT - 1; ++lat, ++idx) {
     for (int lon = 0; lon < LON_COUNT - 1; ++lon, ++idx) {
       indices[tri++] = idx - LON_COUNT;
-      indices[tri++] = idx;
       indices[tri++] = idx + 1;
+      indices[tri++] = idx;
 
       indices[tri++] = idx - LON_COUNT;
-      indices[tri++] = idx + 1;
       indices[tri++] = idx - LON_COUNT + 1;
+      indices[tri++] = idx + 1;
     }
 
     indices[tri++] = idx - LON_COUNT;
-    indices[tri++] = idx;
     indices[tri++] = idx - LON_COUNT + 1;
+    indices[tri++] = idx;
 
     indices[tri++] = idx - LON_COUNT;
-    indices[tri++] = idx - LON_COUNT + 1;
     indices[tri++] = idx - LON_COUNT - LON_COUNT + 1;
+    indices[tri++] = idx - LON_COUNT + 1;
   }
 
   // Generate the South pole triangle indices. Back up the index to the start of
@@ -356,13 +359,13 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 
   for (; idx < VERTEX_COUNT - 2; ++idx) {
     indices[tri++] = VERTEX_COUNT - 1;
-    indices[tri++] = idx + 1;
     indices[tri++] = idx;
+    indices[tri++] = idx + 1;
   }
 
   indices[tri++] = VERTEX_COUNT - 1;
-  indices[tri++] = VERTEX_COUNT - LON_COUNT - 1;
   indices[tri++] = idx;
+  indices[tri++] = VERTEX_COUNT - LON_COUNT - 1;
 
   glBindBuffer(GL_ARRAY_BUFFER, buffers[bufferVBO]);
   glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex3D) * VERTEX_COUNT, globe, GL_STATIC_DRAW);
@@ -373,6 +376,8 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 #if defined _DEBUG
+  // Keep the CPU-side buffers in case we want to write the globe model out to
+  // disk for debugging.
   rsrc->globe        = globe;
   rsrc->globeIndices = indices;
   globe              = NULL;
@@ -394,22 +399,39 @@ cleanup:
 
 /**
  * @brief   Initialize a vertex for a given latitude and longitude.
- * @details Converts the coordinates to ECEF, initializes the texture
- *          coordinates assuming (90N, 180W) => (0, 0) and
- *          (90S, 180E) => (1, 1).
+ * @details The Y and Z axes are swapped. ECEF uses the Z axis for the Earth's
+ *          polar axis. If this convention is kept, the texture will wrap around
+ *          the Z axis and then be mirrored over the XZ plane due to the
+ *          projection. This will cause the texture to appear backwards.
+ * 
+ *          If the Y axis is used as the polar axis, the texture will wrap
+ *          around the Y axis, and the flip due to the projection can then be
+ *          corrected by a simple rotation.
+ * 
+ *          The other option is to keep Z as the polar axis and scale the Y axis
+ *          by -1. But that effectively turns the Earth inside out making the
+ *          normals inconsistent and changing the winding order of the quad
+ *          triangles.
+ * 
+ *          Yet another option is changing the projection to put +Y up in the
+ *          viewport. However, that would make rendering inconsistent with
+ *          framebuffer memory ordering.
  * @param[in]  lat The latitude.
  * @param[in]  lon The longitude.
  * @param[out] v   The vertex.
  */
 static void initVertex(double lat, double lon, Vertex3D *v) {
-  geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.y, &v->pos.coord.z);
+  geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.z, &v->pos.coord.y);
+
+  // The vertex normal is simply the direction vector of the vertex.
   vectorUnit3f(&v->normal, &v->pos);
+
+  // (90N, 180W) => (0, 0) and (90S, 180E) => (1, 1).
   v->tex.texCoord.u = (float)((lon + 180.0) / 360.0);
   v->tex.texCoord.v = (float)((-lat + 90.0) / 180.0);
-  v->color.color.r  = 1.0f;
-  v->color.color.g  = 1.0f;
-  v->color.color.b  = 1.0f;
-  v->color.color.a  = 1.0f;
+
+  // The color of the vertex does not really matter.
+  v->color = gfx_White;
 }
 
 /**

@@ -40,6 +40,16 @@
 #error "No SIMD support."
 #endif
 
+#define PROJ_LEFT   0.0f
+#define PROJ_RIGHT  GFX_SCREEN_WIDTH
+#define PROJ_TOP    GFX_SCREEN_HEIGHT
+#define PROJ_BOTTOM 0.0f
+// The depth of the projection is arbitrary. For the text/icon layer, it has no
+// effect on the text/icon layer. The globe will use the depth buffer to cull
+// the far side of the globe.
+#define PROJ_FAR    1000.0f
+#define PROJ_NEAR   0.0f
+
 /**
  * @struct FontImage
  * @brief  Font table entry.
@@ -1035,7 +1045,7 @@ cleanup:
  * @param[in] rsrc The gfx context.
  */
 static void initRender(DrawResources_ *rsrc) {
-  glViewport(0, 0, GFX_SCREEN_WIDTH, GFX_SCREEN_HEIGHT);
+  glViewport(0, 0, (GLsizei)GFX_SCREEN_WIDTH, (GLsizei)GFX_SCREEN_HEIGHT);
 
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1049,24 +1059,24 @@ static void initRender(DrawResources_ *rsrc) {
  * @param[in,out] proj The projection matrix.
  */
 static void makeProjection(TransformMatrix proj) {
-  proj[0][0] = 2.0f / GFX_SCREEN_WIDTH;
+  proj[0][0] = 2.0f / (PROJ_RIGHT - PROJ_LEFT);
   proj[0][1] = 0.0f;
   proj[0][2] = 0.0f;
   proj[0][3] = 0.0f;
 
   proj[1][0] = 0.0f;
-  proj[1][1] = 2.0f / GFX_SCREEN_HEIGHT;
+  proj[1][1] = 2.0f / (PROJ_TOP - PROJ_BOTTOM);
   proj[1][2] = 0.0f;
   proj[1][3] = 0.0f;
 
   proj[2][0] = 0.0f;
   proj[2][1] = 0.0f;
-  proj[2][2] = -2.0f / (float)(PROJ_Z_FAR - PROJ_Z_NEAR);
+  proj[2][2] = -2.0f / (PROJ_FAR - PROJ_NEAR);
   proj[2][3] = 0.0f;
 
-  proj[3][0] = -1.0f;
-  proj[3][1] = -1.0f;
-  proj[3][2] = -(float)(PROJ_Z_FAR + PROJ_Z_NEAR) / (float)(PROJ_Z_FAR - PROJ_Z_NEAR);
+  proj[3][0] = -(PROJ_RIGHT + PROJ_LEFT) / (PROJ_RIGHT - PROJ_LEFT);
+  proj[3][1] = -(PROJ_TOP + PROJ_BOTTOM) / (PROJ_TOP - PROJ_BOTTOM);
+  proj[3][2] = -(PROJ_FAR + PROJ_NEAR) / (PROJ_FAR - PROJ_NEAR);
   proj[3][3] = 1.0f;
 }
 

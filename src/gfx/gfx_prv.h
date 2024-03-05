@@ -14,11 +14,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define FONT_ROWS    8
-#define FONT_COLS    16
-#define MAX_TEXTURES 8
-#define PROJ_Z_FAR   1000
-#define PROJ_Z_NEAR  0
+#define FONT_ROWS       8
+#define FONT_COLS       16
+#define MAX_TEXTURES    8
+#define MAX_FBO_NESTING 3
 
 #define GET_EGL_ERROR(rsrc)              gfx_getEglError(rsrc, __FILE__, __LINE__)
 #define GET_SHADER_ERROR(rsrc, shader)   gfx_getShaderError(rsrc, shader, __FILE__, __LINE__);
