@@ -374,7 +374,8 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
 
   getWindSpeedText(station, true, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
-  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Red, true, vertAlignBaseline);
+  gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Yellow, true,
+               vertAlignBaseline);
 }
 
 /**
