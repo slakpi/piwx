@@ -18,13 +18,13 @@ static void drawBackground(DrawResources resources);
 
 static void drawCloudLayers(DrawResources *resources, const WxStation *station);
 
-static void drawStationIdentifier(DrawResources resources, const WxStation *station);
+static void drawStationIdentifier(DrawResources resources, const char *ident);
 
-static void drawStationFlightCategory(DrawResources resources, const WxStation *station);
+static void drawStationFlightCategory(DrawResources resources, FlightCategory cat);
 
-static void drawStationWeather(DrawResources resources, const WxStation *station);
+static void drawStationWeather(DrawResources resources, DominantWeather wx);
 
-static void drawStationWxString(DrawResources resources, const WxStation *station);
+static void drawStationWxString(DrawResources resources, const char *wxString);
 
 static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *station);
 
@@ -38,9 +38,9 @@ static Icon getWeatherIcon(DominantWeather wx);
 
 static Icon getWindIcon(int direction);
 
-static void getWindDirectionText(const WxStation *station, char *buf, size_t len);
+static void getWindDirectionText(int direction, int speed, char *buf, size_t len);
 
-static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len);
+static void getWindSpeedText(int speed, char *buf, size_t len);
 
 void clearFrame(DrawResources resources) { gfx_clearSurface(resources, gfx_Clear); }
 
@@ -72,10 +72,10 @@ void drawGlobe(DrawResources resources, time_t curTime, Position pos) {
 
 void drawStation(DrawResources resources, time_t curTime, const WxStation *station) {
   drawBackground(resources);
-  drawStationIdentifier(resources, station);
-  drawStationFlightCategory(resources, station);
-  drawStationWeather(resources, station);
-  drawStationWxString(resources, station);
+  drawStationIdentifier(resources, station->localId);
+  drawStationFlightCategory(resources, station->cat);
+  drawStationWeather(resources, station->wx);
+  drawStationWxString(resources, station->wxString);
   drawCloudLayers(resources, station);
   drawWindInfo(resources, station);
   drawTempDewPointVisAlt(resources, station);
@@ -99,11 +99,15 @@ static void drawBackground(DrawResources resources) {
 /**
  * @brief Draw the station identifier.
  * @param[in] resources The gfx context.
- * @param[in] station   The weather station information.
+ * @param[in] ident     The weather station identifier.
  */
-static void drawStationIdentifier(DrawResources resources, const WxStation *station) {
+static void drawStationIdentifier(DrawResources resources, const char *ident) {
   CharInfo info       = {0};
   Point2f  bottomLeft = {0};
+
+  if (!ident) {
+    return;
+  }
 
   if (!gfx_getFontInfo(resources, font16pt, &info)) {
     return;
@@ -111,18 +115,18 @@ static void drawStationIdentifier(DrawResources resources, const WxStation *stat
 
   bottomLeft.coord.y = info.cellSize.v[1];
 
-  gfx_drawText(resources, font16pt, bottomLeft, station->localId, strlen(station->localId),
-               gfx_White, true, vertAlignCell);
+  gfx_drawText(resources, font16pt, bottomLeft, ident, strlen(ident), gfx_White, true,
+               vertAlignCell);
 }
 
 /**
  * @brief Draw a station's flight category icon.
  * @param[in] resources The gfx context.
- * @param[in] station   The weather station information.
+ * @param[in] cat       The weather station's flight category.
  */
-static void drawStationFlightCategory(DrawResources resources, const WxStation *station) {
+static void drawStationFlightCategory(DrawResources resources, FlightCategory cat) {
   const Point2f center = {{205.0f, 40.5f}};
-  Icon          icon   = getFlightCategoryIcon(station->cat);
+  Icon          icon   = getFlightCategoryIcon(cat);
   gfx_drawIcon(resources, icon, center, false);
 }
 
@@ -149,11 +153,11 @@ static Icon getFlightCategoryIcon(FlightCategory cat) {
 /**
  * @brief Draw a station's dominant weather icon.
  * @param[in] resources The gfx context.
- * @param[in] station   The weather station information.
+ * @param[in] wx        The dominant weather phenomenon.
  */
-static void drawStationWeather(DrawResources resources, const WxStation *station) {
+static void drawStationWeather(DrawResources resources, DominantWeather wx) {
   const Point2f center = {{278.0f, 40.5f}};
-  Icon          icon   = getWeatherIcon(station->wx);
+  Icon          icon   = getWeatherIcon(wx);
   gfx_drawIcon(resources, icon, center, false);
 }
 
@@ -211,14 +215,14 @@ static Icon getWeatherIcon(DominantWeather wx) {
 /**
  * @brief Draw a station's weather phenomena string.
  * @param[in] resources The gfx context.
- * @param[in] station   The weather station information.
+ * @param[in] wxString  The weather phenomena string.
  */
-static void drawStationWxString(DrawResources resources, const WxStation *station) {
+static void drawStationWxString(DrawResources resources, const char *wxString) {
   Point2f  bottomLeft = {0};
   CharInfo info       = {0};
   size_t   len        = 0;
 
-  if (!station->wxString) {
+  if (!wxString) {
     return;
   }
 
@@ -226,11 +230,10 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
     return;
   }
 
-  len                = strlen(station->wxString);
+  len                = strlen(wxString);
   bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
   bottomLeft.coord.y = LOWER_DIV - (LOWER_DIV - UPPER_DIV - info.cellSize.v[1]) / 2.0f;
-  gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gfx_White, true,
-               vertAlignCell);
+  gfx_drawText(resources, font8pt, bottomLeft, wxString, len, gfx_White, true, vertAlignCell);
 }
 
 /**
@@ -362,17 +365,17 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   iconInfo.coord.y = bottomLeft.coord.y + (iconInfo.coord.y / 2.0f);
   gfx_drawIcon(resources, icon, iconInfo, true);
 
-  getWindDirectionText(station, buf, COUNTOF(buf));
+  getWindDirectionText(station->windDir, station->windSpeed, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, true,
                vertAlignBaseline);
 
-  getWindSpeedText(station, false, buf, COUNTOF(buf));
+  getWindSpeedText(station->windSpeed, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, true,
                vertAlignBaseline);
 
-  getWindSpeedText(station, true, buf, COUNTOF(buf));
+  getWindSpeedText(station->windGust, buf, COUNTOF(buf));
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Yellow, true,
                vertAlignBaseline);
@@ -429,18 +432,19 @@ static Icon getWindIcon(int direction) {
 
 /**
  * @brief Converts a wind direction to text.
- * @param[in]  station The weather station information.
- * @param[out] buf     The wind direction text.
- * @param[in]  len     Length of @a buf.
+ * @param[in]  direction The wind direction.
+ * @param[in]  speed     The wind speed.
+ * @param[out] buf       The wind direction text.
+ * @param[in]  len       Length of @a buf.
  */
-static void getWindDirectionText(const WxStation *station, char *buf, size_t len) {
-  if (station->windDir > 0) {
+static void getWindDirectionText(int direction, int speed, char *buf, size_t len) {
+  if (direction > 0) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
-    snprintf(buf, len, "%d\x01", station->windDir);
-  } else if (station->windDir == 0) {
-    if (station->windSpeed > 0) {
+    snprintf(buf, len, "%d\x01", direction);
+  } else if (direction == 0) {
+    if (speed > 0) {
       strncpy_safe(buf, "Var", len);
-    } else if (station->windSpeed == 0) {
+    } else if (speed == 0) {
       strncpy_safe(buf, "Calm", len);
     } else {
       strncpy_safe(buf, "---", len);
@@ -452,14 +456,11 @@ static void getWindDirectionText(const WxStation *station, char *buf, size_t len
 
 /**
  * @brief Converts a wind speed to text.
- * @param[in]  station The weather station information.
- * @param[in]  gust    Convert gust speed.
+ * @param[in]  speed   The wind speed.
  * @param[out] buf     The wind speed text.
  * @param[in]  len     Length of @a buf.
  */
-static void getWindSpeedText(const WxStation *station, bool gust, char *buf, size_t len) {
-  int speed = (gust ? station->windGust : station->windSpeed);
-
+static void getWindSpeedText(int speed, char *buf, size_t len) {
   if (speed <= 0) {
     strncpy_safe(buf, "---", len);
   } else {
