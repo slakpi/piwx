@@ -1048,7 +1048,7 @@ static void initRender(DrawResources_ *rsrc) {
   glViewport(0, 0, (GLsizei)GFX_SCREEN_WIDTH, (GLsizei)GFX_SCREEN_HEIGHT);
 
   glEnable(GL_BLEND);
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
   makeProjection(rsrc->proj);
   gfx_resetShader(rsrc, programGeneral);

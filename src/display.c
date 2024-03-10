@@ -228,7 +228,7 @@ static void drawStationWxString(DrawResources resources, const WxStation *statio
 
   len                = strlen(station->wxString);
   bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
-  bottomLeft.coord.y = UPPER_DIV + info.cellSize.v[1];
+  bottomLeft.coord.y = LOWER_DIV - (LOWER_DIV - UPPER_DIV - info.cellSize.v[1]) / 2.0f;
   gfx_drawText(resources, font8pt, bottomLeft, station->wxString, len, gfx_White, true,
                vertAlignCell);
 }
