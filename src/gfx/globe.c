@@ -385,7 +385,7 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 #endif
 
   memcpy(rsrc->globeBuffers, buffers, sizeof(buffers)); // NOLINT -- Size known.
-  memset(buffers, 0, sizeof(buffers)); // NOLINT -- Size known.
+  memset(buffers, 0, sizeof(buffers));                  // NOLINT -- Size known.
 
   ok = true;
 
@@ -403,16 +403,16 @@ cleanup:
  *          polar axis. If this convention is kept, the texture will wrap around
  *          the Z axis and then be mirrored over the XZ plane due to the
  *          projection. This will cause the texture to appear backwards.
- * 
+ *
  *          If the Y axis is used as the polar axis, the texture will wrap
  *          around the Y axis, and the flip due to the projection can then be
  *          corrected by a simple rotation.
- * 
+ *
  *          The other option is to keep Z as the polar axis and scale the Y axis
  *          by -1. But that effectively turns the Earth inside out making the
  *          normals inconsistent and changing the winding order of the quad
  *          triangles.
- * 
+ *
  *          Yet another option is changing the projection to put +Y up in the
  *          viewport. However, that would make rendering inconsistent with
  *          framebuffer memory ordering.
