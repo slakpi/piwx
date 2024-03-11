@@ -13,6 +13,7 @@
 #if defined __ARM_NEON
 #include <arm_neon.h>
 #endif
+#include <assert.h>
 #include <fcntl.h>
 #include <png.h>
 #include <stdbool.h>
@@ -183,6 +184,20 @@ static bool readPixelsToPng(Png *png);
 void gfx_beginLayer(DrawResources resources, Layer layer) {
   DrawResources_ *rsrc = resources;
 
+  if (!rsrc) {
+    return;
+  }
+
+  if (layer >= layerCount) {
+    assert(false);
+    return;
+  }
+
+  if (rsrc->stackDepth >= MAX_FBO_NESTING) {
+    assert(false);
+    return;
+  }
+
   if (rsrc->framebuffer == 0) {
     glGenFramebuffers(1, &rsrc->framebuffer);
   }
@@ -212,6 +227,8 @@ void gfx_beginLayer(DrawResources resources, Layer layer) {
                          0);
   glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
                             rsrc->layerBuffers[layer]);
+
+  rsrc->layerStack[rsrc->stackDepth++] = layer;
 }
 
 void gfx_clearSurface(DrawResources resources, Color4f clear) {
@@ -320,7 +337,30 @@ bool gfx_dumpSurfaceToPng(DrawResources resources, const char *path) {
   return ok;
 }
 
-void gfx_endLayer(DrawResources resources) { glBindFramebuffer(GL_FRAMEBUFFER, 0); }
+void gfx_endLayer(DrawResources resources) {
+  DrawResources_ *rsrc = resources;
+  Layer           layer;
+
+  if (!rsrc) {
+    return;
+  }
+
+  if (rsrc->stackDepth == 0) {
+    return;
+  }
+
+  if (--rsrc->stackDepth == 0) {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    return;
+  }
+
+  layer = rsrc->layerStack[rsrc->stackDepth - 1];
+
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rsrc->layers[layer],
+                         0);
+  glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
+                            rsrc->layerBuffers[layer]);
+}
 
 bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
                                 const Point2f *bottomLeft, const CharInfo *info,

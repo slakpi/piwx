@@ -99,11 +99,10 @@ typedef enum {
  * @brief Cached layer identifier.
  */
 typedef enum {
-  layer0,
-  layerForeground = layer0,
-  layer1,
-  layer2,
-  layerBackground = layer2,
+  layerForeground, // Display foreground layer
+  layerBackground, // Display background layer
+  layerTempA,      // Gfx library temp layer (do not use directly)
+  layerTempB,      // General-use temp layer
   layerCount
 } Layer;
 
@@ -190,16 +189,16 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime, const 
  * @param[in] resources The gfx context.
  * @param[in] icon      The icon to draw.
  * @param[in] center    The center of the icon in pixels.
- * @param[in] shadow    Include a shadow around the icon.
  */
-void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center, bool shadow);
+void gfx_drawIcon(DrawResources resources, Icon icon, Point2f center);
 
 /**
  * @brief Draws the cached layer.
  * @param[in] resources The gfx context.
  * @param[in] layer     The cached layer to draw.
+ * @param[in] shadow    Draw a shadow of the layer contents.
  */
-void gfx_drawLayer(DrawResources resources, Layer layer);
+void gfx_drawLayer(DrawResources resources, Layer layer, bool shadow);
 
 /**
  * @brief Draws a solid line with the given color and width.
@@ -218,11 +217,10 @@ void gfx_drawLine(DrawResources resources, const Point2f *vertices, Color4f colo
  * @param[in] text       The text string.
  * @param[in] len        Length of the text string in characters.
  * @param[in] textColor  The character color.
- * @param[in] shadow     Include a shadow around the text.
  * @param[in] valign     Character vertical alignment
  */
 void gfx_drawText(DrawResources resources, Font font, Point2f bottomLeft, const char *text,
-                  size_t len, Color4f textColor, bool shadow, CharVertAlign valign);
+                  size_t len, Color4f textColor, CharVertAlign valign);
 
 /**
  * @brief   Dumps the current drawing surface to a PNG image.

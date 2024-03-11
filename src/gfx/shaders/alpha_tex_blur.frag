@@ -1,11 +1,11 @@
-// Multiplying by 1.75 gives the shadow a stronger appearance by increasing the
+// Multiplying by 1.5 gives the shadow a stronger appearance by increasing the
 // weight of the blur and possibly causing the alpha to saturate.
-#define C0 (0.19859610213125314 * 1.75)
-#define C1 (0.17571363439579307 * 1.75)
-#define C2 (0.12170274650962626 * 1.75)
-#define C3 (0.06598396774984912 * 1.75)
-#define C4 (0.02800156023378088 * 1.75)
-#define C5 (0.00930004004532404 * 1.75)
+#define C0 (0.19859610213125314 * 1.5)
+#define C1 (0.17571363439579307 * 1.5)
+#define C2 (0.12170274650962626 * 1.5)
+#define C3 (0.06598396774984912 * 1.5)
+#define C4 (0.02800156023378088 * 1.5)
+#define C5 (0.00930004004532404 * 1.5)
 
 varying vec2 tex_coord;
 

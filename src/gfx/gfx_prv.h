@@ -155,6 +155,8 @@ typedef struct {
   GLuint  layers[layerCount];        // Cache layer textures
   GLuint  layerBuffers[layerCount];  // Cache layer render buffers
   GLuint  framebuffer;               // Cache framebuffer
+  Layer   layerStack[MAX_FBO_NESTING];
+  uint8_t stackDepth;
 } DrawResources_;
 
 /**

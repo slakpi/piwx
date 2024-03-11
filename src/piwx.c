@@ -426,16 +426,21 @@ static void updateDisplay(const PiwxConfig *cfg, DrawResources resources, const 
     gfx_endLayer(resources);
   }
 
-  gfx_drawLayer(resources, layerBackground);
+  gfx_drawLayer(resources, layerBackground, false);
 
   if (updateLayers[layerForeground]) {
-    gfx_beginLayer(resources, layerForeground);
+    gfx_beginLayer(resources, layerTempB);
     clearFrame(resources);
     drawStation(resources, now, station);
     gfx_endLayer(resources);
+
+    gfx_beginLayer(resources, layerForeground);
+    clearFrame(resources);
+    gfx_drawLayer(resources, layerTempB, true);
+    gfx_endLayer(resources);
   }
 
-  gfx_drawLayer(resources, layerForeground);
+  gfx_drawLayer(resources, layerForeground, false);
 
   gfx_commitToScreen(resources);
 }
