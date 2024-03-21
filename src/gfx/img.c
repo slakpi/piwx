@@ -228,7 +228,9 @@ cleanup:
  * @brief Validates that the bit depth is 8- or 16-bits.
  * @param[in] bits Bit depth to test.
  */
-static bool validateBits(png_byte bits) { return (bits == 8 || bits == 16); }
+static bool validateBits(png_byte bits) {
+  return (bits == 8 || bits == 16);
+}
 
 /**
  * @brief Validates that the color format is RGB, RGBA or grayscale.

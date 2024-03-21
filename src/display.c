@@ -42,7 +42,9 @@ static void getWindDirectionText(int direction, int speed, char *buf, size_t len
 
 static void getWindSpeedText(int speed, char *buf, size_t len);
 
-void clearFrame(DrawResources resources) { gfx_clearSurface(resources, gfx_Clear); }
+void clearFrame(DrawResources resources) {
+  gfx_clearSurface(resources, gfx_Clear);
+}
 
 void drawDownloadInProgress(DrawResources resources) {
   Point2f center = {{GFX_SCREEN_WIDTH / 2.0f, GFX_SCREEN_HEIGHT / 2.0f}};

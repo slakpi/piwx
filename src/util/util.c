@@ -4,9 +4,13 @@
 #include "util.h"
 #include <string.h>
 
-int max(int a, int b) { return (a > b ? a : b); }
+int max(int a, int b) {
+  return (a > b ? a : b);
+}
 
-int min(int a, int b) { return (a < b ? a : b); }
+int min(int a, int b) {
+  return (a < b ? a : b);
+}
 
 size_t strncpy_safe(char *dst, const char *src, size_t maxlen) {
   // Based on Apple's implementation of @a strlcpy in XNU.
@@ -23,6 +27,10 @@ size_t strncpy_safe(char *dst, const char *src, size_t maxlen) {
   return srclen;
 }
 
-unsigned int umax(unsigned int a, unsigned int b) { return (a > b ? a : b); }
+unsigned int umax(unsigned int a, unsigned int b) {
+  return (a > b ? a : b);
+}
 
-unsigned int umin(unsigned int a, unsigned int b) { return (a < b ? a : b); }
+unsigned int umin(unsigned int a, unsigned int b) {
+  return (a < b ? a : b);
+}

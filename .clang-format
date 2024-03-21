@@ -5,5 +5,6 @@ AlignConsecutiveMacros: AcrossComments
 AlignConsecutiveAssignments: AcrossComments
 AlignConsecutiveBitFields: AcrossComments
 AlignConsecutiveDeclarations: AcrossComments
+AllowShortFunctionsOnASingleLine: Empty
 ColumnLimit: 100
 ...

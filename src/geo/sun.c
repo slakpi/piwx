@@ -260,14 +260,18 @@ static bool calcAbsTime(double lat, double lon, double jd, double offset, bool s
  * @param[in] jd The Julian day.
  * @returns The Julian century.
  */
-static double calcTimeJulianCentury(double jd) { return (jd - 2451545.0) / 36525.0; }
+static double calcTimeJulianCentury(double jd) {
+  return (jd - 2451545.0) / 36525.0;
+}
 
 /**
  * @brief   Calculate the Julian day from a Julian century.
  * @param[in] t The Julian century.
  * @returns The Julian day.
  */
-static double calcJDFromJulianCentury(double t) { return t * 36525.0 + 2451545.0; }
+static double calcJDFromJulianCentury(double t) {
+  return t * 36525.0 + 2451545.0;
+}
 
 /**
  * @brief   Calculate the solar equation of time.
