@@ -44,4 +44,4 @@ void drawGlobe(DrawResources resources, time_t curTime, Position pos);
  */
 void drawStation(DrawResources resources, time_t curTime, const WxStation *station);
 
-#endif
+#endif /* DISPLAY_H */

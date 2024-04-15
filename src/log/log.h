@@ -54,4 +54,4 @@ bool openLog(const char *logFile, LogLevel maxLevel);
  */
 void writeLog(LogLevel level, const char *fmt, ...);
 
-#endif
+#endif /* LOG_H */

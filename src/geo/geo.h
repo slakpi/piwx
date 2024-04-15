@@ -80,4 +80,4 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime);
  */
 void geo_latLonToECEF(double lat, double lon, float *x, float *y, float *z);
 
-#endif
+#endif /* GEO_H */

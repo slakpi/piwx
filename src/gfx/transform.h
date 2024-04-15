@@ -58,4 +58,4 @@ void makeYRotation(TransformMatrix mat, float theta);
  */
 void makeZRotation(TransformMatrix mat, float theta);
 
-#endif
+#endif /* TRANSFORM_H */

@@ -61,4 +61,4 @@ Animation makePositionAnimation(Position origin, Position target, unsigned int s
  */
 void resetPositionAnimation(Animation anim, Position origin, Position target);
 
-#endif
+#endif /* ANIM_H */
