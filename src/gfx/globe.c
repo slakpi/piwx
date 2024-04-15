@@ -84,6 +84,10 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   float           width, height, scale, zoff;
   TransformMatrix view, model, tmp;
 
+  if (!rsrc) {
+    return;
+  }
+
   if (rsrc->globeBuffers[0] == 0) {
     return;
   }
