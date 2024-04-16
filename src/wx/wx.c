@@ -138,7 +138,15 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
 
 static void classifyDominantWeather(WxStation *station);
 
+static char *dupNodeText(xmlNodePtr node);
+
 static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag, xmlHashTablePtr hash);
+
+static double getNodeAsDouble(xmlNodePtr node);
+
+static int getNodeAsInt(xmlNodePtr node);
+
+static bool getNodeAsUTCDateTime(xmlNodePtr node, struct tm *tm);
 
 static CloudCover getLayerCloudCover(xmlAttr *attr, xmlHashTablePtr hash);
 
@@ -153,8 +161,6 @@ static void initHash(xmlHashTablePtr hash);
 static WxStation *makeNewStation();
 
 static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
-
-static bool parseUTCDateTime(const char *str, struct tm *tm);
 
 static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *station);
 
@@ -382,52 +388,6 @@ static char *trimLocalId(const char *id) {
 }
 
 /**
- * @brief   Simple ISO-8601 parser.
- * @details Assumes UTC and ignores timezone information. Assumes integer
- *          seconds. Performs basic sanity checks, but does not check if the
- *          day exceeds the number of days in the specified month.
- * @param[in] str The string to parse.
- * @param[in] tm  Receives the date time.
- * @returns True if successful, false otherwise.
- */
-static bool parseUTCDateTime(const char *str, struct tm *tm) {
-  // TODO: This should probably be a lexer at some point.
-  // NOLINTNEXTLINE -- Not scanning to string buffers.
-  sscanf(str, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday, &tm->tm_hour,
-         &tm->tm_min, &tm->tm_sec);
-
-  if (tm->tm_year < 1900) {
-    return false;
-  }
-
-  if (!(tm->tm_mon >= 1 && tm->tm_mon <= 12)) {
-    return false;
-  }
-
-  if (!(tm->tm_mday >= 1 && tm->tm_mday <= 31)) {
-    return false;
-  }
-
-  if (!(tm->tm_hour >= 0 && tm->tm_hour <= 23)) {
-    return false;
-  }
-
-  if (!(tm->tm_min >= 0 && tm->tm_min <= 59)) {
-    return false;
-  }
-
-  if (!(tm->tm_sec >= 0 && tm->tm_sec <= 59)) {
-    return false;
-  }
-
-  tm->tm_year -= 1900;
-  tm->tm_mon -= 1;
-  tm->tm_isdst = 0;
-
-  return true;
-}
-
-/**
  * @brief Initialize the tag map.
  * @param[in] hash Tag hash map.
  */
@@ -520,7 +480,13 @@ static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata
  * @returns The flight category or catInvalid.
  */
 static FlightCategory getStationFlightCategory(xmlNodePtr node, xmlHashTablePtr hash) {
-  Tag tag = getTag(hash, node->content);
+  Tag tag;
+  
+  if (!node || !node->content) {
+    return catInvalid;
+  }
+
+  tag = getTag(hash, node->content);
 
   switch (tag) {
   case tagVFR:
@@ -650,47 +616,47 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 
     switch (tag) {
     case tagRawText:
-      station->raw = strdup((char *)c->children->content);
+      station->raw = dupNodeText(c->children);
       break;
     case tagStationId:
-      station->id      = strdup((char *)c->children->content);
+      station->id      = dupNodeText(c->children);
       station->localId = trimLocalId(station->id);
       break;
     case tagObsTime:
-      parseUTCDateTime((char *)c->children->content, &obs);
+      getNodeAsUTCDateTime(c->children, &obs);
       station->obsTime = timegm(&obs);
       break;
     case tagLat:
-      station->pos.lat = strtod((char *)c->children->content, NULL);
+      station->pos.lat = getNodeAsDouble(c->children);
       break;
     case tagLon:
-      station->pos.lon = strtod((char *)c->children->content, NULL);
+      station->pos.lon = getNodeAsDouble(c->children);
       break;
     case tagTemp:
       station->hasTemp = true;
-      station->temp    = strtod((char *)c->children->content, NULL);
+      station->temp    = getNodeAsDouble(c->children);
       break;
     case tagDewpoint:
       station->hasDewPoint = true;
-      station->dewPoint    = strtod((char *)c->children->content, NULL);
+      station->dewPoint    = getNodeAsDouble(c->children);
       break;
     case tagWindDir:
-      station->windDir = atoi((char *)c->children->content);
+      station->windDir = getNodeAsInt(c->children);
       break;
     case tagWindSpeed:
-      station->windSpeed = atoi((char *)c->children->content);
+      station->windSpeed = getNodeAsInt(c->children);
       break;
     case tagWindGust:
-      station->windGust = atoi((char *)c->children->content);
+      station->windGust = getNodeAsInt(c->children);
       break;
     case tagVis:
-      station->visibility = strtod((char *)c->children->content, NULL);
+      station->visibility = getNodeAsDouble(c->children);
       break;
     case tagAlt:
-      station->alt = strtod((char *)c->children->content, NULL);
+      station->alt = getNodeAsDouble(c->children);
       break;
     case tagWxString:
-      station->wxString = strdup((char *)c->children->content);
+      station->wxString = dupNodeText(c->children);
       break;
     case tagCategory:
       station->cat = getStationFlightCategory(c->children, hash);
@@ -699,7 +665,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       addCloudLayer(c, station, hash);
       break;
     case tagVertVis:
-      station->vertVis = strtod((char *)c->children->content, NULL);
+      station->vertVis = getNodeAsDouble(c->children);
       break;
     default:
       break;
@@ -707,6 +673,96 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 
     c = c->next;
   }
+}
+
+/**
+ * @brief   Duplicate a node's text.
+ * @param[in] node The node to duplicate.
+ * @returns The duplicate string or NULL if the node is empty or invalid.
+ */
+static char *dupNodeText(xmlNodePtr node) {
+  if (!node || !node->content) {
+    return NULL;
+  }
+
+  return strdup((char *)node->content);
+}
+
+/**
+ * @brief   Convert a node's text to a double.
+ * @param[in] node The node to convert.
+ * @returns The double representation or 0.0 if the node is empty or invalid.
+ */
+static double getNodeAsDouble(xmlNodePtr node) {
+  if (!node || !node->content) {
+    return 0.0;
+  }
+
+  return strtod((char *)node->content, NULL);
+}
+
+/**
+ * @brief   Convert a node's text to an integer.
+ * @param[in] node The node to convert.
+ * @returns The integer representation or 0 if the node is empty or invalid.
+ */
+static int getNodeAsInt(xmlNodePtr node) {
+  if (!node || !node->content) {
+    return 0;
+  }
+
+  return (int)strtol((char *)node->content, NULL, 10);
+}
+
+/**
+ * @brief   Convert a node's text as an ISO-8601 date/time string.
+ * @details Assumes UTC and ignores timezone information. Assumes integer
+ *          seconds. Performs basic sanity checks, but does not check if the
+ *          day exceeds the number of days in the specified month.
+ * @param[in]  node The node to convert.
+ * @param[out] tm   Receives the date time.
+ * @returns True if successful, false otherwise.
+ */
+static bool getNodeAsUTCDateTime(xmlNodePtr node, struct tm *tm) {
+  if (!node || !node->content) {
+    memset(tm, 0, sizeof(*tm));
+    return false;
+  }
+
+  // TODO: This should probably be a lexer at some point.
+  // NOLINTNEXTLINE -- Not scanning to string buffers.
+  sscanf((char *)node->content, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday,
+         &tm->tm_hour, &tm->tm_min, &tm->tm_sec);
+
+  if (tm->tm_year < 1900) {
+    return false;
+  }
+
+  if (!(tm->tm_mon >= 1 && tm->tm_mon <= 12)) {
+    return false;
+  }
+
+  if (!(tm->tm_mday >= 1 && tm->tm_mday <= 31)) {
+    return false;
+  }
+
+  if (!(tm->tm_hour >= 0 && tm->tm_hour <= 23)) {
+    return false;
+  }
+
+  if (!(tm->tm_min >= 0 && tm->tm_min <= 59)) {
+    return false;
+  }
+
+  if (!(tm->tm_sec >= 0 && tm->tm_sec <= 59)) {
+    return false;
+  }
+
+  tm->tm_year -= 1900;
+  tm->tm_mon -= 1;
+  tm->tm_isdst = 0;
+
+  return true;
 }
 
 /**
