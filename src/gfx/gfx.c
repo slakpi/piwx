@@ -288,6 +288,10 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     glDeleteTextures(1, &rsrc->fonts[i].tex);
   }
 
+  for (int i = 0; i < iconCount; ++i) {
+    glDeleteTextures(1, &rsrc->icons[i].tex);
+  }
+
   if (rsrc->context != EGL_NO_CONTEXT) {
     eglDestroyContext(rsrc->display, rsrc->context);
   }
