@@ -2,13 +2,6 @@
 # Find packages.
 #-------------------------------------------------------------------------------
 find_package(PiGPIO REQUIRED)
-find_package(BISON REQUIRED)
-find_package(FLEX REQUIRED)
-find_package(CURL REQUIRED)
-find_package(LibXml2 REQUIRED)
-find_package(PNG REQUIRED)
-find_package(Python3 REQUIRED)
-find_package(Threads REQUIRED)
 
 #-------------------------------------------------------------------------------
 # Setup the configuration header.

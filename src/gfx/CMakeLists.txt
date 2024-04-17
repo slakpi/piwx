@@ -1,4 +1,11 @@
 #-------------------------------------------------------------------------------
+# Find packages.
+#-------------------------------------------------------------------------------
+find_package(PNG REQUIRED)
+find_package(Python3 REQUIRED)
+find_package(Threads REQUIRED)
+
+#-------------------------------------------------------------------------------
 # @brief   Converts a shader file into a string constant in a C header.
 # @details Given a file name such as "vertex.shader", the function creates a C
 #          header named "vertex.shader.h" with the contents of "vert.shader" in

@@ -1,4 +1,12 @@
 #-------------------------------------------------------------------------------
+# Find packages.
+#-------------------------------------------------------------------------------
+find_package(FLEX REQUIRED)
+find_package(CURL REQUIRED)
+find_package(LibXml2 REQUIRED)
+find_package(Threads REQUIRED)
+
+#-------------------------------------------------------------------------------
 # Setup an interface target shared between wx and wx_lexer.
 #-------------------------------------------------------------------------------
 add_library(wx_intf INTERFACE)
