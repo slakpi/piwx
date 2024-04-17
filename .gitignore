@@ -1,5 +1,6 @@
 .vscode
 .worktree
 build
+doc/doxygen/*
+!doc/doxygen/.keep
 test.png
-
