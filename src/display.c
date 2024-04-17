@@ -38,9 +38,9 @@ static Icon getWeatherIcon(DominantWeather wx);
 
 static Icon getWindIcon(int direction);
 
-static void getWindDirectionText(int direction, int speed, char *buf, size_t len);
+static void getWindDirectionText(char *buf, size_t len, int direction, int speed);
 
-static void getWindSpeedText(int speed, char *buf, size_t len);
+static void getWindSpeedText(char *buf, size_t len, int speed);
 
 void clearFrame(DrawResources resources) {
   gfx_clearSurface(resources, gfx_Clear);
@@ -366,15 +366,15 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   iconInfo.coord.y = bottomLeft.coord.y + (iconInfo.coord.y / 2.0f);
   gfx_drawIcon(resources, icon, iconInfo);
 
-  getWindDirectionText(station->windDir, station->windSpeed, buf, COUNTOF(buf));
+  getWindDirectionText(buf, COUNTOF(buf), station->windDir, station->windSpeed);
   bottomLeft.coord.y += fontInfo.capHeight;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
-  getWindSpeedText(station->windSpeed, buf, COUNTOF(buf));
+  getWindSpeedText(buf, COUNTOF(buf), station->windSpeed);
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
-  getWindSpeedText(station->windGust, buf, COUNTOF(buf));
+  getWindSpeedText(buf, COUNTOF(buf), station->windGust);
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Yellow, vertAlignBaseline);
 }
@@ -430,12 +430,12 @@ static Icon getWindIcon(int direction) {
 
 /**
  * @brief Converts a wind direction to text.
- * @param[in]  direction The wind direction.
- * @param[in]  speed     The wind speed.
  * @param[out] buf       The wind direction text.
  * @param[in]  len       Length of @a buf.
+ * @param[in]  direction The wind direction.
+ * @param[in]  speed     The wind speed.
  */
-static void getWindDirectionText(int direction, int speed, char *buf, size_t len) {
+static void getWindDirectionText(char *buf, size_t len, int direction, int speed) {
   if (direction > 0) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, len, "%d\x01", direction);
@@ -454,11 +454,11 @@ static void getWindDirectionText(int direction, int speed, char *buf, size_t len
 
 /**
  * @brief Converts a wind speed to text.
- * @param[in]  speed   The wind speed.
  * @param[out] buf     The wind speed text.
  * @param[in]  len     Length of @a buf.
+ * @param[in]  speed   The wind speed.
  */
-static void getWindSpeedText(int speed, char *buf, size_t len) {
+static void getWindSpeedText(char *buf, size_t len, int speed) {
   if (speed <= 0) {
     strncpy_safe(buf, "---", len);
   } else {

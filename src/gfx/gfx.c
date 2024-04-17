@@ -980,7 +980,7 @@ static bool loadFont(DrawResources_ *rsrc, const char *fontResources, const Font
   bool ok             = false;
 
   // Get the fully-qualified path to the font image.
-  conf_getPathForFont(fontResources, entry->name, path, COUNTOF(path));
+  conf_getPathForFont(path, COUNTOF(path), fontResources, entry->name);
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);
@@ -1061,7 +1061,7 @@ static bool loadIcon(DrawResources_ *rsrc, const char *imageResources, const Ico
   bool ok             = false;
 
   // Get the fully-qualified path to the icon image.
-  conf_getPathForImage(imageResources, entry->name, path, COUNTOF(path));
+  conf_getPathForImage(path, COUNTOF(path), imageResources, entry->name);
 
   if (!loadPng(&png, path)) {
     SET_ERROR(rsrc, -1, path);

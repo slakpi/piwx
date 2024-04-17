@@ -15,16 +15,16 @@
 #define MIN_PER_DAY  1400
 #define HOUR_PER_DAY 24
 
-static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
-                        double *absTime);
+static bool calcAbsTime(double *absTime, double lat, double lon, double jd, double offset,
+                        bool sunrise);
 
 static double calcEccentricityEarthOrbit(double t);
 
-static bool calcEquationOfTime(double t, double *Etime);
+static bool calcEquationOfTime(double *Etime, double t);
 
 static double calcGeomMeanAnomalySun(double t);
 
-static bool calcGeomMeanLonSun(double t, double *lon);
+static bool calcGeomMeanLonSun(double *lon, double t);
 
 static double calcHourAngleSunrise(double lat, double solarDec, double offset);
 
@@ -38,13 +38,13 @@ static double calcMeanObliquityOfEcliptic(double t);
 
 static double calcObliquityCorrection(double t);
 
-static bool calcSunApparentLon(double t, double *lon);
+static bool calcSunApparentLon(double *lon, double t);
 
-static bool calcSunDeclination(double t, double *decl);
+static bool calcSunDeclination(double *decl, double t);
 
 static double calcSunEqOfCenter(double t);
 
-static bool calcSunTrueLon(double t, double *lon);
+static bool calcSunTrueLon(double *lon, double t);
 
 static time_t calcTime(int year, int month, int day, double minutes);
 
@@ -62,13 +62,13 @@ bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int yea
   //       This may be due to the Equation of Time which seems to be slightly
   //       off compared to online sources.
 
-  if (!calcAbsTime(lat, lon, jd, angle, true, &absTime)) {
+  if (!calcAbsTime(&absTime, lat, lon, jd, angle, true)) {
     return false;
   }
 
   *start = calcTime(year, month, day, absTime);
 
-  if (!calcAbsTime(lat, lon, jd, angle, false, &absTime)) {
+  if (!calcAbsTime(&absTime, lat, lon, jd, angle, false)) {
     return false;
   }
 
@@ -89,11 +89,11 @@ bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
         ((double)date.tm_sec / SEC_PER_DAY);
   t = calcTimeJulianCentury(jd);
 
-  if (!calcSunDeclination(t, lat)) {
+  if (!calcSunDeclination(lat, t)) {
     return false;
   }
 
-  if (!calcEquationOfTime(t, &eqTime)) {
+  if (!calcEquationOfTime(&eqTime, t)) {
     return false;
   }
 
@@ -196,17 +196,17 @@ static double calcJD(int y, int m, int d) {
 
 /**
  * @brief   Calculates the UTC sunset or sunrise time at a given location.
+ * @param[out] absTime UTC time (UNIX time).
  * @param[in]  lat     Latitude of the location (+N/-S) in degrees.
  * @param[in]  lon     Longitude of the location (+E/-W) in degrees.
  * @param[in]  jd      Julian day of interest.
  * @param[in]  offset  Agnular offset (official, civil, nautical, astronomical)
  *                     in degrees.
  * @param[in]  sunrise True if sunrise, false if sunset.
- * @param[out] absTime UTC time (UNIX time).
  * @returns True if able to calculate the sunset/sunrise time.
  */
-static bool calcAbsTime(double lat, double lon, double jd, double offset, bool sunrise,
-                        double *absTime) {
+static bool calcAbsTime(double *absTime, double lat, double lon, double jd, double offset,
+                        bool sunrise) {
   double t = calcTimeJulianCentury(jd);
   double eqTime;
   double solarDec;
@@ -215,11 +215,11 @@ static bool calcAbsTime(double lat, double lon, double jd, double offset, bool s
   double timeDiff;
   double newt;
 
-  if (!calcEquationOfTime(t, &eqTime)) {
+  if (!calcEquationOfTime(&eqTime, t)) {
     return false;
   }
 
-  if (!calcSunDeclination(t, &solarDec)) {
+  if (!calcSunDeclination(&solarDec, t)) {
     return false;
   }
 
@@ -234,11 +234,11 @@ static bool calcAbsTime(double lat, double lon, double jd, double offset, bool s
   *absTime = 720 - timeDiff - eqTime;
   newt     = calcTimeJulianCentury(calcJDFromJulianCentury(t) + (*absTime / 1440.0));
 
-  if (!calcEquationOfTime(newt, &eqTime)) {
+  if (!calcEquationOfTime(&eqTime, newt)) {
     return false;
   }
 
-  if (!calcSunDeclination(newt, &solarDec)) {
+  if (!calcSunDeclination(&solarDec, newt)) {
     return false;
   }
 
@@ -277,11 +277,11 @@ static double calcJDFromJulianCentury(double t) {
  * @brief   Calculate the solar equation of time.
  * @details The solar equation of time is the difference between noon and solar
  *          noon at a given point in time.
- * @param[in]  t     The Julian century.
  * @param[out] Etime The equation of time.
+ * @param[in]  t     The Julian century.
  * @returns True if able to calculate the equation of time, false otherwise.
  */
-static bool calcEquationOfTime(double t, double *Etime) {
+static bool calcEquationOfTime(double *Etime, double t) {
   double epsilon = calcObliquityCorrection(t);
   double e       = calcEccentricityEarthOrbit(t);
   double m       = calcGeomMeanAnomalySun(t);
@@ -293,7 +293,7 @@ static bool calcEquationOfTime(double t, double *Etime) {
   double sin4l0;
   double sin2m;
 
-  if (!calcGeomMeanLonSun(t, &l0)) {
+  if (!calcGeomMeanLonSun(&l0, t)) {
     return false;
   }
 
@@ -314,16 +314,16 @@ static bool calcEquationOfTime(double t, double *Etime) {
 /**
  * @brief   Calculate the Sun's declination relative to the equator at a given
  *          point in time.
- * @param[in]  t    The Jualian century.
  * @param[out] decl The declination in degrees.
+ * @param[in]  t    The Jualian century.
  * @returns True if able to calculate the declination, false otherwise.
  */
-static bool calcSunDeclination(double t, double *decl) {
+static bool calcSunDeclination(double *decl, double t) {
   double e = calcObliquityCorrection(t);
   double lon;
   double sint;
 
-  if (!calcSunApparentLon(t, &lon)) {
+  if (!calcSunApparentLon(&lon, t)) {
     return false;
   }
 
@@ -428,12 +428,12 @@ static double calcGeomMeanAnomalySun(double t) {
 
 /**
  * @brief   Calculate the geometric mean longitude of the Sun.
- * @param[in]  t   The Julian century.
  * @param[out] lon The geometric mean longitude of the Sun.
+ * @param[in]  t   The Julian century.
  * @returns True if able to calculate the geometric mean longitude, false
  *          otherwise.
  */
-static bool calcGeomMeanLonSun(double t, double *lon) {
+static bool calcGeomMeanLonSun(double *lon, double t) {
   double l0;
 
   if (isnan(t)) {
@@ -449,15 +449,15 @@ static bool calcGeomMeanLonSun(double t, double *lon) {
 /**
  * @brief   Calculate the apparent longitude of the Sun.
  * @details See https://en.wikipedia.org/wiki/Apparent_longitude.
- * @param[in]  t   The Julian century.
  * @param[out] lon The apparent longitude of the Sun.
+ * @param[in]  t   The Julian century.
  * @returns True if able to calculate the apparent longitude, false otherwise.
  */
-static bool calcSunApparentLon(double t, double *decl) {
+static bool calcSunApparentLon(double *decl, double t) {
   double omega = 125.04 - 1934.136 * t;
   double lon;
 
-  if (!calcSunTrueLon(t, &lon)) {
+  if (!calcSunTrueLon(&lon, t)) {
     return false;
   }
 
@@ -468,15 +468,15 @@ static bool calcSunApparentLon(double t, double *decl) {
 
 /**
  * @brief   Calculate the true longitude of the Sun.
- * @param[in]  t   The Julian century.
  * @param[out] lon The true longitude of the Sun.
+ * @param[in]  t   The Julian century.
  * @returns True if able to calculate the true longitude, false otherwise.
  */
-static bool calcSunTrueLon(double t, double *lon) {
+static bool calcSunTrueLon(double *lon, double t) {
   double c = calcSunEqOfCenter(t);
   double l0;
 
-  if (!calcGeomMeanLonSun(t, &l0)) {
+  if (!calcGeomMeanLonSun(&l0, t)) {
     return false;
   }
 

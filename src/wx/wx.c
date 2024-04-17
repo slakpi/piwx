@@ -146,7 +146,7 @@ static double getNodeAsDouble(xmlNodePtr node);
 
 static int getNodeAsInt(xmlNodePtr node);
 
-static bool getNodeAsUTCDateTime(xmlNodePtr node, struct tm *tm);
+static bool getNodeAsUTCDateTime(struct tm *tm, xmlNodePtr node);
 
 static CloudCover getLayerCloudCover(xmlAttr *attr, xmlHashTablePtr hash);
 
@@ -481,7 +481,7 @@ static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata
  */
 static FlightCategory getStationFlightCategory(xmlNodePtr node, xmlHashTablePtr hash) {
   Tag tag;
-  
+
   if (!node || !node->content) {
     return catInvalid;
   }
@@ -623,7 +623,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       station->localId = trimLocalId(station->id);
       break;
     case tagObsTime:
-      getNodeAsUTCDateTime(c->children, &obs);
+      getNodeAsUTCDateTime(&obs, c->children);
       station->obsTime = timegm(&obs);
       break;
     case tagLat:
@@ -719,11 +719,11 @@ static int getNodeAsInt(xmlNodePtr node) {
  * @details Assumes UTC and ignores timezone information. Assumes integer
  *          seconds. Performs basic sanity checks, but does not check if the
  *          day exceeds the number of days in the specified month.
- * @param[in]  node The node to convert.
  * @param[out] tm   Receives the date time.
+ * @param[in]  node The node to convert.
  * @returns True if successful, false otherwise.
  */
-static bool getNodeAsUTCDateTime(xmlNodePtr node, struct tm *tm) {
+static bool getNodeAsUTCDateTime(struct tm *tm, xmlNodePtr node) {
   if (!node || !node->content) {
     memset(tm, 0, sizeof(*tm));
     return false;

@@ -20,7 +20,7 @@ typedef void *yyscan_t;
 #include <stdlib.h>
 #include <string.h>
 
-static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len);
+static char *appendFileToPath(char *path, size_t len, const char *prefix, const char *file);
 
 void conf_freePiwxConfig(PiwxConfig *cfg) {
   if (!cfg) {
@@ -96,25 +96,25 @@ bool conf_parseStream(PiwxConfig *cfg, FILE *cfgFile) {
   return (ret == 0);
 }
 
-char *conf_getPathForFont(const char *fontResources, const char *file, char *path, size_t len) {
-  return appendFileToPath(fontResources, file, path, len);
+char *conf_getPathForFont(char *path, size_t len, const char *fontResources, const char *file) {
+  return appendFileToPath(path, len, fontResources, file);
 }
 
-char *conf_getPathForImage(const char *imageResources, const char *file, char *path, size_t len) {
-  return appendFileToPath(imageResources, file, path, len);
+char *conf_getPathForImage(char *path, size_t len, const char *imageResources, const char *file) {
+  return appendFileToPath(path, len, imageResources, file);
 }
 
 /**
  * @brief   Append a file name to a path prefix.
  * @details A POSIX-only function to append a trailing backslash to @a prefix,
  *          if necessary, followed by @a name.
- * @param[in]  prefix Null-terminated path prefix.
- * @param[in]  file   Null-terminated file name.
  * @param[out] path   Output buffer. May not overlap @a prefix or @a file.
  * @param[in]  len    Length of @a path.
+ * @param[in]  prefix Null-terminated path prefix.
+ * @param[in]  file   Null-terminated file name.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-static char *appendFileToPath(const char *prefix, const char *file, char *path, size_t len) {
+static char *appendFileToPath(char *path, size_t len, const char *prefix, const char *file) {
   size_t pl = strlen(prefix);
   size_t fl = strlen(file);
 

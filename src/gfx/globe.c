@@ -67,7 +67,7 @@ static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResource
 
 static bool genGlobeModel(DrawResources_ *rsrc);
 
-static void initVertex(double lat, double lon, Vertex3D *v);
+static void initVertex(Vertex3D *v, double lat, double lon);
 
 static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, const char *image,
                              GLuint tex, Texture *texture);
@@ -241,7 +241,7 @@ static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResource
     return false;
   }
 
-  conf_getPathForImage(imageResources, "globe.obj", path, COUNTOF(path));
+  conf_getPathForImage(path, COUNTOF(path), imageResources, "globe.obj");
 
   obj = fopen(path, "w");
 
@@ -309,17 +309,17 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 
   // Generate all vertices.
 
-  initVertex(90, 0, &globe[idx++]);
+  initVertex(&globe[idx++], 90, 0);
 
   for (int lat = 90 - LAT_INTERVAL_DEG; lat > -90; lat -= LAT_INTERVAL_DEG) {
     // Use <= +180 to duplicate the -180 longitude vertices with a U coordinate
     // of 1.
     for (int lon = -180; lon <= 180; lon += LON_INTERVAL_DEG) {
-      initVertex(lat, lon, &globe[idx++]);
+      initVertex(&globe[idx++], lat, lon);
     }
   }
 
-  initVertex(-90, 0, &globe[idx++]);
+  initVertex(&globe[idx++], -90, 0);
 
   // Generate the North pole triangle indices.
 
@@ -420,11 +420,11 @@ cleanup:
  *          Yet another option is changing the projection to put +Y up in the
  *          viewport. However, that would make rendering inconsistent with
  *          framebuffer memory ordering.
+ * @param[out] v   The vertex.
  * @param[in]  lat The latitude.
  * @param[in]  lon The longitude.
- * @param[out] v   The vertex.
  */
-static void initVertex(double lat, double lon, Vertex3D *v) {
+static void initVertex(Vertex3D *v, double lat, double lon) {
   geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.z, &v->pos.coord.y);
 
   // The vertex normal is simply the direction vector of the vertex.
@@ -495,7 +495,7 @@ static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, c
   GLenum color;
   bool   ok = false;
 
-  conf_getPathForImage(imageResources, image, path, COUNTOF(path));
+  conf_getPathForImage(path, COUNTOF(path), imageResources, image);
 
   if (!loadPng(&png, path)) {
     goto cleanup;

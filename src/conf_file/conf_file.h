@@ -58,24 +58,24 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
  * @brief   Load the fully-qualified path to the specified font file.
  * @details Appends @a file to the @a fontResources path using @a path as an
  *          output buffer.
- * @param[in]  fontResources The path to PiWx's font resources.
- * @param[in]  file          The font file to append.
  * @param[out] path          The buffer to hold the fully-qualified path.
  * @param[in]  len           The length of @a path.
+ * @param[in]  fontResources The path to PiWx's font resources.
+ * @param[in]  file          The font file to append.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *conf_getPathForFont(const char *fontResources, const char *file, char *path, size_t len);
+char *conf_getPathForFont(char *path, size_t len, const char *fontResources, const char *file);
 
 /**
  * @brief   Load the fully-qualified path to the specified bitmap file.
  * @details Appends @a file to the @a imageResources path using @a path as an
  *          output buffer.
- * @param[in]  imageResources The path to PiWx's image resources.
- * @param[in]  file           The bitmap file to append.
  * @param[out] path           The buffer to hold the fully-qualified path.
  * @param[in]  len            The length of @a path.
+ * @param[in]  imageResources The path to PiWx's image resources.
+ * @param[in]  file           The bitmap file to append.
  * @returns The buffer pointer or NULL if the output buffer is too small.
  */
-char *conf_getPathForImage(const char *imageResources, const char *file, char *path, size_t len);
+char *conf_getPathForImage(char *path, size_t len, const char *imageResources, const char *file);
 
 #endif /* CONF_FILE_H */
