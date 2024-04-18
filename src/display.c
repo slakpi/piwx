@@ -271,7 +271,7 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
     gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
     return;
   case skyOvercastSurface:
-    if (station->vertVis < 0) {
+    if (!station->hasVertVis || station->vertVis <= 0) {
       strncpy_safe(buf, "VV ---", COUNTOF(buf));
     } else {
       // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -352,7 +352,7 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   Point2f  bottomLeft = {{84.0f, LOWER_DIV + 10.0f}};
   CharInfo fontInfo   = {0};
   Vector2f iconInfo   = {0};
-  Icon     icon       = getWindIcon(station->windDir);
+  Icon     icon       = getWindIcon(station->hasWindDir ? station->windDir : -1);
 
   if (!gfx_getFontInfo(resources, font6pt, &fontInfo)) {
     return;
@@ -366,15 +366,16 @@ static void drawWindInfo(DrawResources *resources, const WxStation *station) {
   iconInfo.coord.y = bottomLeft.coord.y + (iconInfo.coord.y / 2.0f);
   gfx_drawIcon(resources, icon, iconInfo);
 
-  getWindDirectionText(buf, COUNTOF(buf), station->windDir, station->windSpeed);
+  getWindDirectionText(buf, COUNTOF(buf), station->hasWindDir ? station->windDir : -1,
+                       station->windSpeed);
   bottomLeft.coord.y += fontInfo.capHeight;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
-  getWindSpeedText(buf, COUNTOF(buf), station->windSpeed);
+  getWindSpeedText(buf, COUNTOF(buf), station->hasWindSpeed ? station->windSpeed : -1);
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
-  getWindSpeedText(buf, COUNTOF(buf), station->windGust);
+  getWindSpeedText(buf, COUNTOF(buf), station->hasWindGust ? station->windGust : -1);
   bottomLeft.coord.y += fontInfo.capHeight + fontInfo.leading;
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_Yellow, vertAlignBaseline);
 }
@@ -482,7 +483,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
     return;
   }
 
-  if (station->visibility < 0) {
+  if (!station->hasVisibility || station->visibility < 0) {
     strncpy_safe(buf, "---", COUNTOF(buf));
   } else if (station->visibility < 2) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
@@ -513,7 +514,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   bottomLeft.coord.y += info.cellSize.v[1];
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
-  if (station->alt < 0) {
+  if (!station->hasAlt || station->alt < 0) {
     strncpy_safe(buf, "---", COUNTOF(buf));
   } else {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.

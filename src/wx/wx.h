@@ -21,6 +21,7 @@ typedef enum {
   skyOvercast,
   skyOvercastSurface
 } CloudCover;
+_Static_assert(skyInvalid == 0, "Invalid sky coverage must be zero.");
 
 /**
  * @struct SkyCondition
@@ -37,6 +38,7 @@ typedef struct SkyCondition_ {
  * @brief METAR flight category.
  */
 typedef enum { catInvalid, catVFR, catMVFR, catIFR, catLIFR } FlightCategory;
+_Static_assert(catInvalid == 0, "Invalid flight category must be zero.");
 
 /**
  * @enum  DominantWeather
@@ -68,31 +70,40 @@ typedef enum {
   wxTstormsSqualls,      // [+] TS, SQ
   wxFunnelCloud,         // FC
 } DominantWeather;
+_Static_assert(wxInvalid == 0, "Invalid weather phenomenon must be zero.");
 
 /**
  * @struct WxStation
  * @brief  Weather station data entry.
  */
 typedef struct WxStation_ {
+  double             visibility;
+  double             temp, dewPoint;
+  double             alt;
+  Position           pos;
   char              *id;
   char              *localId;
   char              *raw;
   time_t             obsTime;
-  Position           pos;
-  bool               isNight;
   DominantWeather    wx;
   char              *wxString;
   SkyCondition      *layers;
   int                windDir, windSpeed, windGust;
-  double             visibility;
   int                vertVis;
-  bool               hasTemp, hasDewPoint;
-  double             temp, dewPoint;
-  double             alt;
   FlightCategory     cat;
-  bool               blinkState;
+
   struct WxStation_ *next;
   struct WxStation_ *prev;
+
+  bool               hasObsTime;
+  bool               hasPosition;
+  bool               isNight;
+  bool               hasWindDir, hasWindSpeed, hasWindGust;
+  bool               hasVisibility;
+  bool               hasVertVis;
+  bool               hasTemp, hasDewPoint;
+  bool               hasAlt;
+  bool               blinkState;
 } WxStation;
 
 /**

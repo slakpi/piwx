@@ -39,6 +39,7 @@
 
 #define MIX_BRIGHTNESS(c, b) (((uint16_t)(c) * (b)) >> 8)
 
+static const Position gDefPos       = {0.0, 0.0};
 static const LEDColor gColorVFR     = {0, 255, 0};
 static const LEDColor gColorMVFR    = {0, 0, 255};
 static const LEDColor gColorIFR     = {255, 0, 0};
@@ -201,7 +202,7 @@ static bool go(bool test, bool verbose) {
 
       wx           = wx_queryWx(cfg->stationQuery, cfg->daylight, now, &err);
       curStation   = wx;
-      globePos     = curStation->pos;
+      globePos     = curStation->hasPosition ? curStation->pos : gDefPos;
       first        = false;
       nextUpdate   = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
       nextWx       = now + cfg->cycleTime;
@@ -245,15 +246,17 @@ static bool go(bool test, bool verbose) {
       }
 
       if (curStation != lastStation) {
+        Position start = lastStation->hasPosition ? lastStation->pos : gDefPos;
+        Position end   = curStation->hasPosition ? curStation->pos : gDefPos;
+
         nextWx = now + cfg->cycleTime;
 
         for (int i = 0; i < layerCount; ++i) {
           updateLayers[i] = true;
         }
 
-        globePos = lastStation->pos;
-        setupGlobeAnimation(&globeAnim, lastStation->pos, curStation->pos, cfg->cycleTime * 0.5f,
-                            &globePos);
+        globePos = start;
+        setupGlobeAnimation(&globeAnim, start, end, cfg->cycleTime * 0.5f, &globePos);
       }
 
       updateLayers[layerBackground] |= stepAnimation(globeAnim);

@@ -22,6 +22,8 @@ typedef void *yyscan_t;
 #include "wx.lexer.h"
 
 #define MAX_DATETIME_LEN 20
+#define MAX_WEATHER_LEN  1024
+#define MAX_IDENT_LEN    6
 
 /**
  * @enum  Tag
@@ -138,13 +140,13 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
 
 static void classifyDominantWeather(WxStation *station);
 
-static char *dupNodeText(xmlNodePtr node);
+static char *dupNodeText(xmlNodePtr node, size_t maxLen);
 
 static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag, xmlHashTablePtr hash);
 
-static double getNodeAsDouble(xmlNodePtr node);
+static bool getNodeAsDouble(double *v, xmlNodePtr node);
 
-static int getNodeAsInt(xmlNodePtr node);
+static bool getNodeAsInt(int *v, xmlNodePtr node);
 
 static bool getNodeAsUTCDateTime(struct tm *tm, xmlNodePtr node);
 
@@ -157,8 +159,6 @@ static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag);
 static void hashDealloc(void *payload, xmlChar *name);
 
 static void initHash(xmlHashTablePtr hash);
-
-static WxStation *makeNewStation();
 
 static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
@@ -289,11 +289,13 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTim
       continue;
     }
 
-    newStation = makeNewStation();
+    newStation = malloc(sizeof(WxStation));
 
     if (!newStation) {
       break;
     }
+
+    memset(newStation, 0, sizeof(*newStation)); // NOLINT -- Size known.
 
     // Add the station to the circular list.
     if (!start) {
@@ -422,31 +424,6 @@ static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag) {
 }
 
 /**
- * @brief   Allocate a new station and initialize it with invalid values.
- * @returns The new station.
- */
-static WxStation *makeNewStation() {
-  WxStation *station = malloc(sizeof(WxStation));
-
-  if (!station) {
-    return NULL;
-  }
-
-  memset(station, 0, sizeof(*station)); // NOLINT -- Size known.
-
-  station->windDir    = -1;
-  station->windGust   = -1;
-  station->windSpeed  = -1;
-  station->visibility = -1;
-  station->alt        = -1;
-  station->cat        = catInvalid;
-  station->vertVis    = -1;
-  station->wx         = wxInvalid;
-
-  return station;
-}
-
-/**
  * @brief cURL data callback for the METAR XAML API.
  * @param[in] ptr      Data received.
  * @param[in] size     Size of a data item.
@@ -541,8 +518,14 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
   xmlAttr      *a = node->properties;
   SkyCondition *newLayer, *p;
   Tag           tag;
+  bool          hasHeight = false;
 
   newLayer = malloc(sizeof(SkyCondition));
+
+  if (!newLayer) {
+    return;
+  }
+
   memset(newLayer, 0, sizeof(SkyCondition)); // NOLINT -- Size known.
 
   // Get the layer information.
@@ -554,13 +537,20 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
       newLayer->coverage = getLayerCloudCover(a, hash);
       break;
     case tagCloudBase:
-      newLayer->height = (int)strtol((const char *)a->children->content, NULL, 10);
+      hasHeight = getNodeAsInt(&newLayer->height, a->children);
       break;
     default:
       break;
     }
 
     a = a->next;
+  }
+
+  // If the coverage is not valid or the height is invalid, then the layer
+  // provides no information, cannot be sorted, and should just be discarded.
+  if (newLayer->coverage == skyInvalid || !hasHeight || newLayer->height < 0) {
+    free(newLayer);
+    return;
   }
 
   // Add the layer in sorted order.
@@ -604,7 +594,8 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
 static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *station) {
   Tag        tag;
   struct tm  obs;
-  xmlNodePtr c = node->children;
+  xmlNodePtr c      = node->children;
+  bool       hasLat = false, hasLon = false;
 
   while (c) {
     if (c->type == XML_TEXT_NODE) {
@@ -616,47 +607,45 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 
     switch (tag) {
     case tagRawText:
-      station->raw = dupNodeText(c->children);
+      station->raw = dupNodeText(c->children, MAX_WEATHER_LEN);
       break;
     case tagStationId:
-      station->id      = dupNodeText(c->children);
+      station->id      = dupNodeText(c->children, MAX_IDENT_LEN);
       station->localId = trimLocalId(station->id);
       break;
     case tagObsTime:
-      getNodeAsUTCDateTime(&obs, c->children);
-      station->obsTime = timegm(&obs);
+      station->hasObsTime = getNodeAsUTCDateTime(&obs, c->children);
+      station->obsTime    = timegm(&obs);
       break;
     case tagLat:
-      station->pos.lat = getNodeAsDouble(c->children);
+      hasLat = getNodeAsDouble(&station->pos.lat, c->children);
       break;
     case tagLon:
-      station->pos.lon = getNodeAsDouble(c->children);
+      hasLon = getNodeAsDouble(&station->pos.lon, c->children);
       break;
     case tagTemp:
-      station->hasTemp = true;
-      station->temp    = getNodeAsDouble(c->children);
+      station->hasTemp = getNodeAsDouble(&station->temp, c->children);
       break;
     case tagDewpoint:
-      station->hasDewPoint = true;
-      station->dewPoint    = getNodeAsDouble(c->children);
+      station->hasDewPoint = getNodeAsDouble(&station->dewPoint, c->children);
       break;
     case tagWindDir:
-      station->windDir = getNodeAsInt(c->children);
+      station->hasWindDir = getNodeAsInt(&station->windDir, c->children);
       break;
     case tagWindSpeed:
-      station->windSpeed = getNodeAsInt(c->children);
+      station->hasWindSpeed = getNodeAsInt(&station->windSpeed, c->children);
       break;
     case tagWindGust:
-      station->windGust = getNodeAsInt(c->children);
+      station->hasWindGust = getNodeAsInt(&station->windGust, c->children);
       break;
     case tagVis:
-      station->visibility = getNodeAsDouble(c->children);
+      station->hasVisibility = getNodeAsDouble(&station->visibility, c->children);
       break;
     case tagAlt:
-      station->alt = getNodeAsDouble(c->children);
+      station->hasAlt = getNodeAsDouble(&station->alt, c->children);
       break;
     case tagWxString:
-      station->wxString = dupNodeText(c->children);
+      station->wxString = dupNodeText(c->children, MAX_WEATHER_LEN);
       break;
     case tagCategory:
       station->cat = getStationFlightCategory(c->children, hash);
@@ -665,7 +654,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       addCloudLayer(c, station, hash);
       break;
     case tagVertVis:
-      station->vertVis = getNodeAsDouble(c->children);
+      station->hasVertVis = getNodeAsInt(&station->vertVis, c->children);
       break;
     default:
       break;
@@ -673,45 +662,62 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 
     c = c->next;
   }
+
+  station->hasPosition = (hasLat && hasLon);
 }
 
 /**
  * @brief   Duplicate a node's text.
- * @param[in] node The node to duplicate.
- * @returns The duplicate string or NULL if the node is empty or invalid.
+ * @param[in] node   The node to duplicate.
+ * @param[in] maxLen The maximum number of characters to duplicate.
+ * @returns The duplicate string or NULL if the node invalid.
  */
-static char *dupNodeText(xmlNodePtr node) {
+static char *dupNodeText(xmlNodePtr node, size_t maxLen) {
+  size_t len;
+
   if (!node || !node->content) {
     return NULL;
   }
 
-  return strdup((char *)node->content);
+  len = strnlen((char *)node->content, maxLen);
+
+  return strndup((char *)node->content, len);
 }
 
 /**
  * @brief   Convert a node's text to a double.
- * @param[in] node The node to convert.
- * @returns The double representation or 0.0 if the node is empty or invalid.
+ * @param[out] v    Double value.
+ * @param[in]  node The node to convert.
+ * @returns True if the conversion succeeds, false if the node is invalid.
  */
-static double getNodeAsDouble(xmlNodePtr node) {
+static bool getNodeAsDouble(double *v, xmlNodePtr node) {
+  char *end;
+
   if (!node || !node->content) {
-    return 0.0;
+    return false;
   }
 
-  return strtod((char *)node->content, NULL);
+  *v = strtod((char *)node->content, &end);
+
+  return (end != (char *)node->content && isfinite(*v));
 }
 
 /**
  * @brief   Convert a node's text to an integer.
- * @param[in] node The node to convert.
- * @returns The integer representation or 0 if the node is empty or invalid.
+ * @param[out] v    Integer value.
+ * @param[in]  node The node to convert.
+ * @returns True if the conversion succeeds, false if the node is invalid.
  */
-static int getNodeAsInt(xmlNodePtr node) {
+static bool getNodeAsInt(int *v, xmlNodePtr node) {
+  char *end;
+
   if (!node || !node->content) {
-    return 0;
+    return false;
   }
 
-  return (int)strtol((char *)node->content, NULL, 10);
+  *v = (int)strtol((char *)node->content, &end, 10);
+
+  return (end != (char *)node->content);
 }
 
 /**
@@ -778,12 +784,18 @@ static void classifyDominantWeather(WxStation *station) {
   Intensity       intensity;
   SkyCondition   *s;
 
-  station->wx = wxInvalid;
-
-  s = station->layers;
-  h = INT_MAX;
+  // If there are no cloud layers and there are no reported phenomena, just
+  // assume clear weather.
+  if (!station->layers && !station->wxString) {
+    station->wx = station->isNight ? wxClearNight : wxClearDay;
+    return;
+  }
 
   // First, find the most impactful cloud cover.
+  station->wx = wxInvalid;
+  s           = station->layers;
+  h           = INT_MAX;
+
   while (s) {
     if (s->coverage < skyScattered && station->wx < wxClearDay) {
       station->wx = (station->isNight ? wxClearNight : wxClearDay);
