@@ -335,7 +335,7 @@ static bool calcSunDeclination(double *decl, double t) {
 
 /**
  * @brief   Calculate the corrected obliquity of the ecliptic.
- * @details See https://en.wikipedia.org/wiki/Axial_tilt.
+ * @see     https://en.wikipedia.org/wiki/Axial_tilt.
  * @param[in] t The Julian century.
  * @returns The corrected obliquity of the ecliptic.
  */
@@ -347,9 +347,9 @@ static double calcObliquityCorrection(double t) {
 
 /**
  * @brief   Calculate the solar hour angle for sunrise.
- * @details See https://en.wikipedia.org/wiki/Hour_angle. Converts the angular
- *          offset relative to the location to a solar hour angle relative to
- *          solar noon.
+ * @see     https://en.wikipedia.org/wiki/Hour_angle.
+ * @details Converts the angular offset relative to the location to a solar hour
+ *          angle relative to solar noon.
  * @param[in] lat      The latitude of the location in degrees.
  * @param[in] solarDec The solar declination in degrees.
  * @param[in] offset   Angular offset (official, civil, nautical, astronomical)
@@ -364,7 +364,7 @@ static double calcHourAngleSunrise(double lat, double solarDec, double offset) {
 
 /**
  * @brief   Calculate the solar hour angle for sunset.
- * @details See @a calcHourAngleSunrise.
+ * @see     @a calcHourAngleSunrise.
  * @param[in] lat      The latitude of the location in degrees.
  * @param[in] solarDec The solar declination in degrees.
  * @param[in] offset   Angular offset (official, civil, nautical, astronomical)
@@ -448,7 +448,7 @@ static bool calcGeomMeanLonSun(double *lon, double t) {
 
 /**
  * @brief   Calculate the apparent longitude of the Sun.
- * @details See https://en.wikipedia.org/wiki/Apparent_longitude.
+ * @see     https://en.wikipedia.org/wiki/Apparent_longitude.
  * @param[out] lon The apparent longitude of the Sun.
  * @param[in]  t   The Julian century.
  * @returns True if able to calculate the apparent longitude, false otherwise.
@@ -487,7 +487,7 @@ static bool calcSunTrueLon(double *lon, double t) {
 
 /**
  * @brief   Calculate the equation of center for the Sun.
- * @details See https://en.wikipedia.org/wiki/Equation_of_the_center.
+ * @see     https://en.wikipedia.org/wiki/Equation_of_the_center.
  * @param[in] t The Julian century.
  * @returns The angular difference between the Sun's actual center and the ideal
  *          center with uniform motion in radians.
