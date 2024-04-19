@@ -1,0 +1,26 @@
+digraph "src/log/log.h"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node5 [label="src/log/log.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node5 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="src/conf_file/conf\l_file.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$conf__file_8h.html"];
+  Node6 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="src/conf_file/conf\l_file.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$conf__file_8c.html"];
+  Node6 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="src/conf_file/conf\l_file_prv.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$conf__file__prv_8h.html"];
+  Node8 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 -> Node9 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="src/gfx/gfx.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$gfx_8c.html"];
+  Node6 -> Node10 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node10 [label="src/gfx/globe.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$globe_8c.html"];
+  Node6 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node11 [label="src/piwx.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$piwx_8c.html"];
+  Node5 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node12 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node12 [label="src/log/log.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$log_8c.html"];
+  Node5 -> Node11 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 -> Node13 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node13 [label="src/wx/wx.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$wx_8c.html"];
+}

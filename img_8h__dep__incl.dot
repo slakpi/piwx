@@ -1,0 +1,18 @@
+digraph "src/gfx/img.h"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node3 [label="src/gfx/img.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node3 -> Node4 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="src/gfx/gfx_prv.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$gfx__prv_8h.html"];
+  Node4 -> Node5 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="src/gfx/draw.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$draw_8c.html"];
+  Node4 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="src/gfx/gfx.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$gfx_8c.html"];
+  Node4 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="src/gfx/globe.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$globe_8c.html"];
+  Node3 -> Node6 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node7 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 -> Node8 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="src/gfx/img.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$img_8c.html"];
+}
