@@ -77,33 +77,33 @@ _Static_assert(wxInvalid == 0, "Invalid weather phenomenon must be zero.");
  * @brief  Weather station data entry.
  */
 typedef struct WxStation_ {
-  double             visibility;
-  double             temp, dewPoint;
-  double             alt;
-  Position           pos;
-  char              *id;
-  char              *localId;
-  char              *raw;
-  time_t             obsTime;
-  DominantWeather    wx;
-  char              *wxString;
-  SkyCondition      *layers;
-  int                windDir, windSpeed, windGust;
-  int                vertVis;
-  FlightCategory     cat;
+  double          visibility;
+  double          temp, dewPoint;
+  double          alt;
+  Position        pos;
+  char           *id;
+  char           *localId;
+  char           *raw;
+  time_t          obsTime;
+  DominantWeather wx;
+  char           *wxString;
+  SkyCondition   *layers;
+  int             windDir, windSpeed, windGust;
+  int             vertVis;
+  FlightCategory  cat;
 
   struct WxStation_ *next;
   struct WxStation_ *prev;
 
-  bool               hasObsTime;
-  bool               hasPosition;
-  bool               isNight;
-  bool               hasWindDir, hasWindSpeed, hasWindGust;
-  bool               hasVisibility;
-  bool               hasVertVis;
-  bool               hasTemp, hasDewPoint;
-  bool               hasAlt;
-  bool               blinkState;
+  bool hasObsTime;
+  bool hasPosition;
+  bool isNight;
+  bool hasWindDir, hasWindSpeed, hasWindGust;
+  bool hasVisibility;
+  bool hasVertVis;
+  bool hasTemp, hasDewPoint;
+  bool hasAlt;
+  bool blinkState;
 } WxStation;
 
 /**

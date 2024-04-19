@@ -164,7 +164,7 @@ static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata
 
 static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *station);
 
-static char *trimLocalId(const char *id);
+static char *trimLocalId(const char *id, size_t maxLen);
 
 void wx_freeStations(WxStation *stations) {
   WxStation    *p;
@@ -368,15 +368,22 @@ void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t no
  *          IDs. So, for the US, 7S3 should be "K7S3". If the specified ID has
  *          a number in it, return a duplicate string that does not have the K.
  *          If the ID is an ICAO ID, return a duplicate of the original string.
- * @param[in] id The airport ID of interest.
+ * @param[in] id     The airport ID of interest.
+ * @param[in] maxLen The maximum number of characters permitted.
  * @returns A duplicate of either the original ID or the shortened non-ICAO ID.
  */
-static char *trimLocalId(const char *id) {
-  size_t      len = strlen(id);
-  const char *p   = id;
+static char *trimLocalId(const char *id, size_t maxLen) {
+  size_t      len;
+  const char *p = id;
 
-  if (len < 1) {
+  if (!id) {
     return NULL;
+  }
+
+  len = strnlen(id, maxLen);
+
+  if (len < 2) {
+    return strndup(p, len);
   }
 
   for (int i = 0; i < len; ++i) {
@@ -386,7 +393,7 @@ static char *trimLocalId(const char *id) {
     }
   }
 
-  return strdup(p);
+  return strndup(p, len);
 }
 
 /**
@@ -611,7 +618,7 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
       break;
     case tagStationId:
       station->id      = dupNodeText(c->children, MAX_IDENT_LEN);
-      station->localId = trimLocalId(station->id);
+      station->localId = trimLocalId(station->id, MAX_IDENT_LEN);
       break;
     case tagObsTime:
       station->hasObsTime = getNodeAsUTCDateTime(&obs, c->children);
@@ -725,48 +732,56 @@ static bool getNodeAsInt(int *v, xmlNodePtr node) {
  * @details Assumes UTC and ignores timezone information. Assumes integer
  *          seconds. Performs basic sanity checks, but does not check if the
  *          day exceeds the number of days in the specified month.
- * @param[out] tm   Receives the date time.
+ * 
+ *          The output date/time will be zeroed if the date/time string is
+ *          invalid.
+ * @param[out] tm   Receives the date/time.
  * @param[in]  node The node to convert.
  * @returns True if successful, false otherwise.
  */
 static bool getNodeAsUTCDateTime(struct tm *tm, xmlNodePtr node) {
+  struct tm tmp_tm;
+
+  memset(tm, 0, sizeof(*tm)); // NOLINT -- Size known.
+
   if (!node || !node->content) {
-    memset(tm, 0, sizeof(*tm));
     return false;
   }
 
   // TODO: This should probably be a lexer at some point.
   // NOLINTNEXTLINE -- Not scanning to string buffers.
-  sscanf((char *)node->content, "%d-%d-%dT%d:%d:%d", &tm->tm_year, &tm->tm_mon, &tm->tm_mday,
-         &tm->tm_hour, &tm->tm_min, &tm->tm_sec);
+  sscanf((char *)node->content, "%d-%d-%dT%d:%d:%d", &tmp_tm.tm_year, &tmp_tm.tm_mon,
+         &tmp_tm.tm_mday, &tmp_tm.tm_hour, &tmp_tm.tm_min, &tmp_tm.tm_sec);
 
-  if (tm->tm_year < 1900) {
+  if (tmp_tm.tm_year < 1900) {
     return false;
   }
 
-  if (!(tm->tm_mon >= 1 && tm->tm_mon <= 12)) {
+  if (!(tmp_tm.tm_mon >= 1 && tmp_tm.tm_mon <= 12)) {
     return false;
   }
 
-  if (!(tm->tm_mday >= 1 && tm->tm_mday <= 31)) {
+  if (!(tmp_tm.tm_mday >= 1 && tmp_tm.tm_mday <= 31)) {
     return false;
   }
 
-  if (!(tm->tm_hour >= 0 && tm->tm_hour <= 23)) {
+  if (!(tmp_tm.tm_hour >= 0 && tmp_tm.tm_hour <= 23)) {
     return false;
   }
 
-  if (!(tm->tm_min >= 0 && tm->tm_min <= 59)) {
+  if (!(tmp_tm.tm_min >= 0 && tmp_tm.tm_min <= 59)) {
     return false;
   }
 
-  if (!(tm->tm_sec >= 0 && tm->tm_sec <= 59)) {
+  if (!(tmp_tm.tm_sec >= 0 && tmp_tm.tm_sec <= 59)) {
     return false;
   }
 
-  tm->tm_year -= 1900;
-  tm->tm_mon -= 1;
-  tm->tm_isdst = 0;
+  tmp_tm.tm_year -= 1900;
+  tmp_tm.tm_mon -= 1;
+  tmp_tm.tm_isdst = 0;
+
+  *tm = tmp_tm;
 
   return true;
 }
@@ -837,7 +852,7 @@ static void classifyDominantWeather(WxStation *station) {
       intensity  = intensityInvalid;
       descriptor = 0;
       break;
-    case wxVC: // Nothing to do for in vincinity
+    case wxVC: // Nothing to do for in vicinity
       break;
     case '-':
       intensity = intensityLight;
