@@ -52,8 +52,8 @@ static double calcTimeJulianCentury(double jd);
 
 static double getTwilightAngularValue(DaylightSpan daylight);
 
-bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int year, int month,
-                          int day, time_t *start, time_t *end) {
+bool geo_calcDaylightSpan(Position pos, DaylightSpan daylight, int year, int month, int day,
+                          time_t *start, time_t *end) {
   double angle = getTwilightAngularValue(daylight);
   double jd    = calcJD(year, month, day);
   double absTime;
@@ -62,13 +62,13 @@ bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int yea
   //       This may be due to the Equation of Time which seems to be slightly
   //       off compared to online sources.
 
-  if (!calcAbsTime(&absTime, lat, lon, jd, angle, true)) {
+  if (!calcAbsTime(&absTime, pos.lat, pos.lon, jd, angle, true)) {
     return false;
   }
 
   *start = calcTime(year, month, day, absTime);
 
-  if (!calcAbsTime(&absTime, lat, lon, jd, angle, false)) {
+  if (!calcAbsTime(&absTime, pos.lat, pos.lon, jd, angle, false)) {
     return false;
   }
 
@@ -77,7 +77,7 @@ bool geo_calcDaylightSpan(double lat, double lon, DaylightSpan daylight, int yea
   return true;
 }
 
-bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
+bool geo_calcSubsolarPoint(Position *pos, time_t obsTime) {
   struct tm date;
   double    jd, t, eqTime;
   double    hrs = ((double)(obsTime % SEC_PER_DAY)) / SEC_PER_HOUR;
@@ -89,7 +89,7 @@ bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
         ((double)date.tm_sec / SEC_PER_DAY);
   t = calcTimeJulianCentury(jd);
 
-  if (!calcSunDeclination(lat, t)) {
+  if (!calcSunDeclination(&pos->lat, t)) {
     return false;
   }
 
@@ -97,12 +97,12 @@ bool geo_calcSubsolarPoint(time_t obsTime, double *lat, double *lon) {
     return false;
   }
 
-  *lon = -15 * (hrs - 12 + (eqTime / 60.0));
+  pos->lon = -15 * (hrs - 12 + (eqTime / 60.0));
 
   return true;
 }
 
-bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) {
+bool geo_isNight(Position pos, time_t obsTime, DaylightSpan daylight) {
   time_t    t = obsTime;
   time_t    start, end;
   struct tm date;
@@ -118,7 +118,7 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) 
 
   gmtime_r(&t, &date);
 
-  if (!geo_calcDaylightSpan(lat, lon, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
+  if (!geo_calcDaylightSpan(pos, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
                             &start, &end)) {
     return false;
   }
@@ -144,7 +144,7 @@ bool geo_isNight(double lat, double lon, DaylightSpan daylight, time_t obsTime) 
 
   gmtime_r(&t, &date);
 
-  if (!geo_calcDaylightSpan(lat, lon, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
+  if (!geo_calcDaylightSpan(pos, daylight, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
                             &start, &end)) {
     return false;
   }

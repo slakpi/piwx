@@ -1,8 +1,8 @@
 /**
  * @file display.h
  */
-#if !defined DRAW_H
-#define DRAW_H
+#if !defined DISPLAY_H
+#define DISPLAY_H
 
 #include "geo.h"
 #include "gfx.h"

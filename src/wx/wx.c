@@ -312,7 +312,7 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTim
 
     // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight = geo_isNight(newStation->pos.lat, newStation->pos.lon, daylight, curTime);
+    newStation->isNight = geo_isNight(newStation->pos, curTime, daylight);
     newStation->blinkState = false;
 
     classifyDominantWeather(newStation);
@@ -340,7 +340,7 @@ cleanup:
 }
 
 void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t now) {
-  station->isNight = geo_isNight(station->pos.lat, station->pos.lon, daylight, now);
+  station->isNight = geo_isNight(station->pos, now, daylight);
 
   // Update icons that have day/night variants.
   switch (station->wx) {

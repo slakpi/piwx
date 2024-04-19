@@ -4,6 +4,10 @@
 #if !defined TRANSFORM_H
 #define TRANSFORM_H
 
+/**
+ * @typedef TransformMatrix
+ * @brief   A 4x4 float matrix. A transform functions assume column-major.
+ */
 typedef float TransformMatrix[4][4];
 
 /**

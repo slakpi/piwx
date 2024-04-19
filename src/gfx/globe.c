@@ -53,6 +53,9 @@ _Static_assert(INDEX_COUNT <= USHRT_MAX, "Index count too large.");
 #define DUMP_GLOBE_MODEL 0
 #endif
 
+static const Position gNorthPole = {90.0, 0.0};
+static const Position gSouthPole = {-90.0, 0.0};
+
 #if DRAW_AXES == 1
 static void drawAxes(const DrawResources_ *rsrc, const TransformMatrix view,
                      const TransformMatrix model, const Vector3f *lightDir);
@@ -67,7 +70,7 @@ static bool dumpGlobeModel(const DrawResources_ *rsrc, const char *imageResource
 
 static bool genGlobeModel(DrawResources_ *rsrc);
 
-static void initVertex(Vertex3D *v, double lat, double lon);
+static void initVertex(Vertex3D *v, Position pos);
 
 static bool loadGlobeTexture(DrawResources_ *rsrc, const char *imageResources, const char *image,
                              GLuint tex, Texture *texture);
@@ -80,7 +83,7 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
 
   Point2f         center;
   Vector3f        lightDir;
-  double          sunLat, sunLon;
+  Position        sunPos;
   float           width, height, scale, zoff;
   TransformMatrix view, model, tmp;
 
@@ -96,8 +99,8 @@ void gfx_drawGlobe(DrawResources resources, Position pos, time_t curTime,
   // direction vector and flip its direction to point back at the Earth.
   //
   //   NOTE: The Y/Z swap. See `initVertex`.
-  geo_calcSubsolarPoint(curTime, &sunLat, &sunLon);
-  geo_latLonToECEF(sunLat, sunLon, &lightDir.coord.x, &lightDir.coord.z, &lightDir.coord.y);
+  geo_calcSubsolarPoint(&sunPos, curTime);
+  geo_latLonToECEF(sunPos, &lightDir.coord.x, &lightDir.coord.z, &lightDir.coord.y);
   vectorUnit3f(&lightDir, &lightDir);
   vectorScale3f(&lightDir, &lightDir, -1.0f);
 
@@ -309,17 +312,18 @@ static bool genGlobeModel(DrawResources_ *rsrc) {
 
   // Generate all vertices.
 
-  initVertex(&globe[idx++], 90, 0);
+  initVertex(&globe[idx++], gNorthPole);
 
   for (int lat = 90 - LAT_INTERVAL_DEG; lat > -90; lat -= LAT_INTERVAL_DEG) {
     // Use <= +180 to duplicate the -180 longitude vertices with a U coordinate
     // of 1.
     for (int lon = -180; lon <= 180; lon += LON_INTERVAL_DEG) {
-      initVertex(&globe[idx++], lat, lon);
+      Position pos = {lat, lon};
+      initVertex(&globe[idx++], pos);
     }
   }
 
-  initVertex(&globe[idx++], -90, 0);
+  initVertex(&globe[idx++], gSouthPole);
 
   // Generate the North pole triangle indices.
 
@@ -421,18 +425,17 @@ cleanup:
  *          viewport. However, that would make rendering inconsistent with
  *          framebuffer memory ordering.
  * @param[out] v   The vertex.
- * @param[in]  lat The latitude.
- * @param[in]  lon The longitude.
+ * @param[in]  pos The position.
  */
-static void initVertex(Vertex3D *v, double lat, double lon) {
-  geo_latLonToECEF(lat, lon, &v->pos.coord.x, &v->pos.coord.z, &v->pos.coord.y);
+static void initVertex(Vertex3D *v, Position pos) {
+  geo_latLonToECEF(pos, &v->pos.coord.x, &v->pos.coord.z, &v->pos.coord.y);
 
   // The vertex normal is simply the direction vector of the vertex.
   vectorUnit3f(&v->normal, &v->pos);
 
   // (90N, 180W) => (0, 0) and (90S, 180E) => (1, 1).
-  v->tex.texCoord.u = (float)((lon + 180.0) / 360.0);
-  v->tex.texCoord.v = (float)((-lat + 90.0) / 180.0);
+  v->tex.texCoord.u = (float)((pos.lon + 180.0) / 360.0);
+  v->tex.texCoord.v = (float)((-pos.lat + 90.0) / 180.0);
 
   // The color of the vertex does not really matter.
   v->color = gfx_White;
