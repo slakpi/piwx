@@ -151,6 +151,8 @@ static void classifyDominantWeather(WxStation *station);
 
 static int compareIdentifiers(const WxStation *a, const WxStation *b);
 
+static int compareOrder(const WxStation *a, const WxStation *b);
+
 static int comparePositions(const WxStation *a, const WxStation *b);
 
 static char *dupNodeText(xmlNodePtr node, size_t maxLen);
@@ -167,11 +169,15 @@ static CloudCover getLayerCloudCover(xmlAttr *attr, xmlHashTablePtr hash);
 
 static FlightCategory getStationFlightCategory(xmlNodePtr node, xmlHashTablePtr hash);
 
+static unsigned int getStationOrder(xmlHashTablePtr hash, const char *id);
+
 static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag);
 
 static void hashDealloc(void *payload, xmlChar *name);
 
-static void initHash(xmlHashTablePtr hash);
+static xmlHashTablePtr initStationOrderHash(const char *stations);
+
+static xmlHashTablePtr initTagHash();
 
 static void insertStation(WxStation **start, WxStation *newStation, SortType sort);
 
@@ -219,13 +225,21 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
   METARCallbackData data;
   xmlDocPtr         doc = NULL;
   xmlNodePtr        p;
-  xmlHashTablePtr   hash = NULL;
+  xmlHashTablePtr   hash      = NULL;
+  xmlHashTablePtr   orderHash = NULL;
   Tag               tag;
   WxStation        *start = NULL;
   int               count, len;
   bool              ok = false;
 
-  *err = 0;
+  *err      = 0;
+  hash      = initTagHash();
+  orderHash = initStationOrderHash(stations);
+
+  if (!hash || !orderHash) {
+    *err = -1;
+    goto cleanup;
+  }
 
   // Build the query string to look for the most recent report for each station
   // within the last hour and a half. It is possible some stations lag more than
@@ -275,9 +289,6 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
   doc = data.ctxt->myDoc;
   xmlFreeParserCtxt(data.ctxt);
 
-  hash = xmlHashCreate(tagLast);
-  initHash(hash);
-
   // Find the response tag.
   p = getChildTag(doc->children, tagResponse, hash);
 
@@ -316,6 +327,7 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
     readStation(p, hash, newStation);
     newStation->isNight    = geo_isNight(newStation->pos, curTime, daylight);
     newStation->blinkState = false;
+    newStation->order      = getStationOrder(orderHash, newStation->id);
     classifyDominantWeather(newStation);
 
     insertStation(&start, newStation, sort);
@@ -332,6 +344,10 @@ cleanup:
 
   if (hash) {
     xmlHashFree(hash, hashDealloc);
+  }
+
+  if (orderHash) {
+    xmlHashFree(orderHash, hashDealloc);
   }
 
   if (!ok) {
@@ -400,13 +416,64 @@ static char *trimLocalId(const char *id, size_t maxLen) {
 }
 
 /**
- * @brief Initialize the tag map.
- * @param[in] hash Tag hash map.
+ * @brief   Initialize the station query order hash.
+ * @param[in] stations The list of stations to query.
+ * @returns A new hash table pointer or NULL if there are no stations.
  */
-static void initHash(xmlHashTablePtr hash) {
+static xmlHashTablePtr initStationOrderHash(const char *stations) {
+  static const char *delim = ", \t\n";
+
+  char            buf[4096];
+  char           *p;
+  unsigned int    count = 0;
+  xmlHashTablePtr hash;
+
+  // First pass: count the number of stations.
+  strncpy_safe(buf, stations, COUNTOF(buf));
+  p = strtok(buf, delim);
+  while (p) {
+    ++count;
+    p = strtok(NULL, delim);
+  }
+
+  if (count == 0) {
+    return NULL;
+  }
+
+  // Second pass, allocate the hash table and add the entries.
+  strncpy_safe(buf, stations, COUNTOF(buf));
+  p     = strtok(buf, delim);
+  hash  = xmlHashCreate(count);
+  count = 0;
+
+  if (!hash) {
+    return NULL;
+  }
+
+  while (p) {
+    xmlHashAddEntry(hash, (xmlChar *)p, (void *)count++);
+    p = strtok(NULL, delim);
+  }
+
+  return hash;
+}
+
+/**
+ * @brief   Initialize the tag map.
+ * @returns A new hash table pointer.
+ */
+static xmlHashTablePtr initTagHash() {
+  xmlHashTablePtr hash = xmlHashCreate(tagLast);
+
+  if (!hash) {
+    return NULL;
+  }
+
   for (long i = 0; gTagNames[i]; ++i) {
     xmlHashAddEntry(hash, (xmlChar *)gTagNames[i], (void *)gTags[i]);
   }
+
+  return hash;
 }
 
 /**
@@ -416,6 +483,22 @@ static void initHash(xmlHashTablePtr hash) {
  * @param[in] name    The tag name.
  */
 static void hashDealloc(void *payload, xmlChar *name) {}
+
+/**
+ * @brief   Retrieve the query order from a station from the hash table.
+ * @param[in] hash The hash table to query.
+ * @param[in] id   The station identifier to query.
+ * @returns The query order for the station or 0 if the station is not found.
+ */
+static unsigned int getStationOrder(xmlHashTablePtr hash, const char *id) {
+  void *p = xmlHashLookup(hash, (const xmlChar *)id);
+
+  if (!p) {
+    return 0;
+  }
+
+  return (unsigned int)p;
+}
 
 /**
  * @brief   Lookup the tag ID for a given tag name.
@@ -701,6 +784,9 @@ static void insertStation(WxStation **start, WxStation *newStation, SortType sor
   case sortPosition:
     comp = comparePositions;
     break;
+  case sortQuery:
+    comp = compareOrder;
+    break;
   default:
     comp = NULL;
     break;
@@ -745,7 +831,7 @@ static void insertStation(WxStation **start, WxStation *newStation, SortType sor
 }
 
 /**
- * @brief   Lexicographical comparison of the station local identifiers.
+ * @brief   Lexicographical sort of the station local identifiers.
  * @details If neither station has a local identifier, they compare equal. A
  *          station without a local identifier compares less than a station with
  *          a local identifier. Otherwise, a lexicographical comparison of the
@@ -762,6 +848,20 @@ static int compareIdentifiers(const WxStation *a, const WxStation *b) {
   }
 
   return strcmp(a->localId, b->localId);
+}
+
+/**
+ * @brief Query order sort.
+ * @see   @a StationCompareFn 
+ */
+static int compareOrder(const WxStation *a, const WxStation *b) {
+  if (a->order < b->order) {
+    return -1;
+  } else if (a->order == b->order) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 /**

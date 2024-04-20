@@ -182,6 +182,7 @@ static SortType makeSortType(int val) {
   switch (val) {
   case sortAlpha:
   case sortPosition:
+  case sortQuery:
     return (SortType)val;
   default:
     return sortNone;

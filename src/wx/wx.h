@@ -12,7 +12,7 @@
  * @enum  SortType
  * @brief Weather station sort type.
  */
-typedef enum { sortNone, sortPosition, sortAlpha } SortType;
+typedef enum { sortNone, sortPosition, sortAlpha, sortQuery } SortType;
 _Static_assert(sortNone == 0, "No sorting must be zero.");
 
 /**
@@ -98,6 +98,7 @@ typedef struct WxStation_ {
   int             windDir, windSpeed, windGust;
   int             vertVis;
   FlightCategory  cat;
+  unsigned int    order;
 
   struct WxStation_ *next;
   struct WxStation_ *prev;

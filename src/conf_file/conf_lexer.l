@@ -167,6 +167,11 @@ WS          [\v\r\n\t ]+
   return TOKEN_SORT_TYPE;
 }
 
+"query" {
+  yylval->val = sortQuery;
+  return TOKEN_SORT_TYPE;
+}
+
 "=" { return '='; }
 
 ";" { return ';'; }
