@@ -20,6 +20,7 @@
 #define DEFAULT_LOG_LEVEL            logWarning
 #define DEFAULT_DAYLIGHT             daylightCivil
 #define DEFAULT_DRAW_GLOBE           true
+#define DEFAULT_SORT_TYPE            sortNone
 
 /**
  * @brief   Parse configuration settings from a file stream.

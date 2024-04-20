@@ -11,9 +11,13 @@ typedef void* yyscan_t;
 #include "conf.parser.h"
 #include "conf.lexer.h"
 
-static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error) {
+static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error);
 
-}
+static DaylightSpan makeDaylightSpan(int val);
+
+static LogLevel makeLogLevel(int val);
+
+static SortType makeSortType(int val);
 
 %}
 
@@ -34,7 +38,7 @@ static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error) {
 
 %token<p> TOKEN_PARAM
 %token<str> TOKEN_STRING
-%token<val> TOKEN_VALUE TOKEN_ONOFF TOKEN_LOGLEVEL TOKEN_DAYLIGHT_SPAN
+%token<val> TOKEN_VALUE TOKEN_ONOFF TOKEN_LOGLEVEL TOKEN_DAYLIGHT_SPAN TOKEN_SORT_TYPE
 %start confFile
 
 %%
@@ -116,48 +120,70 @@ assignment
   case confDrawGlobe:
     cfg->drawGlobe = ($3 == 0 ? false : true);
     break;
-  default:
-    YYERROR;
-  }
-  }
-| TOKEN_PARAM '=' TOKEN_LOGLEVEL ';' {
-  switch ($1.param) {
-    case confLogLevel:
-      switch ($3) {
-      case logWarning:
-      case logInfo:
-      case logDebug:
-        cfg->logLevel = $3;
-        break;
-      default:
-        cfg->logLevel = logQuiet;
-        break;
-      }
-      break;
-    default:
-      YYERROR;
-    }
-  }
-| TOKEN_PARAM '=' TOKEN_DAYLIGHT_SPAN ';' {
-  switch ($1.param) {
-  case confDaylight:
-    switch ($3) {
-    case daylightOfficial:
-    case daylightCivil:
-    case daylightNautical:
-    case daylightAstronomical:
-      cfg->daylight = $3;
-      break;
-    default:
-      cfg->daylight = daylightCivil;
-      break;
-    }
+  case confSortType:
+    cfg->stationSort = makeSortType($3);
     break;
   default:
     YYERROR;
   }
   }
+| TOKEN_PARAM '=' TOKEN_LOGLEVEL ';' {
+  if ($1.param != confLogLevel) {
+    YYERROR;
+  }
+
+  cfg->logLevel = makeLogLevel($3);
+  }
+| TOKEN_PARAM '=' TOKEN_DAYLIGHT_SPAN ';' {
+  if ($1.param != confDaylight) {
+    YYERROR;
+  }
+
+  cfg->daylight = makeDaylightSpan($3);
+  }
+| TOKEN_PARAM '=' TOKEN_SORT_TYPE ';' {
+  if ($1.param != confSortType) {
+    YYERROR;
+  }
+
+  cfg->stationSort = makeSortType($3);
+  }
 | error ';'
 ;
 
 %%
+
+static void conf_error(yyscan_t _scanner, PiwxConfig *cfg, char *error) {}
+
+static DaylightSpan makeDaylightSpan(int val) {
+  switch (val) {
+  case daylightOfficial:
+  case daylightCivil:
+  case daylightNautical:
+  case daylightAstronomical:
+    return (DaylightSpan)val;
+  default:
+    return daylightCivil;
+  }
+}
+
+static LogLevel makeLogLevel(int val) {
+  switch (val) {
+  case logWarning:
+  case logInfo:
+  case logDebug:
+    return (LogLevel)val;
+  default:
+    return logQuiet;
+  }
+}
+
+static SortType makeSortType(int val) {
+  switch (val) {
+  case sortAlpha:
+  case sortPosition:
+    return (SortType)val;
+  default:
+    return sortNone;
+  }
+}

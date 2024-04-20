@@ -11,6 +11,16 @@
 #define CONF_MAX_LEDS 50
 
 /**
+ * @enum  SortType
+ * @brief Weather station sort type.
+ */
+typedef enum {
+  sortNone,
+  sortAlpha,
+  sortPosition
+} SortType;
+
+/**
  * @struct PiwxConfig
  * @brief  The configuration structure.
  */
@@ -31,6 +41,7 @@ typedef struct {
   LogLevel     logLevel;                      // Logging output level
   DaylightSpan daylight;                      // Daylight span for night dimming
   bool         drawGlobe;                     // Draw day/night globe
+  SortType     stationSort;                   // Weather station sort type
 } PiwxConfig;
 
 /**

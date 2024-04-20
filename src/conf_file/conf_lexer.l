@@ -152,6 +152,21 @@ WS          [\v\r\n\t ]+
   return TOKEN_PARAM;
 }
 
+"sort" {
+  yylval->p.param = confSortType;
+  return TOKEN_PARAM;
+}
+
+"alpha" {
+  yylval->val = sortAlpha;
+  return TOKEN_SORT_TYPE;
+}
+
+"position" {
+  yylval->val = sortPosition;
+  return TOKEN_SORT_TYPE;
+}
+
 "=" { return '='; }
 
 ";" { return ';'; }
