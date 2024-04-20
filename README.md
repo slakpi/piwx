@@ -61,6 +61,18 @@ sample to a new file called `piwx.conf`.
     # Airport METAR display cycle time in seconds.
     cycletime=5;
 
+The Aviation Weather data API does not return stations in any particular order.
+The `sort` option allows sorting stations lexicographically or geographically.
+
+    # Sort by geographical position.
+    sort=position;
+
+If `sort` is set to `off` or is not specified, stations are displayed in the
+order received from the Aviation Weather data API. When set to `on` or
+`position`, stations are displayed from West to East and North to South. When
+set to `alpha`, stations are displayed in lexicographical order, e.g. `77S`
+sorts before `KAST`, and `KAST` sorts before `KTPA`.
+
 With LED support enabled, PiWx will drive a 50-LED WS281x strip to display
 flight categories at select airports. The `led<num>` option assigns an airport
 to a LED where `<num>` is a number between 1 and 50 inclusive.
