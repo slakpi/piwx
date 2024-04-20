@@ -13,6 +13,7 @@
  * @brief Weather station sort type.
  */
 typedef enum { sortNone, sortAlpha, sortPosition } SortType;
+_Static_assert(sortNone == 0, "No sorting must be zero.");
 
 /**
  * @enum  CloudCover
