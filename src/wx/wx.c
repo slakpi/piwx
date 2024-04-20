@@ -314,9 +314,9 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
     memset(newStation, 0, sizeof(*newStation)); // NOLINT -- Size known.
 
     readStation(p, hash, newStation);
-    classifyDominantWeather(newStation);
     newStation->isNight    = geo_isNight(newStation->pos, curTime, daylight);
     newStation->blinkState = false;
+    classifyDominantWeather(newStation);
 
     insertStation(&start, newStation, sort);
 
