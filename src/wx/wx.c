@@ -69,6 +69,15 @@ typedef struct {
   xmlParserCtxtPtr ctxt;
 } METARCallbackData;
 
+/**
+ * @typedef StationCompareFn
+ * @brief   Weather station comparison function signature.
+ * @param[in] a Left-hand side station.
+ * @param[in] b Right-hand side station.
+ * @returns -1 if @a a < @a b, 0 if @a a == @a b, 1 if @a a > @a b.
+ */
+typedef int (*StationCompareFn)(const WxStation *a, const WxStation *b);
+
 // clang-format off
 static const Tag gTags[] = {
   tagResponse,
@@ -140,6 +149,10 @@ static void addCloudLayer(xmlNodePtr node, WxStation *station, xmlHashTablePtr h
 
 static void classifyDominantWeather(WxStation *station);
 
+static int compareIdentifiers(const WxStation *a, const WxStation *b);
+
+static int comparePositions(const WxStation *a, const WxStation *b);
+
 static char *dupNodeText(xmlNodePtr node, size_t maxLen);
 
 static xmlNodePtr getChildTag(xmlNodePtr children, Tag tag, xmlHashTablePtr hash);
@@ -159,6 +172,8 @@ static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag);
 static void hashDealloc(void *payload, xmlChar *name);
 
 static void initHash(xmlHashTablePtr hash);
+
+static void insertStation(WxStation **start, WxStation *newStation, SortType sort);
 
 static size_t metarCallback(char *ptr, size_t size, size_t nmemb, void *userdata);
 
@@ -196,7 +211,8 @@ void wx_freeStations(WxStation *stations) {
   }
 }
 
-WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTime, int *err) {
+WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight, time_t curTime,
+                      int *err) {
   CURL             *curlLib;
   CURLcode          res;
   char              url[4096];
@@ -205,7 +221,7 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTim
   xmlNodePtr        p;
   xmlHashTablePtr   hash = NULL;
   Tag               tag;
-  WxStation        *start = NULL, *cur;
+  WxStation        *start = NULL;
   int               count, len;
   bool              ok = false;
 
@@ -297,25 +313,12 @@ WxStation *wx_queryWx(const char *stations, DaylightSpan daylight, time_t curTim
 
     memset(newStation, 0, sizeof(*newStation)); // NOLINT -- Size known.
 
-    // Add the station to the circular list.
-    if (!start) {
-      start = cur = newStation;
-      cur->next   = cur;
-      cur->prev   = cur;
-    } else {
-      start->prev      = newStation;
-      cur->next        = newStation;
-      newStation->next = start;
-      newStation->prev = cur;
-      cur              = newStation;
-    }
-
-    // Read the stations.
     readStation(p, hash, newStation);
-    newStation->isNight = geo_isNight(newStation->pos, curTime, daylight);
+    classifyDominantWeather(newStation);
+    newStation->isNight    = geo_isNight(newStation->pos, curTime, daylight);
     newStation->blinkState = false;
 
-    classifyDominantWeather(newStation);
+    insertStation(&start, newStation, sort);
 
     p = p->next;
   }
@@ -674,6 +677,119 @@ static void readStation(xmlNodePtr node, xmlHashTablePtr hash, WxStation *statio
 }
 
 /**
+ * @brief Insert a new station into a circular list.
+ * @param[in,out] start   The head of the list.
+ * @param[in,out] station The station to insert.
+ * @param[in]     sort    Station sort type.
+ */
+static void insertStation(WxStation **start, WxStation *newStation, SortType sort) {
+  StationCompareFn comp;
+  WxStation       *p;
+
+  // If start is NULL, just make the new station the start of the list.
+  if (!*start) {
+    *start         = newStation;
+    (*start)->next = newStation;
+    (*start)->prev = newStation;
+    return;
+  }
+
+  switch (sort) {
+  case sortAlpha:
+    comp = compareIdentifiers;
+    break;
+  case sortPosition:
+    comp = comparePositions;
+    break;
+  default:
+    comp = NULL;
+    break;
+  }
+
+  p = *start;
+
+  // If not sorting, set p to NULL. This will skip the loop and insert the new
+  // station at the end of the list.
+  if (!comp) {
+    p = NULL;
+  }
+
+  while (p) {
+    if (comp(newStation, p) < 0) {
+      break;
+    }
+
+    if (p->next == *start) {
+      p = NULL;
+    } else {
+      p = p->next;
+    }
+  }
+
+  // If p is the start of the list, update the start pointer to the new station
+  // since it will be inserted before the current start.
+  if (p == *start) {
+    *start = newStation;
+  }
+
+  // If p is NULL, set p to the start to insert the station at the end of the
+  // list.
+  if (!p) {
+    p = *start;
+  }
+
+  newStation->next = p;
+  newStation->prev = p->prev;
+  p->prev->next    = newStation;
+  p->prev          = newStation;
+}
+
+/**
+ * @brief   Lexicographical comparison of the station local identifiers.
+ * @details If neither station has a local identifier, they compare equal. A
+ *          station without a local identifier compares less than a station with
+ *          a local identifier. Otherwise, a lexicographical comparison of the
+ *          local identifiers is performed.
+ * @see   @a StationCompareFn
+ */
+static int compareIdentifiers(const WxStation *a, const WxStation *b) {
+  if (!a->localId && !b->localId) {
+    return 0;
+  } else if (!a->localId) {
+    return -1;
+  } else if (!b->localId) {
+    return 1;
+  }
+
+  return strcmp(a->localId, b->localId);
+}
+
+/**
+ * @brief   Geographical sort by longitude, then latitude.
+ * @details If neither station has a position, they compare equal. A station
+ *          without a position compares less than a station with a position.
+ *          Otherwise, sort stations West to East, then North to South.
+ * @see   @a StationCompareFn
+ */
+static int comparePositions(const WxStation *a, const WxStation *b) {
+  if (!a->hasPosition && !b->hasPosition) {
+    return 0;
+  } else if (!a->hasPosition || a->pos.lon < b->pos.lon) {
+    return -1;
+  } else if (!b->hasPosition || a->pos.lon > b->pos.lon) {
+    return 1;
+  }
+
+  if (a->pos.lat > b->pos.lat) {
+    return -1;
+  } else if (a->pos.lat < b->pos.lat) {
+    return 1;
+  }
+
+  return 0;
+}
+
+/**
  * @brief   Duplicate a node's text.
  * @param[in] node   The node to duplicate.
  * @param[in] maxLen The maximum number of characters to duplicate.
@@ -732,7 +848,7 @@ static bool getNodeAsInt(int *v, xmlNodePtr node) {
  * @details Assumes UTC and ignores timezone information. Assumes integer
  *          seconds. Performs basic sanity checks, but does not check if the
  *          day exceeds the number of days in the specified month.
- * 
+ *
  *          The output date/time will be zeroed if the date/time string is
  *          invalid.
  * @param[out] tm   Receives the date/time.

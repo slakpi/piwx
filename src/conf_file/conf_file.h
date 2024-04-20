@@ -6,19 +6,10 @@
 
 #include "geo.h"
 #include "log.h"
+#include "wx.h"
 #include <stddef.h>
 
 #define CONF_MAX_LEDS 50
-
-/**
- * @enum  SortType
- * @brief Weather station sort type.
- */
-typedef enum {
-  sortNone,
-  sortAlpha,
-  sortPosition
-} SortType;
 
 /**
  * @struct PiwxConfig

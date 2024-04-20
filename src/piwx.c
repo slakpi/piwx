@@ -200,7 +200,7 @@ static bool go(bool test, bool verbose) {
         gfx_commitToScreen(resources);
       }
 
-      wx           = wx_queryWx(cfg->stationQuery, cfg->daylight, now, &err);
+      wx           = wx_queryWx(cfg->stationQuery, cfg->stationSort, cfg->daylight, now, &err);
       curStation   = wx;
       globePos     = curStation->hasPosition ? curStation->pos : gDefPos;
       first        = false;
@@ -385,16 +385,14 @@ static bool updateStations(const PiwxConfig *cfg, WxStation *stations, uint32_t 
   WxStation *p          = stations;
   bool       updateLEDs = false;
 
-  while (true) {
-    updateLEDs |= updateStation(cfg, p, update, now);
-
-    p = p->next;
-
-    // Circular list.
-    if (p == stations) {
-      break;
-    }
+  if (!stations) {
+    return false;
   }
+
+  do {
+    updateLEDs |= updateStation(cfg, p, update, now);
+    p = p->next;
+  } while (p != stations);
 
   return updateLEDs;
 }
@@ -489,7 +487,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
     return;
   }
 
-  while (p) {
+  do {
     for (int i = 0; i < CONF_MAX_LEDS; ++i) {
       if (!cfg->ledAssignments[i]) {
         continue;
@@ -504,12 +502,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
     }
 
     p = p->next;
-
-    // Circular list.
-    if (p == stations) {
-      break;
-    }
-  }
+  } while (p != stations);
 
   led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, colors, CONF_MAX_LEDS);
 }

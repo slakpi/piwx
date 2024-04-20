@@ -9,7 +9,7 @@ find_package(FLEX REQUIRED)
 #-------------------------------------------------------------------------------
 add_library(conf_intf INTERFACE)
 target_include_directories(conf_intf INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(conf_intf INTERFACE Piwx::Geo Piwx::Log)
+target_link_libraries(conf_intf INTERFACE Piwx::Geo Piwx::Log Piwx::Wx)
 
 #-------------------------------------------------------------------------------
 # Setup the configuration file parser and lexer.
