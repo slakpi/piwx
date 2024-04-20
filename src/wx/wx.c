@@ -244,15 +244,14 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
   // Build the query string to look for the most recent report for each station
   // within the last hour and a half. It is possible some stations lag more than
   // an hour, but typically not more than an hour and a half.
-  count = strncpy_safe(url,
+  count = strncpy_safe(url, COUNTOF(url),
                        "https://aviationweather.gov/cgi-bin/data/dataserver.php?"
                        "requestType=retrieve&"
                        "dataSource=metars&"
                        "hoursBeforeNow=1.5&"
                        "mostRecentForEachStation=constraint&"
                        "format=xml&"
-                       "stationString=",
-                       COUNTOF(url));
+                       "stationString=");
 
   assertLog(count < COUNTOF(url), "Base URL is too large.");
   count = COUNTOF(url) - strlen(url);
@@ -429,7 +428,7 @@ static xmlHashTablePtr initStationOrderHash(const char *stations) {
   xmlHashTablePtr hash;
 
   // First pass: count the number of stations.
-  strncpy_safe(buf, stations, COUNTOF(buf));
+  strncpy_safe(buf, COUNTOF(buf), stations);
   p = strtok(buf, delim);
   while (p) {
     ++count;
@@ -441,7 +440,7 @@ static xmlHashTablePtr initStationOrderHash(const char *stations) {
   }
 
   // Second pass, allocate the hash table and add the entries.
-  strncpy_safe(buf, stations, COUNTOF(buf));
+  strncpy_safe(buf, COUNTOF(buf), stations);
   p     = strtok(buf, delim);
   hash  = xmlHashCreate(count);
   count = 0;
@@ -852,7 +851,7 @@ static int compareIdentifiers(const WxStation *a, const WxStation *b) {
 
 /**
  * @brief Query order sort.
- * @see   @a StationCompareFn 
+ * @see   @a StationCompareFn
  */
 static int compareOrder(const WxStation *a, const WxStation *b) {
   if (a->order < b->order) {

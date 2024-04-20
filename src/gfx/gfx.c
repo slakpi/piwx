@@ -409,7 +409,7 @@ bool gfx_getCharacterRenderInfo(const DrawResources_ *rsrc, Font font, char c,
 void gfx_getEglError(DrawResources_ *rsrc, const char *file, long line) {
   const char *msg = "Unknown error.";
 
-  strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
+  strncpy_safe(rsrc->errorFile, COUNTOF(rsrc->errorFile), file);
   rsrc->errorLine = line;
   rsrc->error     = (int)eglGetError();
 
@@ -476,7 +476,7 @@ void gfx_getEglError(DrawResources_ *rsrc, const char *file, long line) {
     break;
   }
 
-  strncpy_safe(rsrc->errorMsg, msg, COUNTOF(rsrc->errorMsg));
+  strncpy_safe(rsrc->errorMsg, COUNTOF(rsrc->errorMsg), msg);
 }
 
 bool gfx_getFontInfo(DrawResources resources, Font font, CharInfo *info) {
@@ -518,7 +518,7 @@ void gfx_getGfxError(DrawResources resources, int *error, char *msg, size_t len)
 
   if (msg) {
     size_t l = min(COUNTOF(rsrc->errorMsg), len);
-    strncpy_safe(msg, rsrc->errorMsg, l);
+    strncpy_safe(msg, l, rsrc->errorMsg);
   }
 }
 
@@ -528,7 +528,7 @@ void gfx_getProgramError(DrawResources_ *rsrc, GLuint program, const char *file,
   glGetProgramInfoLog(program, COUNTOF(rsrc->errorMsg), &len, rsrc->errorMsg);
   rsrc->error     = -1;
   rsrc->errorLine = line;
-  strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
+  strncpy_safe(rsrc->errorFile, COUNTOF(rsrc->errorFile), file);
 }
 
 void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, long line) {
@@ -537,7 +537,7 @@ void gfx_getShaderError(DrawResources_ *rsrc, GLuint shader, const char *file, l
   glGetShaderInfoLog(shader, COUNTOF(rsrc->errorMsg), &len, rsrc->errorMsg);
   rsrc->error     = -1;
   rsrc->errorLine = line;
-  strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
+  strncpy_safe(rsrc->errorFile, COUNTOF(rsrc->errorFile), file);
 }
 
 bool gfx_initGraphics(const char *fontResources, const char *imageResources,
@@ -632,10 +632,10 @@ void gfx_resetShader(const DrawResources_ *rsrc, Program program) {
 }
 
 void gfx_setError(DrawResources_ *rsrc, int error, const char *msg, const char *file, long line) {
-  strncpy_safe(rsrc->errorMsg, msg, COUNTOF(rsrc->errorMsg));
+  strncpy_safe(rsrc->errorMsg, COUNTOF(rsrc->errorMsg), msg);
   rsrc->error     = error;
   rsrc->errorLine = line;
-  strncpy_safe(rsrc->errorFile, file, COUNTOF(rsrc->errorFile));
+  strncpy_safe(rsrc->errorFile, COUNTOF(rsrc->errorFile), file);
 }
 
 void gfx_setupShader(const DrawResources_ *rsrc, Program program, GLuint texture) {

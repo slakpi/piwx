@@ -267,12 +267,12 @@ static void drawCloudLayers(DrawResources *resources, const WxStation *station) 
 
   switch (sky->coverage) {
   case skyClear:
-    strncpy_safe(buf, "Clear", COUNTOF(buf));
+    strncpy_safe(buf, COUNTOF(buf), "Clear");
     gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
     return;
   case skyOvercastSurface:
     if (!station->hasVertVis || station->vertVis <= 0) {
-      strncpy_safe(buf, "VV ---", COUNTOF(buf));
+      strncpy_safe(buf, COUNTOF(buf), "VV ---");
     } else {
       // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
       snprintf(buf, COUNTOF(buf), "VV %d", station->vertVis);
@@ -442,14 +442,14 @@ static void getWindDirectionText(char *buf, size_t len, int direction, int speed
     snprintf(buf, len, "%d\x01", direction);
   } else if (direction == 0) {
     if (speed > 0) {
-      strncpy_safe(buf, "Var", len);
+      strncpy_safe(buf, len, "Var");
     } else if (speed == 0) {
-      strncpy_safe(buf, "Calm", len);
+      strncpy_safe(buf, len, "Calm");
     } else {
-      strncpy_safe(buf, "---", len);
+      strncpy_safe(buf, len, "---");
     }
   } else {
-    strncpy_safe(buf, "---", len);
+    strncpy_safe(buf, len, "---");
   }
 }
 
@@ -461,7 +461,7 @@ static void getWindDirectionText(char *buf, size_t len, int direction, int speed
  */
 static void getWindSpeedText(char *buf, size_t len, int speed) {
   if (speed <= 0) {
-    strncpy_safe(buf, "---", len);
+    strncpy_safe(buf, len, "---");
   } else {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, len, "%dkt", speed);
@@ -484,7 +484,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   }
 
   if (!station->hasVisibility || station->visibility < 0) {
-    strncpy_safe(buf, "---", COUNTOF(buf));
+    strncpy_safe(buf, COUNTOF(buf), "---");
   } else if (station->visibility < 2) {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "Vis %.1fsm", station->visibility);
@@ -507,7 +507,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "---/%.0f\x01\x43", station->dewPoint);
   } else {
-    strncpy_safe(buf, "---/---", COUNTOF(buf));
+    strncpy_safe(buf, COUNTOF(buf), "---/---");
   }
 
   bottomLeft.coord.x = 5.0f;
@@ -515,7 +515,7 @@ static void drawTempDewPointVisAlt(DrawResources *resources, const WxStation *st
   gfx_drawText(resources, font6pt, bottomLeft, buf, strlen(buf), gfx_White, vertAlignBaseline);
 
   if (!station->hasAlt || station->alt < 0) {
-    strncpy_safe(buf, "---", COUNTOF(buf));
+    strncpy_safe(buf, COUNTOF(buf), "---");
   } else {
     // NOLINTNEXTLINE -- snprintf is sufficient; buffer size known.
     snprintf(buf, COUNTOF(buf), "%.2f\"", station->alt);

@@ -12,19 +12,19 @@ int min(int a, int b) {
   return (a < b ? a : b);
 }
 
-size_t strncpy_safe(char *dst, const char *src, size_t maxlen) {
+size_t strncpy_safe(char *dest, size_t destLen, const char *src) {
   // Based on Apple's implementation of @a strlcpy in XNU.
 
-  const size_t srclen = strlen(src);
+  const size_t srcLen = strlen(src);
 
-  if (srclen + 1 < maxlen) {
-    memcpy(dst, src, srclen + 1); // NOLINT -- Size checked.
-  } else if (maxlen != 0) {
-    memcpy(dst, src, maxlen - 1); // NOLINT -- Size checked.
-    dst[maxlen - 1] = '\0';
+  if (srcLen + 1 < destLen) {
+    memcpy(dest, src, srcLen + 1); // NOLINT -- Size checked.
+  } else if (destLen != 0) {
+    memcpy(dest, src, destLen - 1); // NOLINT -- Size checked.
+    dest[destLen - 1] = '\0';
   }
 
-  return srclen;
+  return srcLen;
 }
 
 unsigned int umax(unsigned int a, unsigned int b) {

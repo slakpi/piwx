@@ -111,7 +111,7 @@ static void openTempFile(void) {
   gTempFile = fdopen(fd, "w");
   assert(gTempFile);
 
-  strncpy_safe(gTempFilePath, tmpFile, COUNTOF(gTempFilePath));
+  strncpy_safe(gTempFilePath, COUNTOF(gTempFilePath), tmpFile);
 }
 
 static void writeValidConfFile(FILE *cfgFile, const PiwxConfig *cfg) {
