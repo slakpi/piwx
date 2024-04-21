@@ -62,7 +62,8 @@ sample to a new file called `piwx.conf`.
     cycletime=5;
 
 The Aviation Weather data API does not return stations in any particular order.
-The `sort` option allows sorting stations lexicographically or geographically.
+The `sort` option allows sorting stations lexicographically, geographically, or
+in the order specified by the configuration file.
 
     # Sort by geographical position.
     sort=position;
@@ -71,7 +72,8 @@ If `sort` is set to `off` or is not specified, stations are displayed in the
 order received from the Aviation Weather data API. When set to `on` or
 `position`, stations are displayed from West to East and North to South. When
 set to `alpha`, stations are displayed in lexicographical order, e.g. `77S`
-sorts before `KAST`, and `KAST` sorts before `KTPA`.
+sorts before `KAST`, and `KAST` sorts before `KTPA`. When set to `query`,
+stations are displayed in the order specified by the `stations` query.
 
 With LED support enabled, PiWx will drive a 50-LED WS281x strip to display
 flight categories at select airports. The `led<num>` option assigns an airport
