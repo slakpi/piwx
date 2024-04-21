@@ -57,9 +57,24 @@ static const struct option gLongArgs[] = {
 };
 // clang-format on
 
+static const char *gDaylightSpanTable[] = {"Official", "Civil", "Nautical", "Astronomical"};
+_Static_assert(COUNTOF(gDaylightSpanTable) == daylightSpanCount, "Daylight span count mismatch.");
+
+static const char *gLogLevelTable[] = {"Quiet", "Warning", "Info", "Debug"};
+_Static_assert(COUNTOF(gLogLevelTable) == logLevelCount, "Log level count mismatch.");
+
+static const char *gSortTypeTable[] = {"None", "Position", "Lexicographical", "Query Order"};
+_Static_assert(COUNTOF(gSortTypeTable) == sortTypeCount, "Sort type count mismatch.");
+
 static bool gRun;
 
+static const char *getDaylightSpanText(DaylightSpan span);
+
 static LEDColor getLEDColor(const PiwxConfig *cfg, const WxStation *station);
+
+static const char *getLogLevelText(LogLevel log);
+
+static const char *getSortTypeText(SortType sort);
 
 static void globePositionUpdate(Position pos, void *param);
 
@@ -312,18 +327,23 @@ cleanup:
  * @param[in] config The PiWx configuration to print.
  */
 static void printConfiguration(const PiwxConfig *config) {
+  printf("Config File: %s\n", config->configFile);
   printf("Image Resources: %s\n", config->imageResources);
   printf("Font Resources: %s\n", config->fontResources);
   printf("Station Query: %s\n", config->stationQuery);
   printf("Cycle Time: %d\n", config->cycleTime);
   printf("High-Wind Speed: %d\n", config->highWindSpeed);
+  printf("High-Wind Blink: %d\n", config->highWindBlink);
+  printf("Draw Globe: %d\n", config->drawGlobe);
   printf("LED Brightness: %d\n", config->ledBrightness);
   printf("LED Night Brightness: %d\n", config->ledNightBrightness);
   printf("LED Data Pin: %d\n", config->ledDataPin);
   printf("LED DMA Channel: %d\n", config->ledDMAChannel);
-  printf("Log Level: %d\n", config->logLevel);
+  printf("Log Level: %s\n", getLogLevelText(config->logLevel));
+  printf("Daylight Span: %s\n", getDaylightSpanText(config->daylight));
+  printf("Sort Type: %s\n", getSortTypeText(config->stationSort));
 
-  for (int i = 0; i < CONF_MAX_LEDS; ++i) {
+  for (int i = 0; i < COUNTOF(config->ledAssignments); ++i) {
     if (config->ledAssignments[i]) {
       printf("LED %d = %s\n", i + 1, config->ledAssignments[i]);
     }
@@ -508,6 +528,23 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
 }
 
 /**
+ * @brief   Get the descriptive text for a daylight span option.
+ * @param[in] span The daylight span to describe.
+ * @returns The daylight span description.
+ */
+static const char *getDaylightSpanText(DaylightSpan span) {
+  switch (span) {
+  case daylightOfficial:
+  case daylightCivil:
+  case daylightNautical:
+  case daylightAstronomical:
+    return gDaylightSpanTable[span];
+  default:
+    return "---";
+  }
+}
+
+/**
  * @brief   Get the LED color for a weather report.
  * @param[in] cfg     PiWx configuration.
  * @param[in] station The weather station.
@@ -546,6 +583,40 @@ static LEDColor getLEDColor(const PiwxConfig *cfg, const WxStation *station) {
   color.b = MIX_BRIGHTNESS(color.b, (uint8_t)brightness);
 
   return color;
+}
+
+/**
+ * @brief   Get the descriptive text for a log level option.
+ * @param[in] log The log level to describe.
+ * @returns The log level description.
+ */
+static const char *getLogLevelText(LogLevel log) {
+  switch (log) {
+  case logQuiet:
+  case logWarning:
+  case logInfo:
+  case logDebug:
+    return gLogLevelTable[log];
+  default:
+    return "---";
+  }
+}
+
+/**
+ * @brief   Get the descriptive text for a sort type option.
+ * @param[in] sort The sort type to describe.
+ * @returns The sort type description.
+ */
+static const char *getSortTypeText(SortType sort) {
+  switch (sort) {
+  case sortNone:
+  case sortPosition:
+  case sortAlpha:
+  case sortQuery:
+    return gSortTypeTable[sort];
+  default:
+    return "---";
+  }
 }
 
 /**

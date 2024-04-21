@@ -16,12 +16,7 @@
  *
  * @warning The log is not thread-safe.
  */
-typedef enum {
-  logQuiet,
-  logWarning,
-  logInfo,
-  logDebug,
-} LogLevel;
+typedef enum { logQuiet, logWarning, logInfo, logDebug, logLevelCount } LogLevel;
 
 /**
  * @brief   If @a condition is not true, log the message and assert.

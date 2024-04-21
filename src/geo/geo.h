@@ -33,7 +33,8 @@ typedef enum {
   daylightOfficial,
   daylightCivil,
   daylightNautical,
-  daylightAstronomical
+  daylightAstronomical,
+  daylightSpanCount
 } DaylightSpan;
 
 /**

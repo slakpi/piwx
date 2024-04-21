@@ -12,7 +12,7 @@
  * @enum  SortType
  * @brief Weather station sort type.
  */
-typedef enum { sortNone, sortPosition, sortAlpha, sortQuery } SortType;
+typedef enum { sortNone, sortPosition, sortAlpha, sortQuery, sortTypeCount } SortType;
 _Static_assert(sortNone == 0, "No sorting must be zero.");
 
 /**
