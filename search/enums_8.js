@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['tag',['Tag',['../wx_8c.html#a305263dd89ad9fde1863aece00907351',1,'wx.c']]]
+  ['sorttype',['SortType',['../wx_8h.html#ad7fca38b521558f128d4a566729f5803',1,'wx.h']]]
 ];

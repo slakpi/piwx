@@ -109,6 +109,17 @@ typedef struct <a class="el" href="structWxStation__.html">WxStation_</a>&#160;<
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:ad7fca38b521558f128d4a566729f5803"><td class="memItemLeft" align="right" valign="top"><a id="ad7fca38b521558f128d4a566729f5803"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a> { <br />
+&#160;&#160;<b>sortNone</b>, 
+<b>sortPosition</b>, 
+<b>sortAlpha</b>, 
+<b>sortQuery</b>, 
+<br />
+&#160;&#160;<b>sortTypeCount</b>
+<br />
+ }<tr class="memdesc:ad7fca38b521558f128d4a566729f5803"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weather station sort type. <br /></td></tr>
+</td></tr>
+<tr class="separator:ad7fca38b521558f128d4a566729f5803"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a98732eca3672400d0ae8bf9fbab5ebd7"><td class="memItemLeft" align="right" valign="top"><a id="a98732eca3672400d0ae8bf9fbab5ebd7"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#a98732eca3672400d0ae8bf9fbab5ebd7">CloudCover</a> { <br />
 &#160;&#160;<b>skyInvalid</b>, 
 <b>skyClear</b>, 
@@ -167,6 +178,9 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:a896528a4d02436c0d38b4a39b44ea87e"><td class="memItemLeft" align="right" valign="top"><a id="a896528a4d02436c0d38b4a39b44ea87e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>_Static_assert</b> (sortNone==0, &quot;No sorting must be zero.&quot;)</td></tr>
+<tr class="separator:a896528a4d02436c0d38b4a39b44ea87e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a551c759c996f52eb1f0a3147d9391aa3"><td class="memItemLeft" align="right" valign="top"><a id="a551c759c996f52eb1f0a3147d9391aa3"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>_Static_assert</b> (skyInvalid==0, &quot;Invalid sky coverage must be zero.&quot;)</td></tr>
 <tr class="separator:a551c759c996f52eb1f0a3147d9391aa3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -179,9 +193,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a32899580b61c5563b6a26fbe365d6a4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#a32899580b61c5563b6a26fbe365d6a4e">wx_freeStations</a> (<a class="el" href="structWxStation.html">WxStation</a> *stations)</td></tr>
 <tr class="memdesc:a32899580b61c5563b6a26fbe365d6a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees a list of weather stations.  <a href="#a32899580b61c5563b6a26fbe365d6a4e">More...</a><br /></td></tr>
 <tr class="separator:a32899580b61c5563b6a26fbe365d6a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:affe2d29d3ebc96f000aa07426466a299"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWxStation.html">WxStation</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#affe2d29d3ebc96f000aa07426466a299">wx_queryWx</a> (const char *stations, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t curTime, int *err)</td></tr>
-<tr class="memdesc:affe2d29d3ebc96f000aa07426466a299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the weather source for a comma-separated list of stations.  <a href="#affe2d29d3ebc96f000aa07426466a299">More...</a><br /></td></tr>
-<tr class="separator:affe2d29d3ebc96f000aa07426466a299"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0ecc3287feb3328393383409f0b6fd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWxStation.html">WxStation</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#ad0ecc3287feb3328393383409f0b6fd1">wx_queryWx</a> (const char *stations, <a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a> sort, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t curTime, int *err)</td></tr>
+<tr class="memdesc:ad0ecc3287feb3328393383409f0b6fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the weather source for a comma-separated list of stations.  <a href="#ad0ecc3287feb3328393383409f0b6fd1">More...</a><br /></td></tr>
+<tr class="separator:ad0ecc3287feb3328393383409f0b6fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fbba0d58e854fd9bcca4c210319fa92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8h.html#a1fbba0d58e854fd9bcca4c210319fa92">wx_updateDayNightState</a> (<a class="el" href="structWxStation.html">WxStation</a> *station, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t now)</td></tr>
 <tr class="memdesc:a1fbba0d58e854fd9bcca4c210319fa92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the <em>isNight</em> flag and icon for the new observation time.  <a href="#a1fbba0d58e854fd9bcca4c210319fa92">More...</a><br /></td></tr>
 <tr class="separator:a1fbba0d58e854fd9bcca4c210319fa92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -213,8 +227,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="affe2d29d3ebc96f000aa07426466a299"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#affe2d29d3ebc96f000aa07426466a299">&#9670;&nbsp;</a></span>wx_queryWx()</h2>
+<a id="ad0ecc3287feb3328393383409f0b6fd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0ecc3287feb3328393383409f0b6fd1">&#9670;&nbsp;</a></span>wx_queryWx()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -224,6 +238,12 @@ Functions</h2></td></tr>
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>stations</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a>&#160;</td>
+          <td class="paramname"><em>sort</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -255,6 +275,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">stations</td><td>The list of stations to query. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sort</td><td>Station sort type. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">daylight</td><td>The daylight span to use for determining night. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">curTime</td><td>The current system time. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">err</td><td>Query error code. </td></tr>

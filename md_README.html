@@ -96,7 +96,10 @@ stations="KHIO,KMMV,KUAO,KVUO,KSLE,KSPB,KTPA,KCGC,KGNV,KDEN";
 
 # Airport METAR display cycle time in seconds.
 cycletime=5;
-</pre><p>With LED support enabled, PiWx will drive a 50-LED WS281x strip to display flight categories at select airports. The <code>led&lt;num&gt;</code> option assigns an airport to a LED where <code>&lt;num&gt;</code> is a number between 1 and 50 inclusive. </p><pre class="fragment"># Assign LEDs
+</pre><p>The Aviation Weather data API does not return stations in any particular order. The <code>sort</code> option allows sorting stations lexicographically, geographically, or in the order specified by the configuration file. </p><pre class="fragment"># Sort by geographical position.
+sort=position;
+</pre><p>If <code>sort</code> is set to <code>off</code> or is not specified, stations are displayed in the order received from the Aviation Weather data API. When set to <code>on</code> or <code>position</code>, stations are displayed from West to East and North to South. When set to <code>alpha</code>, stations are displayed in lexicographical order, e.g. <code>77S</code> sorts before <code>KAST</code>, and <code>KAST</code> sorts before <code>KTPA</code>. When set to <code>query</code>, stations are displayed in the order specified by the <code>stations</code> query.</p>
+<p>With LED support enabled, PiWx will drive a 50-LED WS281x strip to display flight categories at select airports. The <code>led&lt;num&gt;</code> option assigns an airport to a LED where <code>&lt;num&gt;</code> is a number between 1 and 50 inclusive. </p><pre class="fragment"># Assign LEDs
 led1="KHIO";
 led5="KMMV";
 led6="KUAO";

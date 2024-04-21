@@ -120,6 +120,9 @@ Typedefs</h2></td></tr>
 <tr class="memitem:a157535ed0322a026cc197c8985c08d35"><td class="memItemLeft" align="right" valign="top"><a id="a157535ed0322a026cc197c8985c08d35"></a>
 typedef void *&#160;</td><td class="memItemRight" valign="bottom"><b>yyscan_t</b></td></tr>
 <tr class="separator:a157535ed0322a026cc197c8985c08d35"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69f4771b7b89730741eaab3ea9384600"><td class="memItemLeft" align="right" valign="top">typedef int(*&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a69f4771b7b89730741eaab3ea9384600">StationCompareFn</a>) (const <a class="el" href="structWxStation.html">WxStation</a> *a, const <a class="el" href="structWxStation.html">WxStation</a> *b)</td></tr>
+<tr class="memdesc:a69f4771b7b89730741eaab3ea9384600"><td class="mdescLeft">&#160;</td><td class="mdescRight">Weather station comparison function signature.  <a href="#a69f4771b7b89730741eaab3ea9384600">More...</a><br /></td></tr>
+<tr class="separator:a69f4771b7b89730741eaab3ea9384600"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
@@ -188,6 +191,15 @@ Functions</h2></td></tr>
 <tr class="memitem:a1add6f3edff3a81e65df13e7136446ab"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a1add6f3edff3a81e65df13e7136446ab">classifyDominantWeather</a> (<a class="el" href="structWxStation.html">WxStation</a> *station)</td></tr>
 <tr class="memdesc:a1add6f3edff3a81e65df13e7136446ab"><td class="mdescLeft">&#160;</td><td class="mdescRight">Classifies the dominant weather phenomenon.  <a href="#a1add6f3edff3a81e65df13e7136446ab">More...</a><br /></td></tr>
 <tr class="separator:a1add6f3edff3a81e65df13e7136446ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8a37dfb7bd83e7138e881f9ec93f2c75"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a8a37dfb7bd83e7138e881f9ec93f2c75">compareIdentifiers</a> (const <a class="el" href="structWxStation.html">WxStation</a> *a, const <a class="el" href="structWxStation.html">WxStation</a> *b)</td></tr>
+<tr class="memdesc:a8a37dfb7bd83e7138e881f9ec93f2c75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lexicographical sort of the station local identifiers.  <a href="#a8a37dfb7bd83e7138e881f9ec93f2c75">More...</a><br /></td></tr>
+<tr class="separator:a8a37dfb7bd83e7138e881f9ec93f2c75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9731ad2b2cc37e3f75af82de4d7443b"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#aa9731ad2b2cc37e3f75af82de4d7443b">compareOrder</a> (const <a class="el" href="structWxStation.html">WxStation</a> *a, const <a class="el" href="structWxStation.html">WxStation</a> *b)</td></tr>
+<tr class="memdesc:aa9731ad2b2cc37e3f75af82de4d7443b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query order sort.  <a href="#aa9731ad2b2cc37e3f75af82de4d7443b">More...</a><br /></td></tr>
+<tr class="separator:aa9731ad2b2cc37e3f75af82de4d7443b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb220cdfb6959417206eefb5decb3d19"><td class="memItemLeft" align="right" valign="top">static int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#abb220cdfb6959417206eefb5decb3d19">comparePositions</a> (const <a class="el" href="structWxStation.html">WxStation</a> *a, const <a class="el" href="structWxStation.html">WxStation</a> *b)</td></tr>
+<tr class="memdesc:abb220cdfb6959417206eefb5decb3d19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Geographical sort by longitude, then latitude.  <a href="#abb220cdfb6959417206eefb5decb3d19">More...</a><br /></td></tr>
+<tr class="separator:abb220cdfb6959417206eefb5decb3d19"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad598f0d8004989d1a954f6719e607407"><td class="memItemLeft" align="right" valign="top">static char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#ad598f0d8004989d1a954f6719e607407">dupNodeText</a> (xmlNodePtr node, size_t maxLen)</td></tr>
 <tr class="memdesc:ad598f0d8004989d1a954f6719e607407"><td class="mdescLeft">&#160;</td><td class="mdescRight">Duplicate a node's text.  <a href="#ad598f0d8004989d1a954f6719e607407">More...</a><br /></td></tr>
 <tr class="separator:ad598f0d8004989d1a954f6719e607407"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -209,15 +221,24 @@ Functions</h2></td></tr>
 <tr class="memitem:a638bf2a7a2d9458c3d18e762a2074b72"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="wx_8h.html#abd284c2ad76e43b1ffda15506954b245">FlightCategory</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a638bf2a7a2d9458c3d18e762a2074b72">getStationFlightCategory</a> (xmlNodePtr node, xmlHashTablePtr hash)</td></tr>
 <tr class="memdesc:a638bf2a7a2d9458c3d18e762a2074b72"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts category text to a FlightCategory value.  <a href="#a638bf2a7a2d9458c3d18e762a2074b72">More...</a><br /></td></tr>
 <tr class="separator:a638bf2a7a2d9458c3d18e762a2074b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a49e4f348f632e2a26ff5109d7de27307"><td class="memItemLeft" align="right" valign="top">static unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a49e4f348f632e2a26ff5109d7de27307">getStationOrder</a> (xmlHashTablePtr hash, const char *id)</td></tr>
+<tr class="memdesc:a49e4f348f632e2a26ff5109d7de27307"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the query order from a station from the hash table.  <a href="#a49e4f348f632e2a26ff5109d7de27307">More...</a><br /></td></tr>
+<tr class="separator:a49e4f348f632e2a26ff5109d7de27307"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9dad95da19cdf99e6d6a9bc350c2ba70"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="wx_8c.html#a305263dd89ad9fde1863aece00907351">Tag</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a9dad95da19cdf99e6d6a9bc350c2ba70">getTag</a> (xmlHashTablePtr hash, const xmlChar *tag)</td></tr>
 <tr class="memdesc:a9dad95da19cdf99e6d6a9bc350c2ba70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Lookup the tag ID for a given tag name.  <a href="#a9dad95da19cdf99e6d6a9bc350c2ba70">More...</a><br /></td></tr>
 <tr class="separator:a9dad95da19cdf99e6d6a9bc350c2ba70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79abce9b93c673d2e20225bcd4e917c4"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a79abce9b93c673d2e20225bcd4e917c4">hashDealloc</a> (void *payload, xmlChar *name)</td></tr>
 <tr class="memdesc:a79abce9b93c673d2e20225bcd4e917c4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Hash destructor.  <a href="#a79abce9b93c673d2e20225bcd4e917c4">More...</a><br /></td></tr>
 <tr class="separator:a79abce9b93c673d2e20225bcd4e917c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a05f7e01cb7e8707b1dd0ad5b8a9ded8a"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a05f7e01cb7e8707b1dd0ad5b8a9ded8a">initHash</a> (xmlHashTablePtr hash)</td></tr>
-<tr class="memdesc:a05f7e01cb7e8707b1dd0ad5b8a9ded8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the tag map.  <a href="#a05f7e01cb7e8707b1dd0ad5b8a9ded8a">More...</a><br /></td></tr>
-<tr class="separator:a05f7e01cb7e8707b1dd0ad5b8a9ded8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a399459341efb359057c8e882d7110f34"><td class="memItemLeft" align="right" valign="top">static xmlHashTablePtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a399459341efb359057c8e882d7110f34">initStationOrderHash</a> (const char *stations)</td></tr>
+<tr class="memdesc:a399459341efb359057c8e882d7110f34"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the station query order hash.  <a href="#a399459341efb359057c8e882d7110f34">More...</a><br /></td></tr>
+<tr class="separator:a399459341efb359057c8e882d7110f34"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d1aeda9f1d0e1fb8607d10c7d62fc0e"><td class="memItemLeft" align="right" valign="top">static xmlHashTablePtr&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a2d1aeda9f1d0e1fb8607d10c7d62fc0e">initTagHash</a> ()</td></tr>
+<tr class="memdesc:a2d1aeda9f1d0e1fb8607d10c7d62fc0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the tag map.  <a href="#a2d1aeda9f1d0e1fb8607d10c7d62fc0e">More...</a><br /></td></tr>
+<tr class="separator:a2d1aeda9f1d0e1fb8607d10c7d62fc0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa2c6ba752f4885f51eae6d0f4e14c9e"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#aaa2c6ba752f4885f51eae6d0f4e14c9e">insertStation</a> (<a class="el" href="structWxStation.html">WxStation</a> **start, <a class="el" href="structWxStation.html">WxStation</a> *newStation, <a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a> sort)</td></tr>
+<tr class="memdesc:aaa2c6ba752f4885f51eae6d0f4e14c9e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Insert a new station into a circular list.  <a href="#aaa2c6ba752f4885f51eae6d0f4e14c9e">More...</a><br /></td></tr>
+<tr class="separator:aaa2c6ba752f4885f51eae6d0f4e14c9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8acca632bcbccdaec701f42cde083ad8"><td class="memItemLeft" align="right" valign="top">static size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a8acca632bcbccdaec701f42cde083ad8">metarCallback</a> (char *ptr, size_t size, size_t nmemb, void *userdata)</td></tr>
 <tr class="memdesc:a8acca632bcbccdaec701f42cde083ad8"><td class="mdescLeft">&#160;</td><td class="mdescRight">cURL data callback for the METAR XAML API.  <a href="#a8acca632bcbccdaec701f42cde083ad8">More...</a><br /></td></tr>
 <tr class="separator:a8acca632bcbccdaec701f42cde083ad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -230,9 +251,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a32899580b61c5563b6a26fbe365d6a4e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a32899580b61c5563b6a26fbe365d6a4e">wx_freeStations</a> (<a class="el" href="structWxStation.html">WxStation</a> *stations)</td></tr>
 <tr class="memdesc:a32899580b61c5563b6a26fbe365d6a4e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Frees a list of weather stations.  <a href="#a32899580b61c5563b6a26fbe365d6a4e">More...</a><br /></td></tr>
 <tr class="separator:a32899580b61c5563b6a26fbe365d6a4e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:affe2d29d3ebc96f000aa07426466a299"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWxStation.html">WxStation</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#affe2d29d3ebc96f000aa07426466a299">wx_queryWx</a> (const char *stations, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t curTime, int *err)</td></tr>
-<tr class="memdesc:affe2d29d3ebc96f000aa07426466a299"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the weather source for a comma-separated list of stations.  <a href="#affe2d29d3ebc96f000aa07426466a299">More...</a><br /></td></tr>
-<tr class="separator:affe2d29d3ebc96f000aa07426466a299"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad0ecc3287feb3328393383409f0b6fd1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structWxStation.html">WxStation</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#ad0ecc3287feb3328393383409f0b6fd1">wx_queryWx</a> (const char *stations, <a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a> sort, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t curTime, int *err)</td></tr>
+<tr class="memdesc:ad0ecc3287feb3328393383409f0b6fd1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Query the weather source for a comma-separated list of stations.  <a href="#ad0ecc3287feb3328393383409f0b6fd1">More...</a><br /></td></tr>
+<tr class="separator:ad0ecc3287feb3328393383409f0b6fd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1fbba0d58e854fd9bcca4c210319fa92"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="wx_8c.html#a1fbba0d58e854fd9bcca4c210319fa92">wx_updateDayNightState</a> (<a class="el" href="structWxStation.html">WxStation</a> *station, <a class="el" href="geo_8h.html#a07513629be283faa21645da8b9db3efd">DaylightSpan</a> daylight, time_t now)</td></tr>
 <tr class="memdesc:a1fbba0d58e854fd9bcca4c210319fa92"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates the <em>isNight</em> flag and icon for the new observation time.  <a href="#a1fbba0d58e854fd9bcca4c210319fa92">More...</a><br /></td></tr>
 <tr class="separator:a1fbba0d58e854fd9bcca4c210319fa92"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -245,6 +266,31 @@ Variables</h2></td></tr>
 static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNames</b> []</td></tr>
 <tr class="separator:afad4eb95b8ba604bdaa0763ebb85e2d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Typedef Documentation</h2>
+<a id="a69f4771b7b89730741eaab3ea9384600"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a69f4771b7b89730741eaab3ea9384600">&#9670;&nbsp;</a></span>StationCompareFn</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">StationCompareFn</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Weather station comparison function signature. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>Left-hand side station. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>Right-hand side station. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>-1 if <em>a</em> &lt; <em>b</em>, 0 if <em>a</em> == <em>b</em>, 1 if <em>a</em> &gt; <em>b</em>. </dd></dl>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="aad9a151567e5dcddeaf624e858edc58c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#aad9a151567e5dcddeaf624e858edc58c">&#9670;&nbsp;</a></span>addCloudLayer()</h2>
@@ -329,6 +375,123 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a8a37dfb7bd83e7138e881f9ec93f2c75"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a8a37dfb7bd83e7138e881f9ec93f2c75">&#9670;&nbsp;</a></span>compareIdentifiers()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int compareIdentifiers </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Lexicographical sort of the station local identifiers. </p>
+<p>If neither station has a local identifier, they compare equal. A station without a local identifier compares less than a station with a local identifier. Otherwise, a lexicographical comparison of the local identifiers is performed. </p><dl class="section see"><dt>See also</dt><dd><em><a class="el" href="wx_8c.html#a69f4771b7b89730741eaab3ea9384600" title="Weather station comparison function signature. ">StationCompareFn</a></em> </dd></dl>
+
+</div>
+</div>
+<a id="aa9731ad2b2cc37e3f75af82de4d7443b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa9731ad2b2cc37e3f75af82de4d7443b">&#9670;&nbsp;</a></span>compareOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int compareOrder </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Query order sort. </p>
+<dl class="section see"><dt>See also</dt><dd><em><a class="el" href="wx_8c.html#a69f4771b7b89730741eaab3ea9384600" title="Weather station comparison function signature. ">StationCompareFn</a></em> </dd></dl>
+
+</div>
+</div>
+<a id="abb220cdfb6959417206eefb5decb3d19"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abb220cdfb6959417206eefb5decb3d19">&#9670;&nbsp;</a></span>comparePositions()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static int comparePositions </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>b</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Geographical sort by longitude, then latitude. </p>
+<p>If neither station has a position, they compare equal. A station without a position compares less than a station with a position. Otherwise, sort stations West to East, then North to South. </p><dl class="section see"><dt>See also</dt><dd><em><a class="el" href="wx_8c.html#a69f4771b7b89730741eaab3ea9384600" title="Weather station comparison function signature. ">StationCompareFn</a></em> </dd></dl>
 
 </div>
 </div>
@@ -662,6 +825,52 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
 
 </div>
 </div>
+<a id="a49e4f348f632e2a26ff5109d7de27307"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a49e4f348f632e2a26ff5109d7de27307">&#9670;&nbsp;</a></span>getStationOrder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static unsigned int getStationOrder </td>
+          <td>(</td>
+          <td class="paramtype">xmlHashTablePtr&#160;</td>
+          <td class="paramname"><em>hash</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>id</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Retrieve the query order from a station from the hash table. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>The hash table to query. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">id</td><td>The station identifier to query. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>The query order for the station or 0 if the station is not found. </dd></dl>
+
+</div>
+</div>
 <a id="a9dad95da19cdf99e6d6a9bc350c2ba70"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9dad95da19cdf99e6d6a9bc350c2ba70">&#9670;&nbsp;</a></span>getTag()</h2>
 
@@ -753,8 +962,8 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
 
 </div>
 </div>
-<a id="a05f7e01cb7e8707b1dd0ad5b8a9ded8a"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a05f7e01cb7e8707b1dd0ad5b8a9ded8a">&#9670;&nbsp;</a></span>initHash()</h2>
+<a id="a399459341efb359057c8e882d7110f34"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a399459341efb359057c8e882d7110f34">&#9670;&nbsp;</a></span>initStationOrderHash()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -763,10 +972,44 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">static void initHash </td>
+          <td class="memname">static xmlHashTablePtr initStationOrderHash </td>
           <td>(</td>
-          <td class="paramtype">xmlHashTablePtr&#160;</td>
-          <td class="paramname"><em>hash</em></td><td>)</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>stations</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Initialize the station query order hash. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">stations</td><td>The list of stations to query. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>A new hash table pointer or NULL if there are no stations. </dd></dl>
+
+</div>
+</div>
+<a id="a2d1aeda9f1d0e1fb8607d10c7d62fc0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2d1aeda9f1d0e1fb8607d10c7d62fc0e">&#9670;&nbsp;</a></span>initTagHash()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static xmlHashTablePtr initTagHash </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -778,9 +1021,56 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
 </div><div class="memdoc">
 
 <p>Initialize the tag map. </p>
+<dl class="section return"><dt>Returns</dt><dd>A new hash table pointer. </dd></dl>
+
+</div>
+</div>
+<a id="aaa2c6ba752f4885f51eae6d0f4e14c9e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa2c6ba752f4885f51eae6d0f4e14c9e">&#9670;&nbsp;</a></span>insertStation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void insertStation </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structWxStation.html">WxStation</a> **&#160;</td>
+          <td class="paramname"><em>start</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structWxStation.html">WxStation</a> *&#160;</td>
+          <td class="paramname"><em>newStation</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a>&#160;</td>
+          <td class="paramname"><em>sort</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Insert a new station into a circular list. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">hash</td><td>Tag hash map. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">start</td><td>The head of the list. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">station</td><td>The station to insert. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sort</td><td>Station sort type. </td></tr>
   </table>
   </dd>
 </dl>
@@ -971,8 +1261,8 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
 
 </div>
 </div>
-<a id="affe2d29d3ebc96f000aa07426466a299"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#affe2d29d3ebc96f000aa07426466a299">&#9670;&nbsp;</a></span>wx_queryWx()</h2>
+<a id="ad0ecc3287feb3328393383409f0b6fd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad0ecc3287feb3328393383409f0b6fd1">&#9670;&nbsp;</a></span>wx_queryWx()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -982,6 +1272,12 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
           <td>(</td>
           <td class="paramtype">const char *&#160;</td>
           <td class="paramname"><em>stations</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="wx_8h.html#ad7fca38b521558f128d4a566729f5803">SortType</a>&#160;</td>
+          <td class="paramname"><em>sort</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1013,6 +1309,7 @@ static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>gTagNa
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">stations</td><td>The list of stations to query. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sort</td><td>Station sort type. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">daylight</td><td>The daylight span to use for determining night. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">curTime</td><td>The current system time. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">err</td><td>Query error code. </td></tr>

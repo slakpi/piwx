@@ -89,6 +89,9 @@ $(function() {
 <li>getCloudLayerText()
 : <a class="el" href="display_8c.html#aff071b406759cde108e5f0a95b73df84">display.c</a>
 </li>
+<li>getDaylightSpanText()
+: <a class="el" href="piwx_8c.html#a1195eb8378b39aece4bcbca43f72ae0d">piwx.c</a>
+</li>
 <li>getFlightCategoryIcon()
 : <a class="el" href="display_8c.html#a415f2ee78716a864bae8d9540d18532c">display.c</a>
 </li>
@@ -101,6 +104,9 @@ $(function() {
 <li>getLevelText()
 : <a class="el" href="log_8c.html#a7baa8970263487c55035d52911e037f1">log.c</a>
 </li>
+<li>getLogLevelText()
+: <a class="el" href="piwx_8c.html#abadc154f81dd3596949c85c4c9dafac1">piwx.c</a>
+</li>
 <li>getNodeAsDouble()
 : <a class="el" href="wx_8c.html#ab0a4e005f6528d20fb505fbeb541d9c7">wx.c</a>
 </li>
@@ -110,8 +116,14 @@ $(function() {
 <li>getNodeAsUTCDateTime()
 : <a class="el" href="wx_8c.html#a067be543b79a634b1f71b7dcfdba439f">wx.c</a>
 </li>
+<li>getSortTypeText()
+: <a class="el" href="piwx_8c.html#a2cf98dcb6021fc41e40807edc4ca4813">piwx.c</a>
+</li>
 <li>getStationFlightCategory()
 : <a class="el" href="wx_8c.html#a638bf2a7a2d9458c3d18e762a2074b72">wx.c</a>
+</li>
+<li>getStationOrder()
+: <a class="el" href="wx_8c.html#a49e4f348f632e2a26ff5109d7de27307">wx.c</a>
 </li>
 <li>getTag()
 : <a class="el" href="wx_8c.html#a9dad95da19cdf99e6d6a9bc350c2ba70">wx.c</a>
@@ -132,16 +144,16 @@ $(function() {
 : <a class="el" href="display_8c.html#adf59ff6dc656d6bd7eb0892970276acf">display.c</a>
 </li>
 <li>gfx_beginLayer()
-: <a class="el" href="gfx_8c.html#aea92c2650e135af82ef980648ae96e64">gfx.c</a>
-, <a class="el" href="gfx_8h.html#aea92c2650e135af82ef980648ae96e64">gfx.h</a>
+: <a class="el" href="gfx_8h.html#aea92c2650e135af82ef980648ae96e64">gfx.h</a>
+, <a class="el" href="gfx_8c.html#aea92c2650e135af82ef980648ae96e64">gfx.c</a>
 </li>
 <li>gfx_cleanupGraphics()
 : <a class="el" href="gfx_8c.html#a9bc9c36d3e0424e9b95f688050cb5825">gfx.c</a>
 , <a class="el" href="gfx_8h.html#a9bc9c36d3e0424e9b95f688050cb5825">gfx.h</a>
 </li>
 <li>gfx_clearSurface()
-: <a class="el" href="gfx_8h.html#aeeaa32d610607f63c9d0be937cb71138">gfx.h</a>
-, <a class="el" href="gfx_8c.html#aeeaa32d610607f63c9d0be937cb71138">gfx.c</a>
+: <a class="el" href="gfx_8c.html#aeeaa32d610607f63c9d0be937cb71138">gfx.c</a>
+, <a class="el" href="gfx_8h.html#aeeaa32d610607f63c9d0be937cb71138">gfx.h</a>
 </li>
 <li>gfx_commitToScreen()
 : <a class="el" href="gfx_8c.html#a0cfc35e1e13ed1602e08a9151c88a55d">gfx.c</a>
@@ -188,52 +200,52 @@ $(function() {
 , <a class="el" href="gfx_8h.html#a273b88e818611c8cd7bc13c60a2fbddf">gfx.h</a>
 </li>
 <li>gfx_getGfxError()
-: <a class="el" href="gfx_8c.html#a30b92426534669ed3712f63c3422b35b">gfx.c</a>
-, <a class="el" href="gfx_8h.html#a30b92426534669ed3712f63c3422b35b">gfx.h</a>
+: <a class="el" href="gfx_8h.html#a30b92426534669ed3712f63c3422b35b">gfx.h</a>
+, <a class="el" href="gfx_8c.html#a30b92426534669ed3712f63c3422b35b">gfx.c</a>
 </li>
 <li>gfx_getIconInfo()
-: <a class="el" href="gfx_8h.html#ae3fe780b8e3fd06722d816c7401b360d">gfx.h</a>
-, <a class="el" href="gfx_8c.html#ae3fe780b8e3fd06722d816c7401b360d">gfx.c</a>
+: <a class="el" href="gfx_8c.html#ae3fe780b8e3fd06722d816c7401b360d">gfx.c</a>
+, <a class="el" href="gfx_8h.html#ae3fe780b8e3fd06722d816c7401b360d">gfx.h</a>
 </li>
 <li>gfx_getProgramError()
-: <a class="el" href="gfx_8c.html#a70c0d8f8e2468c69af57aec18eb22791">gfx.c</a>
-, <a class="el" href="gfx__prv_8h.html#a70c0d8f8e2468c69af57aec18eb22791">gfx_prv.h</a>
+: <a class="el" href="gfx__prv_8h.html#a70c0d8f8e2468c69af57aec18eb22791">gfx_prv.h</a>
+, <a class="el" href="gfx_8c.html#a70c0d8f8e2468c69af57aec18eb22791">gfx.c</a>
 </li>
 <li>gfx_getShaderError()
 : <a class="el" href="gfx_8c.html#a77a435704e10e7d0d413dbea2fb26d22">gfx.c</a>
 , <a class="el" href="gfx__prv_8h.html#a77a435704e10e7d0d413dbea2fb26d22">gfx_prv.h</a>
 </li>
 <li>gfx_initGlobe()
-: <a class="el" href="globe_8c.html#af2005956497ae25f61ca206275e10bc4">globe.c</a>
-, <a class="el" href="gfx__prv_8h.html#af2005956497ae25f61ca206275e10bc4">gfx_prv.h</a>
+: <a class="el" href="gfx__prv_8h.html#af2005956497ae25f61ca206275e10bc4">gfx_prv.h</a>
+, <a class="el" href="globe_8c.html#af2005956497ae25f61ca206275e10bc4">globe.c</a>
 </li>
 <li>gfx_initGraphics()
-: <a class="el" href="gfx_8h.html#ae43f24c74e76be6ef8a7ce468e55702c">gfx.h</a>
-, <a class="el" href="gfx_8c.html#ae43f24c74e76be6ef8a7ce468e55702c">gfx.c</a>
+: <a class="el" href="gfx_8c.html#ae43f24c74e76be6ef8a7ce468e55702c">gfx.c</a>
+, <a class="el" href="gfx_8h.html#ae43f24c74e76be6ef8a7ce468e55702c">gfx.h</a>
 </li>
 <li>gfx_loadTexture()
-: <a class="el" href="gfx__prv_8h.html#a4515545426639d11fff74d2b188e1f46">gfx_prv.h</a>
-, <a class="el" href="gfx_8c.html#a4515545426639d11fff74d2b188e1f46">gfx.c</a>
+: <a class="el" href="gfx_8c.html#a4515545426639d11fff74d2b188e1f46">gfx.c</a>
+, <a class="el" href="gfx__prv_8h.html#a4515545426639d11fff74d2b188e1f46">gfx_prv.h</a>
 </li>
 <li>gfx_pngColorToGLColor()
 : <a class="el" href="gfx_8c.html#af927af4fe332a931792493fcc2987606">gfx.c</a>
 , <a class="el" href="gfx__prv_8h.html#af927af4fe332a931792493fcc2987606">gfx_prv.h</a>
 </li>
 <li>gfx_resetShader()
-: <a class="el" href="gfx_8c.html#ac47386a206c4bfc6095033851db4ba55">gfx.c</a>
-, <a class="el" href="gfx__prv_8h.html#ac47386a206c4bfc6095033851db4ba55">gfx_prv.h</a>
+: <a class="el" href="gfx__prv_8h.html#ac47386a206c4bfc6095033851db4ba55">gfx_prv.h</a>
+, <a class="el" href="gfx_8c.html#ac47386a206c4bfc6095033851db4ba55">gfx.c</a>
 </li>
 <li>gfx_setError()
-: <a class="el" href="gfx_8c.html#a11ca5e8f46415a4bb25b7bbf375cce73">gfx.c</a>
-, <a class="el" href="gfx__prv_8h.html#a11ca5e8f46415a4bb25b7bbf375cce73">gfx_prv.h</a>
+: <a class="el" href="gfx__prv_8h.html#a11ca5e8f46415a4bb25b7bbf375cce73">gfx_prv.h</a>
+, <a class="el" href="gfx_8c.html#a11ca5e8f46415a4bb25b7bbf375cce73">gfx.c</a>
 </li>
 <li>gfx_setup3DShader()
-: <a class="el" href="gfx__prv_8h.html#acf2d52d6be41765370868de87d3c7954">gfx_prv.h</a>
-, <a class="el" href="gfx_8c.html#acf2d52d6be41765370868de87d3c7954">gfx.c</a>
+: <a class="el" href="gfx_8c.html#acf2d52d6be41765370868de87d3c7954">gfx.c</a>
+, <a class="el" href="gfx__prv_8h.html#acf2d52d6be41765370868de87d3c7954">gfx_prv.h</a>
 </li>
 <li>gfx_setupShader()
-: <a class="el" href="gfx_8c.html#a3a46a868d3a6719ecc95230ff3d67d5e">gfx.c</a>
-, <a class="el" href="gfx__prv_8h.html#a3a46a868d3a6719ecc95230ff3d67d5e">gfx_prv.h</a>
+: <a class="el" href="gfx__prv_8h.html#a3a46a868d3a6719ecc95230ff3d67d5e">gfx_prv.h</a>
+, <a class="el" href="gfx_8c.html#a3a46a868d3a6719ecc95230ff3d67d5e">gfx.c</a>
 </li>
 <li>globePositionUpdate()
 : <a class="el" href="piwx_8c.html#ab160a80b9899d77765041bf46c4315f8">piwx.c</a>

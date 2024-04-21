@@ -86,9 +86,9 @@ Functions</h2></td></tr>
 <tr class="memitem:abd8bbcfabb3ddef2ccaafb9928a37b95"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8c.html#abd8bbcfabb3ddef2ccaafb9928a37b95">min</a> (int a, int b)</td></tr>
 <tr class="memdesc:abd8bbcfabb3ddef2ccaafb9928a37b95"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the minimum of two values.  <a href="#abd8bbcfabb3ddef2ccaafb9928a37b95">More...</a><br /></td></tr>
 <tr class="separator:abd8bbcfabb3ddef2ccaafb9928a37b95"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7287c39cdf6bd13f86aa89b8e563b19"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8c.html#ae7287c39cdf6bd13f86aa89b8e563b19">strncpy_safe</a> (char *dst, const char *src, size_t maxlen)</td></tr>
-<tr class="memdesc:ae7287c39cdf6bd13f86aa89b8e563b19"><td class="mdescLeft">&#160;</td><td class="mdescRight">Safer version of <em>strncpy</em>.  <a href="#ae7287c39cdf6bd13f86aa89b8e563b19">More...</a><br /></td></tr>
-<tr class="separator:ae7287c39cdf6bd13f86aa89b8e563b19"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a25154be583b308a01936842dec0be6f2"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8c.html#a25154be583b308a01936842dec0be6f2">strncpy_safe</a> (char *dest, size_t destLen, const char *src)</td></tr>
+<tr class="memdesc:a25154be583b308a01936842dec0be6f2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Safer version of <em>strncpy</em>.  <a href="#a25154be583b308a01936842dec0be6f2">More...</a><br /></td></tr>
+<tr class="separator:a25154be583b308a01936842dec0be6f2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4c068fc0c08a78822023a97b0b4401a5"><td class="memItemLeft" align="right" valign="top">unsigned int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="util_8c.html#a4c068fc0c08a78822023a97b0b4401a5">umax</a> (unsigned int a, unsigned int b)</td></tr>
 <tr class="memdesc:a4c068fc0c08a78822023a97b0b4401a5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the maximum of two values.  <a href="#a4c068fc0c08a78822023a97b0b4401a5">More...</a><br /></td></tr>
 <tr class="separator:a4c068fc0c08a78822023a97b0b4401a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -173,8 +173,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ae7287c39cdf6bd13f86aa89b8e563b19"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae7287c39cdf6bd13f86aa89b8e563b19">&#9670;&nbsp;</a></span>strncpy_safe()</h2>
+<a id="a25154be583b308a01936842dec0be6f2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a25154be583b308a01936842dec0be6f2">&#9670;&nbsp;</a></span>strncpy_safe()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -188,14 +188,14 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>destLen</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dest_sz</em>&#160;</td>
+          <td class="paramtype">const char *&#160;</td>
+          <td class="paramname"><em>src</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -206,11 +206,11 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Safer version of <em>strncpy</em>. </p>
-<p><em>strncpy</em> will copy up to <em>n</em> characters to the destination and leaves null-termination up to the caller. This version takes an argument that is the size of the destination buffer, copies up to <em>dest_sz</em> - 1 characters and null terminates the buffer. </p><dl class="params"><dt>Parameters</dt><dd>
+<p><em>strncpy</em> will copy up to <em>n</em> characters to the destination and leaves null-termination up to the caller. This version takes an argument that is the length of the destination buffer, copies up to <em>destLen</em> - 1 bytes, and null terminates the buffer. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[out]</td><td class="paramname">dest</td><td>Destination buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">destLen</td><td>Length of the destination buffer in bytes. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>Source buffer. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dest_sz</td><td>Size of the destination buffer. </td></tr>
   </table>
   </dd>
 </dl>
