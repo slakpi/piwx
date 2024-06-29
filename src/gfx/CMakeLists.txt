@@ -1,6 +1,7 @@
 #-------------------------------------------------------------------------------
 # Find packages.
 #-------------------------------------------------------------------------------
+find_package(OpenGL COMPONENTS EGL GLES2)
 find_package(PNG REQUIRED)
 find_package(Python3 REQUIRED)
 find_package(Threads REQUIRED)
@@ -26,12 +27,6 @@ function(add_shader target shader_file)
 endfunction()
 
 #-------------------------------------------------------------------------------
-# Raspberry Pi GL libraries.
-#-------------------------------------------------------------------------------
-set(rpi_gl_include "/opt/vc/include")
-set(rpi_gl_lib "/opt/vc/lib")
-
-#-------------------------------------------------------------------------------
 # Setup the graphics library.
 #-------------------------------------------------------------------------------
 add_library(gfx OBJECT gfx.c draw.c globe.c img.c transform.c vec.c)
@@ -42,7 +37,8 @@ target_include_directories(gfx
 target_link_directories(gfx PUBLIC ${rpi_gl_lib})
 target_link_libraries(gfx
   PUBLIC Piwx::Geo
-  PRIVATE brcmEGL brcmGLESv2 Piwx::Conf_File Piwx::Util PNG::PNG Threads::Threads vcos)
+  PRIVATE OpenGL::OpenGL OpenGL::EGL OpenGL::GLES2 Piwx::Conf_File Piwx::Util PNG::PNG
+          Threads::Threads)
 
 #-------------------------------------------------------------------------------
 # Make shader headers.

@@ -12,6 +12,7 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -173,7 +174,7 @@ static unsigned int getStationOrder(xmlHashTablePtr hash, const char *id);
 
 static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag);
 
-static void hashDealloc(void *payload, xmlChar *name);
+static void hashDealloc(void *payload, const xmlChar *name);
 
 static xmlHashTablePtr initStationOrderHash(const char *stations);
 
@@ -424,7 +425,7 @@ static xmlHashTablePtr initStationOrderHash(const char *stations) {
 
   char            buf[4096];
   char           *p;
-  unsigned int    count = 0;
+  uintptr_t       count = 0;
   xmlHashTablePtr hash;
 
   // First pass: count the number of stations.
@@ -481,7 +482,7 @@ static xmlHashTablePtr initTagHash() {
  * @param[in] payload Data associated with tag.
  * @param[in] name    The tag name.
  */
-static void hashDealloc(void *payload, xmlChar *name) {}
+static void hashDealloc(void *payload, const xmlChar *name) {}
 
 /**
  * @brief   Retrieve the query order from a station from the hash table.
@@ -490,13 +491,8 @@ static void hashDealloc(void *payload, xmlChar *name) {}
  * @returns The query order for the station or 0 if the station is not found.
  */
 static unsigned int getStationOrder(xmlHashTablePtr hash, const char *id) {
-  void *p = xmlHashLookup(hash, (const xmlChar *)id);
-
-  if (!p) {
-    return 0;
-  }
-
-  return (unsigned int)p;
+  uintptr_t t = (uintptr_t)xmlHashLookup(hash, (const xmlChar *)id);
+  return (unsigned int)t;
 }
 
 /**
@@ -506,13 +502,13 @@ static unsigned int getStationOrder(xmlHashTablePtr hash, const char *id) {
  * @returns The associated tag ID or tagInvalid.
  */
 static Tag getTag(xmlHashTablePtr hash, const xmlChar *tag) {
-  void *p = xmlHashLookup(hash, tag);
+  uintptr_t t = (uintptr_t)xmlHashLookup(hash, tag);
 
-  if (!p) {
+  if (t > tagLast) {
     return tagInvalid;
   }
 
-  return (Tag)p;
+  return (Tag)t;
 }
 
 /**

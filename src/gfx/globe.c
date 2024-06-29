@@ -11,6 +11,7 @@
 #include "vec.h"
 #include <assert.h>
 #include <stdint.h>
+#include <string.h>
 #include <time.h>
 
 #define LAT_INTERVAL_DEG 10
