@@ -6,7 +6,6 @@
 #include "log.h"
 #include "util.h"
 #include "wx_type.h"
-#include <assert.h>
 #include <ctype.h>
 #include <curl/curl.h>
 #include <libxml/parser.h>

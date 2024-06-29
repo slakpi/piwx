@@ -137,7 +137,7 @@ void gfx_drawLayer(DrawResources resources, Layer layer, bool shadow) {
     const ProgramInfo *prg = &rsrc->programs[programAlphaTexBlur];
     GLint              index;
 
-    gfx_beginLayer(resources, layerTempA);
+    gfx_beginLayer(resources, prvLayerTemp);
 
     gfx_setupShader(rsrc, programAlphaTexBlur, rsrc->layers[layer]);
 
@@ -152,7 +152,7 @@ void gfx_drawLayer(DrawResources resources, Layer layer, bool shadow) {
 
     gfx_endLayer(resources);
 
-    gfx_setupShader(rsrc, programAlphaTexBlur, rsrc->layers[layerTempA]);
+    gfx_setupShader(rsrc, programAlphaTexBlur, rsrc->layers[prvLayerTemp]);
     glUniform2f(index, 0.0f, 1.0f);
     glDrawElements(GL_TRIANGLES, COUNTOF(indices), GL_UNSIGNED_SHORT, NULL);
   }

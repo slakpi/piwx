@@ -1,6 +1,5 @@
 #include "geo.h"
 #include "util.h"
-#include <assert.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>

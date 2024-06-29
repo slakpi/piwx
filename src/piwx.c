@@ -450,14 +450,14 @@ static void updateDisplay(const PiwxConfig *cfg, DrawResources resources, const 
   gfx_drawLayer(resources, layerBackground, false);
 
   if (updateLayers[layerForeground]) {
-    gfx_beginLayer(resources, layerTempB);
+    gfx_beginLayer(resources, layerTemp);
     clearFrame(resources);
     drawStation(resources, now, station);
     gfx_endLayer(resources);
 
     gfx_beginLayer(resources, layerForeground);
     clearFrame(resources);
-    gfx_drawLayer(resources, layerTempB, true);
+    gfx_drawLayer(resources, layerTemp, true);
     gfx_endLayer(resources);
   }
 

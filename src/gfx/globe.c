@@ -9,7 +9,6 @@
 #include "transform.h"
 #include "util.h"
 #include "vec.h"
-#include <assert.h>
 #include <stdint.h>
 #include <string.h>
 #include <time.h>

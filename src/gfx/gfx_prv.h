@@ -17,7 +17,7 @@
 #define FONT_ROWS       8
 #define FONT_COLS       16
 #define MAX_TEXTURES    8
-#define MAX_FBO_NESTING 3
+#define MAX_FBO_NESTING 4
 
 #define GET_EGL_ERROR(rsrc)              gfx_getEglError(rsrc, __FILE__, __LINE__)
 #define GET_SHADER_ERROR(rsrc, shader)   gfx_getShaderError(rsrc, shader, __FILE__, __LINE__);
@@ -130,13 +130,21 @@ typedef enum { globeDay, globeNight, globeThreshold, globeClouds, globeTexCount 
 typedef enum { bufferVBO, bufferIBO, bufferCount } Buffer;
 
 /**
- * @struct DrawResources_
- * @brief  Private implementation of the gfx DrawResources context.
+ * @brief Private layer identifiers.
+ */
+enum {
+  prvLayerSurface = layerCount, // Surface layer used for the final image
+  prvLayerTemp,                 // Private-use temp layer
+  prvLayerCount,
+};
+
+/**
+ * @struct  DrawResources_
+ * @brief   Private implementation of the gfx DrawResources context.
  */
 typedef struct {
   EGLDisplay      display;                // EGL display object
   EGLContext      context;                // EGL context
-  EGLSurface      surface;                // EGL surface
   int             error;                  // Last error code
   char            errorMsg[256];          // Last error message
   char            errorFile[256];         // File where the last error occurred
@@ -150,12 +158,12 @@ typedef struct {
   Vertex3D *globe;        // Globe vertices
   GLushort *globeIndices; // Indices for globe triangles
 #endif
-  GLuint  globeBuffers[bufferCount]; // Vertex and Index buffers
-  Texture globeTex[globeTexCount];   // Globe textures
-  GLuint  layers[layerCount];        // Cache layer textures
-  GLuint  layerBuffers[layerCount];  // Cache layer render buffers
-  GLuint  framebuffer;               // Cache framebuffer
-  Layer   layerStack[MAX_FBO_NESTING];
+  GLuint  globeBuffers[bufferCount];   // Vertex and Index buffers
+  Texture globeTex[globeTexCount];     // Globe textures
+  GLuint  framebuffer;                 // Cache framebuffer
+  GLuint  layers[prvLayerCount];       // Cache layer textures
+  GLuint  layerBuffers[prvLayerCount]; // Cache layer render buffers
+  Layer   layerStack[MAX_FBO_NESTING]; // Cache layer stack
   uint8_t stackDepth;
 } DrawResources_;
 

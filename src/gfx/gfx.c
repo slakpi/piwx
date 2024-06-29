@@ -1,19 +1,19 @@
 /**
  * @file gfx.c
  */
-#include "gfx.h"
 #include "conf_file.h"
 #include "gfx_prv.h"
+#include "gfx.h"
 #include "img.h"
 #include "transform.h"
 #include "util.h"
 #include "vec.h"
 #include <EGL/egl.h>
+#include <EGL/eglext.h>
 #include <GLES2/gl2.h>
 #if defined __ARM_NEON
 #include <arm_neon.h>
 #endif
-#include <assert.h>
 #include <fcntl.h>
 #include <png.h>
 #include <stdbool.h>
@@ -81,9 +81,7 @@ const Color4f gfx_White   = {{1.0f, 1.0f, 1.0f, 1.0f}};
 const Color4f gfx_Black   = {{0.0f, 0.0f, 0.0f, 1.0f}};
 
 // clang-format off
-static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE,
-                                        EGL_PBUFFER_BIT,
-                                        EGL_BLUE_SIZE, 8,
+static const EGLint gConfigAttribs[] = {EGL_BLUE_SIZE, 8,
                                         EGL_GREEN_SIZE, 8,
                                         EGL_RED_SIZE, 8,
                                         EGL_ALPHA_SIZE, 8,
@@ -95,10 +93,6 @@ static const EGLint gConfigAttribs[] = {EGL_SURFACE_TYPE,
                                         EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT,
                                         EGL_NONE};
 // clang-format on
-
-static const EGLint gPbufferAttribs[] = {
-    EGL_WIDTH, GFX_SCREEN_WIDTH, EGL_HEIGHT, GFX_SCREEN_HEIGHT, EGL_NONE,
-};
 
 static const EGLint gContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
 
@@ -188,20 +182,29 @@ void gfx_beginLayer(DrawResources resources, Layer layer) {
     return;
   }
 
-  if (layer >= layerCount) {
-    assert(false);
+  if (layer >= prvLayerCount) {
+    return;
+  }
+
+  // If the stack depth is greater than zero, then the stack has already been
+  // initialized and a request to begin the surface layer should be ignored. If
+  // the stack depth is zero, then it has not been initialized and a request to
+  // begin a layer other than the surface layer should be ignored.
+  if ((rsrc->stackDepth > 0 && layer == prvLayerSurface) ||
+      (rsrc->stackDepth == 0 && layer != prvLayerSurface)) {
     return;
   }
 
   if (rsrc->stackDepth >= MAX_FBO_NESTING) {
-    assert(false);
     return;
   }
 
+  // Initialize the framebuffer if it is invalid.
   if (rsrc->framebuffer == 0) {
     glGenFramebuffers(1, &rsrc->framebuffer);
   }
 
+  // Initialize the layer texture if it is invalid.
   if (rsrc->layers[layer] == 0) {
     glGenTextures(1, &rsrc->layers[layer]);
     glBindTexture(GL_TEXTURE_2D, rsrc->layers[layer]);
@@ -214,6 +217,7 @@ void gfx_beginLayer(DrawResources resources, Layer layer) {
     glBindTexture(GL_TEXTURE_2D, 0);
   }
 
+  // Initialize the layer render buffer if it is invalid.
   if (rsrc->layerBuffers[layer] == 0) {
     glGenRenderbuffers(1, &rsrc->layerBuffers[layer]);
     glBindRenderbuffer(GL_RENDERBUFFER, rsrc->layerBuffers[layer]);
@@ -222,6 +226,7 @@ void gfx_beginLayer(DrawResources resources, Layer layer) {
     glBindRenderbuffer(GL_RENDERBUFFER, 0);
   }
 
+  // Setup the complete framebuffer.
   glBindFramebuffer(GL_FRAMEBUFFER, rsrc->framebuffer);
   glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rsrc->layers[layer],
                          0);
@@ -296,10 +301,6 @@ void gfx_cleanupGraphics(DrawResources *resources) {
     eglDestroyContext(rsrc->display, rsrc->context);
   }
 
-  if (rsrc->surface != EGL_NO_SURFACE) {
-    eglDestroySurface(rsrc->display, rsrc->surface);
-  }
-
   if (rsrc->display != EGL_NO_DISPLAY) {
     eglTerminate(rsrc->display);
   }
@@ -349,14 +350,14 @@ void gfx_endLayer(DrawResources resources) {
     return;
   }
 
-  if (rsrc->stackDepth == 0) {
+  // If the stack depth is zero, it is uninitialized and there is nothing to do.
+  // If the stack depth is one, then we are down to the surface layer. The
+  // surface layer should never be popped from the stack.
+  if (rsrc->stackDepth < 2) {
     return;
   }
 
-  if (--rsrc->stackDepth == 0) {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    return;
-  }
+  --rsrc->stackDepth;
 
   layer = rsrc->layerStack[rsrc->stackDepth - 1];
 
@@ -736,7 +737,6 @@ static bool allocResources(DrawResources_ **rsrc) {
   memset(*rsrc, 0, sizeof(**rsrc)); // NOLINT -- Size known.
   (*rsrc)->display = EGL_NO_DISPLAY;
   (*rsrc)->context = EGL_NO_CONTEXT;
-  (*rsrc)->surface = EGL_NO_SURFACE;
 
   return true;
 }
@@ -751,7 +751,7 @@ static bool initEgl(DrawResources_ *rsrc) {
   EGLint    numConfigs = 0;
   EGLConfig config     = {0};
 
-  rsrc->display = eglGetDisplay(EGL_DEFAULT_DISPLAY);
+  rsrc->display = eglGetPlatformDisplay(EGL_PLATFORM_SURFACELESS_MESA, NULL, NULL);
 
   if (rsrc->display == EGL_NO_DISPLAY) {
     GET_EGL_ERROR(rsrc);
@@ -768,13 +768,6 @@ static bool initEgl(DrawResources_ *rsrc) {
     return false;
   }
 
-  rsrc->surface = eglCreatePbufferSurface(rsrc->display, config, gPbufferAttribs);
-
-  if (rsrc->surface == EGL_NO_SURFACE) {
-    GET_EGL_ERROR(rsrc);
-    return false;
-  }
-
   eglBindAPI(EGL_OPENGL_API);
 
   rsrc->context = eglCreateContext(rsrc->display, config, EGL_NO_CONTEXT, gContextAttribs);
@@ -784,7 +777,7 @@ static bool initEgl(DrawResources_ *rsrc) {
     return false;
   }
 
-  eglMakeCurrent(rsrc->display, rsrc->surface, rsrc->surface, rsrc->context);
+  eglMakeCurrent(rsrc->display, EGL_NO_SURFACE, EGL_NO_SURFACE, rsrc->context);
 
   return true;
 }
@@ -1089,6 +1082,8 @@ cleanup:
  * @param[in] rsrc The gfx context.
  */
 static void initRender(DrawResources_ *rsrc) {
+  gfx_beginLayer(rsrc, prvLayerSurface);
+
   glViewport(0, 0, (GLsizei)GFX_SCREEN_WIDTH, (GLsizei)GFX_SCREEN_HEIGHT);
 
   glEnable(GL_BLEND);

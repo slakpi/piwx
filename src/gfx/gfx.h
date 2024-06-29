@@ -95,16 +95,20 @@ typedef enum {
 } Icon;
 
 /**
- * @enum  Layer
+ * @typedef Layer
+ * @brief   Cached layer identifier type.
+ */
+typedef uint8_t Layer;
+
+/**
  * @brief Cached layer identifier.
  */
-typedef enum {
+enum {
   layerForeground, // Display foreground layer
   layerBackground, // Display background layer
-  layerTempA,      // Gfx library temp layer (do not use directly)
-  layerTempB,      // General-use temp layer
+  layerTemp,       // General-use temp layer
   layerCount
-} Layer;
+};
 
 /**
  * @typedef Color4f
