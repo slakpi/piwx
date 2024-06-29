@@ -24,8 +24,9 @@ flight planning action in any country.
 Building
 --------
 
-PiWx uses CMake 3.22 to build. The following dependencies must be installed:
+PiWx uses CMake 3.27 to build. The following dependencies must be installed:
 
+* OpenGL ES 2 and EGL (Mesa drivers on Raspberry Pi OS are fine)
 * pigpio (<https://abyz.me.uk/rpi/pigpio/>)
 * Bison (<https://www.gnu.org/software/bison/>)
 * Flex (<https://github.com/westes/flex>)
@@ -39,9 +40,8 @@ build:
 
     % git clone https://github.com/slakpi/piwx.git
     % cd piwx
-    % mkdir build
+    % cmake -B build -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local .
     % cd build
-    % cmake -DCMAKE_INSTALL_PREFIX="/usr/local/piwx" -DCMAKE_BUILD_TYPE=Release ..
     % make
     % sudo make install
 
@@ -146,18 +146,18 @@ will just display Yellow:
     # Disable high-wind blinking
     highwindblink=off;
 
-By default, PiWx uses GPIO18 and DMA Channel 10 to drive the LED string.
-These may be configured using the following options:
+By default, PiWx uses GPIO18 and DMA Channel 10 to drive the LED string. These
+may be configured using the following options:
 
-    # Set LED GPIO pin to GPIO12 (BE CAREFUL)
+    # Set LED GPIO pin to GPIO12 (BE CAREFUL).
     ledpin=12;
     # Set LED DMA channel (BE CAREFUL)
     leddma=10;
 
 BE EXTREMEMLY CAREFUL when choosing the DMA channel. Read up on the available
 DMA channels. PiWx currently only supports GPIO12 and GPIO18 (PWM0). The
-default options are the safest. Leave these options alone unless there is a
-compelling option to change them.
+default options are the safest. However, if the PiTFT display is attached, it
+will use GPIO18 and the LED string will need to use GPIO12.
 
 PiWx can log basic events to `<prefix>/var/piwx/piwx.log`. The logger supports
 four levels of output: `quiet` (default), `warning`, `info`, and `debug`. Each
@@ -177,3 +177,21 @@ repository under `doc/systemd`. This file must be placed in
 Use `sudo systemctl start piwx.service` to test starting PiWx and use
 `sudo systemctl stop piwx.service` to stop it. To enable automatically starting
 PiWx on boot, use `sudo systemctl enable piwx.service`.
+
+PiTFT Notes
+-----------
+
+The Adafruit installer does not always configure the PiTFT overlay correctly. On
+a Raspberry Pi 3 B+, the following options in `/boot/firmware/config.txt` work
+for Raspberry Pi OS 12 (Bookworm):
+
+    dtparam=i2c_arm=on
+    dtparam=i2s=on
+    dtparam=spi=on
+
+    hdmi_force_hotplug=0
+
+    # NOTE: Use whatever rotation value is needed.
+    # NOTE: The Adafruit installer adds `drm` which should not be used.
+    # NOTE: Lower performance is fine.
+    dtoverlay=pitft28-resistive,rotate=270,speed=25000000,fps=20
