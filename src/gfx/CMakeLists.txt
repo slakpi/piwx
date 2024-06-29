@@ -29,7 +29,7 @@ endfunction()
 #-------------------------------------------------------------------------------
 # Setup the graphics library.
 #-------------------------------------------------------------------------------
-add_library(gfx OBJECT gfx.c draw.c globe.c img.c transform.c vec.c)
+add_library(gfx OBJECT gfx.c draw.c globe.c img.c simd.c transform.c vec.c)
 target_compile_options(gfx PRIVATE ${SIMD_C_FLAGS})
 target_include_directories(gfx
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
