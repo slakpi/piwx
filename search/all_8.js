@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['icon_0',['Icon',['../gfx_8h.html#a880cae13d5b4260686b2c8bb663099fb',1,'gfx.h']]],
+  ['icon_0',['Icon',['../group__GfxModule.html#ga880cae13d5b4260686b2c8bb663099fb',1,'gfx.h']]],
   ['iconimage_1',['IconImage',['../structIconImage.html',1,'']]],
   ['img_2ec_2',['img.c',['../img_8c.html',1,'']]],
   ['img_2eh_3',['img.h',['../img_8h.html',1,'']]],

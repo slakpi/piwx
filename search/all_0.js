@@ -11,5 +11,5 @@ var searchData=
   ['animationdata_8',['AnimationData',['../anim_8c.html#a4a609c1251e15758f1aaac3dd3f9c34a',1,'anim.c']]],
   ['animationstepfn_9',['AnimationStepFn',['../anim_8c.html#a341239cc24440963d7f2f5cfa7577cde',1,'anim.c']]],
   ['appendfiletopath_10',['appendFileToPath',['../conf__file_8c.html#a928ffe398761db1022c3852884bac194',1,'conf_file.c']]],
-  ['assertlog_11',['assertLog',['../log_8c.html#a6067687da3f993d53c3996b0ec2c98a6',1,'assertLog(bool condition, const char *fmt,...):&#160;log.c'],['../log_8h.html#a6067687da3f993d53c3996b0ec2c98a6',1,'assertLog(bool condition, const char *fmt,...):&#160;log.c']]]
+  ['assertlog_11',['assertLog',['../group__LogModule.html#ga6067687da3f993d53c3996b0ec2c98a6',1,'assertLog(bool condition, const char *fmt,...):&#160;log.c'],['../group__LogModule.html#ga6067687da3f993d53c3996b0ec2c98a6',1,'assertLog(bool condition, const char *fmt,...):&#160;log.c']]]
 ];

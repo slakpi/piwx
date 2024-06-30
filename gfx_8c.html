@@ -71,7 +71,7 @@ $(function() {
 <a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
-  <div class="headertitle"><div class="title">gfx.c File Reference</div></div>
+  <div class="headertitle"><div class="title">gfx.c File Reference<div class="ingroups"><a class="el" href="group__GfxModule.html">Graphics Module</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="conf__file_8h_source.html">conf_file.h</a>&quot;</code><br />
@@ -179,48 +179,48 @@ Functions</h2></td></tr>
 <tr class="memitem:addea26019591ebaee61eafe57602bf2c"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#addea26019591ebaee61eafe57602bf2c">readPixelsToPng</a> (<a class="el" href="structPng.html">Png</a> *png)</td></tr>
 <tr class="memdesc:addea26019591ebaee61eafe57602bf2c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Read pixels from OpenGL into a PNG.  <a href="gfx_8c.html#addea26019591ebaee61eafe57602bf2c">More...</a><br /></td></tr>
 <tr class="separator:addea26019591ebaee61eafe57602bf2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aea92c2650e135af82ef980648ae96e64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#aea92c2650e135af82ef980648ae96e64">gfx_beginLayer</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="gfx_8h.html#a9a8118be7780e95363d631cbca7e7800">Layer</a> layer)</td></tr>
-<tr class="memdesc:aea92c2650e135af82ef980648ae96e64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Begin drawing to the specified cache layer.  <a href="gfx_8c.html#aea92c2650e135af82ef980648ae96e64">More...</a><br /></td></tr>
-<tr class="separator:aea92c2650e135af82ef980648ae96e64"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aeeaa32d610607f63c9d0be937cb71138"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#aeeaa32d610607f63c9d0be937cb71138">gfx_clearSurface</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a> clear)</td></tr>
-<tr class="memdesc:aeeaa32d610607f63c9d0be937cb71138"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears the current drawing surface with the specified color.  <a href="gfx_8c.html#aeeaa32d610607f63c9d0be937cb71138">More...</a><br /></td></tr>
-<tr class="separator:aeeaa32d610607f63c9d0be937cb71138"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0cfc35e1e13ed1602e08a9151c88a55d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a0cfc35e1e13ed1602e08a9151c88a55d">gfx_commitToScreen</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources)</td></tr>
-<tr class="memdesc:a0cfc35e1e13ed1602e08a9151c88a55d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commits the current drawing surface to the screen.  <a href="gfx_8c.html#a0cfc35e1e13ed1602e08a9151c88a55d">More...</a><br /></td></tr>
-<tr class="separator:a0cfc35e1e13ed1602e08a9151c88a55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9bc9c36d3e0424e9b95f688050cb5825"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a9bc9c36d3e0424e9b95f688050cb5825">gfx_cleanupGraphics</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> *resources)</td></tr>
-<tr class="memdesc:a9bc9c36d3e0424e9b95f688050cb5825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up the specified gfx context.  <a href="gfx_8c.html#a9bc9c36d3e0424e9b95f688050cb5825">More...</a><br /></td></tr>
-<tr class="separator:a9bc9c36d3e0424e9b95f688050cb5825"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab41511ef45de7ae8266ebe31f77a4f75"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#ab41511ef45de7ae8266ebe31f77a4f75">gfx_dumpSurfaceToPng</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, const char *path)</td></tr>
-<tr class="memdesc:ab41511ef45de7ae8266ebe31f77a4f75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dumps the current drawing surface to a PNG image.  <a href="gfx_8c.html#ab41511ef45de7ae8266ebe31f77a4f75">More...</a><br /></td></tr>
-<tr class="separator:ab41511ef45de7ae8266ebe31f77a4f75"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4378da43c4772073b2e0db91de074eb9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a4378da43c4772073b2e0db91de074eb9">gfx_endLayer</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources)</td></tr>
-<tr class="memdesc:a4378da43c4772073b2e0db91de074eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ends cached layer drawing.  <a href="gfx_8c.html#a4378da43c4772073b2e0db91de074eb9">More...</a><br /></td></tr>
-<tr class="separator:a4378da43c4772073b2e0db91de074eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a453edda2e3b8fd2748a7d41d72ec8219"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a453edda2e3b8fd2748a7d41d72ec8219">gfx_getCharacterRenderInfo</a> (const <a class="el" href="structDrawResources__.html">DrawResources_</a> *rsrc, <a class="el" href="gfx_8h.html#a5030a9a7c213c761e2209a0fe3c334f8">Font</a> font, char c, const <a class="el" href="gfx_8h.html#a815b373c848cf92bb60b906cf278a60a">Point2f</a> *bottomLeft, const <a class="el" href="structCharInfo.html">CharInfo</a> *info, <a class="el" href="gfx_8h.html#a7b3b70fc12e6146ab85b9e877eb5a6f8">CharVertAlign</a> valign, <a class="el" href="structCharacterRenderInfo.html">CharacterRenderInfo</a> *rndrInfo)</td></tr>
+<tr class="memitem:gaea92c2650e135af82ef980648ae96e64"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#gaea92c2650e135af82ef980648ae96e64">gfx_beginLayer</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="group__GfxModule.html#ga9a8118be7780e95363d631cbca7e7800">Layer</a> layer)</td></tr>
+<tr class="memdesc:gaea92c2650e135af82ef980648ae96e64"><td class="mdescLeft">&#160;</td><td class="mdescRight">Begin drawing to the specified cache layer.  <a href="group__GfxModule.html#gaea92c2650e135af82ef980648ae96e64">More...</a><br /></td></tr>
+<tr class="separator:gaea92c2650e135af82ef980648ae96e64"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaeeaa32d610607f63c9d0be937cb71138"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#gaeeaa32d610607f63c9d0be937cb71138">gfx_clearSurface</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a> clear)</td></tr>
+<tr class="memdesc:gaeeaa32d610607f63c9d0be937cb71138"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears the current drawing surface with the specified color.  <a href="group__GfxModule.html#gaeeaa32d610607f63c9d0be937cb71138">More...</a><br /></td></tr>
+<tr class="separator:gaeeaa32d610607f63c9d0be937cb71138"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0cfc35e1e13ed1602e08a9151c88a55d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#ga0cfc35e1e13ed1602e08a9151c88a55d">gfx_commitToScreen</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources)</td></tr>
+<tr class="memdesc:ga0cfc35e1e13ed1602e08a9151c88a55d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Commits the current drawing surface to the screen.  <a href="group__GfxModule.html#ga0cfc35e1e13ed1602e08a9151c88a55d">More...</a><br /></td></tr>
+<tr class="separator:ga0cfc35e1e13ed1602e08a9151c88a55d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9bc9c36d3e0424e9b95f688050cb5825"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#ga9bc9c36d3e0424e9b95f688050cb5825">gfx_cleanupGraphics</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> *resources)</td></tr>
+<tr class="memdesc:ga9bc9c36d3e0424e9b95f688050cb5825"><td class="mdescLeft">&#160;</td><td class="mdescRight">Cleans up the specified gfx context.  <a href="group__GfxModule.html#ga9bc9c36d3e0424e9b95f688050cb5825">More...</a><br /></td></tr>
+<tr class="separator:ga9bc9c36d3e0424e9b95f688050cb5825"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab41511ef45de7ae8266ebe31f77a4f75"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#gab41511ef45de7ae8266ebe31f77a4f75">gfx_dumpSurfaceToPng</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, const char *path)</td></tr>
+<tr class="memdesc:gab41511ef45de7ae8266ebe31f77a4f75"><td class="mdescLeft">&#160;</td><td class="mdescRight">Dumps the current drawing surface to a PNG image.  <a href="group__GfxModule.html#gab41511ef45de7ae8266ebe31f77a4f75">More...</a><br /></td></tr>
+<tr class="separator:gab41511ef45de7ae8266ebe31f77a4f75"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4378da43c4772073b2e0db91de074eb9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#ga4378da43c4772073b2e0db91de074eb9">gfx_endLayer</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources)</td></tr>
+<tr class="memdesc:ga4378da43c4772073b2e0db91de074eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ends cached layer drawing.  <a href="group__GfxModule.html#ga4378da43c4772073b2e0db91de074eb9">More...</a><br /></td></tr>
+<tr class="separator:ga4378da43c4772073b2e0db91de074eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a453edda2e3b8fd2748a7d41d72ec8219"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a453edda2e3b8fd2748a7d41d72ec8219">gfx_getCharacterRenderInfo</a> (const <a class="el" href="structDrawResources__.html">DrawResources_</a> *rsrc, <a class="el" href="group__GfxModule.html#ga5030a9a7c213c761e2209a0fe3c334f8">Font</a> font, char c, const <a class="el" href="group__GfxModule.html#ga815b373c848cf92bb60b906cf278a60a">Point2f</a> *bottomLeft, const <a class="el" href="structCharInfo.html">CharInfo</a> *info, <a class="el" href="group__GfxModule.html#ga7b3b70fc12e6146ab85b9e877eb5a6f8">CharVertAlign</a> valign, <a class="el" href="structCharacterRenderInfo.html">CharacterRenderInfo</a> *rndrInfo)</td></tr>
 <tr class="memdesc:a453edda2e3b8fd2748a7d41d72ec8219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate the rendering information for a character.  <a href="gfx_8c.html#a453edda2e3b8fd2748a7d41d72ec8219">More...</a><br /></td></tr>
 <tr class="separator:a453edda2e3b8fd2748a7d41d72ec8219"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5791f411c01efbc39c699cbe02cc8d31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a5791f411c01efbc39c699cbe02cc8d31">gfx_getEglError</a> (<a class="el" href="structDrawResources__.html">DrawResources_</a> *rsrc, const char *file, long line)</td></tr>
 <tr class="memdesc:a5791f411c01efbc39c699cbe02cc8d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get information about the last EGL error.  <a href="gfx_8c.html#a5791f411c01efbc39c699cbe02cc8d31">More...</a><br /></td></tr>
 <tr class="separator:a5791f411c01efbc39c699cbe02cc8d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a273b88e818611c8cd7bc13c60a2fbddf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a273b88e818611c8cd7bc13c60a2fbddf">gfx_getFontInfo</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="gfx_8h.html#a5030a9a7c213c761e2209a0fe3c334f8">Font</a> font, <a class="el" href="structCharInfo.html">CharInfo</a> *info)</td></tr>
-<tr class="memdesc:a273b88e818611c8cd7bc13c60a2fbddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the character information for a font.  <a href="gfx_8c.html#a273b88e818611c8cd7bc13c60a2fbddf">More...</a><br /></td></tr>
-<tr class="separator:a273b88e818611c8cd7bc13c60a2fbddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae3fe780b8e3fd06722d816c7401b360d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#ae3fe780b8e3fd06722d816c7401b360d">gfx_getIconInfo</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="gfx_8h.html#a880cae13d5b4260686b2c8bb663099fb">Icon</a> icon, <a class="el" href="unionVector2f.html">Vector2f</a> *size)</td></tr>
-<tr class="memdesc:ae3fe780b8e3fd06722d816c7401b360d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the width and height of an icon.  <a href="gfx_8c.html#ae3fe780b8e3fd06722d816c7401b360d">More...</a><br /></td></tr>
-<tr class="separator:ae3fe780b8e3fd06722d816c7401b360d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a30b92426534669ed3712f63c3422b35b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a30b92426534669ed3712f63c3422b35b">gfx_getGfxError</a> (<a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, int *error, char *msg, size_t len)</td></tr>
-<tr class="memdesc:a30b92426534669ed3712f63c3422b35b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get error information from a gfx context.  <a href="gfx_8c.html#a30b92426534669ed3712f63c3422b35b">More...</a><br /></td></tr>
-<tr class="separator:a30b92426534669ed3712f63c3422b35b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga273b88e818611c8cd7bc13c60a2fbddf"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#ga273b88e818611c8cd7bc13c60a2fbddf">gfx_getFontInfo</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="group__GfxModule.html#ga5030a9a7c213c761e2209a0fe3c334f8">Font</a> font, <a class="el" href="structCharInfo.html">CharInfo</a> *info)</td></tr>
+<tr class="memdesc:ga273b88e818611c8cd7bc13c60a2fbddf"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the character information for a font.  <a href="group__GfxModule.html#ga273b88e818611c8cd7bc13c60a2fbddf">More...</a><br /></td></tr>
+<tr class="separator:ga273b88e818611c8cd7bc13c60a2fbddf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae3fe780b8e3fd06722d816c7401b360d"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#gae3fe780b8e3fd06722d816c7401b360d">gfx_getIconInfo</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, <a class="el" href="group__GfxModule.html#ga880cae13d5b4260686b2c8bb663099fb">Icon</a> icon, <a class="el" href="unionVector2f.html">Vector2f</a> *size)</td></tr>
+<tr class="memdesc:gae3fe780b8e3fd06722d816c7401b360d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the width and height of an icon.  <a href="group__GfxModule.html#gae3fe780b8e3fd06722d816c7401b360d">More...</a><br /></td></tr>
+<tr class="separator:gae3fe780b8e3fd06722d816c7401b360d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga30b92426534669ed3712f63c3422b35b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#ga30b92426534669ed3712f63c3422b35b">gfx_getGfxError</a> (<a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> resources, int *error, char *msg, size_t len)</td></tr>
+<tr class="memdesc:ga30b92426534669ed3712f63c3422b35b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get error information from a gfx context.  <a href="group__GfxModule.html#ga30b92426534669ed3712f63c3422b35b">More...</a><br /></td></tr>
+<tr class="separator:ga30b92426534669ed3712f63c3422b35b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a70c0d8f8e2468c69af57aec18eb22791"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a70c0d8f8e2468c69af57aec18eb22791">gfx_getProgramError</a> (<a class="el" href="structDrawResources__.html">DrawResources_</a> *rsrc, GLuint program, const char *file, long line)</td></tr>
 <tr class="memdesc:a70c0d8f8e2468c69af57aec18eb22791"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get program linker errors.  <a href="gfx_8c.html#a70c0d8f8e2468c69af57aec18eb22791">More...</a><br /></td></tr>
 <tr class="separator:a70c0d8f8e2468c69af57aec18eb22791"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77a435704e10e7d0d413dbea2fb26d22"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a77a435704e10e7d0d413dbea2fb26d22">gfx_getShaderError</a> (<a class="el" href="structDrawResources__.html">DrawResources_</a> *rsrc, GLuint shader, const char *file, long line)</td></tr>
 <tr class="memdesc:a77a435704e10e7d0d413dbea2fb26d22"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get shader compilation errors.  <a href="gfx_8c.html#a77a435704e10e7d0d413dbea2fb26d22">More...</a><br /></td></tr>
 <tr class="separator:a77a435704e10e7d0d413dbea2fb26d22"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae43f24c74e76be6ef8a7ce468e55702c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#ae43f24c74e76be6ef8a7ce468e55702c">gfx_initGraphics</a> (const char *fontResources, const char *imageResources, <a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> *resources)</td></tr>
-<tr class="memdesc:ae43f24c74e76be6ef8a7ce468e55702c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a new gfx context.  <a href="gfx_8c.html#ae43f24c74e76be6ef8a7ce468e55702c">More...</a><br /></td></tr>
-<tr class="separator:ae43f24c74e76be6ef8a7ce468e55702c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae43f24c74e76be6ef8a7ce468e55702c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__GfxModule.html#gae43f24c74e76be6ef8a7ce468e55702c">gfx_initGraphics</a> (const char *fontResources, const char *imageResources, <a class="el" href="group__GfxModule.html#ga8f9084fa48c381705926070ee1b9c784">DrawResources</a> *resources)</td></tr>
+<tr class="memdesc:gae43f24c74e76be6ef8a7ce468e55702c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize a new gfx context.  <a href="group__GfxModule.html#gae43f24c74e76be6ef8a7ce468e55702c">More...</a><br /></td></tr>
+<tr class="separator:gae43f24c74e76be6ef8a7ce468e55702c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4515545426639d11fff74d2b188e1f46"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#a4515545426639d11fff74d2b188e1f46">gfx_loadTexture</a> (const <a class="el" href="structPng.html">Png</a> *png, GLuint tex, GLenum format, <a class="el" href="structTexture.html">Texture</a> *texture)</td></tr>
 <tr class="memdesc:a4515545426639d11fff74d2b188e1f46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure a texture a load pixels.  <a href="gfx_8c.html#a4515545426639d11fff74d2b188e1f46">More...</a><br /></td></tr>
 <tr class="separator:a4515545426639d11fff74d2b188e1f46"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -242,33 +242,33 @@ Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:acc1d1802e3e3df4859c984f054dad606"><td class="memItemLeft" align="right" valign="top"><a id="acc1d1802e3e3df4859c984f054dad606" name="acc1d1802e3e3df4859c984f054dad606"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Clear</b> = {{0.0f, 0.0f, 0.0f, 0.0f}}</td></tr>
-<tr class="separator:acc1d1802e3e3df4859c984f054dad606"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9d7e4bd34448b8261ce206c13ca396e1"><td class="memItemLeft" align="right" valign="top"><a id="a9d7e4bd34448b8261ce206c13ca396e1" name="a9d7e4bd34448b8261ce206c13ca396e1"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Red</b> = {{1.0f, 0.0f, 0.0f, 1.0f}}</td></tr>
-<tr class="separator:a9d7e4bd34448b8261ce206c13ca396e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1fc85d9b20981d907e85042e8ca64117"><td class="memItemLeft" align="right" valign="top"><a id="a1fc85d9b20981d907e85042e8ca64117" name="a1fc85d9b20981d907e85042e8ca64117"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Green</b> = {{0.0f, 1.0f, 0.0f, 1.0f}}</td></tr>
-<tr class="separator:a1fc85d9b20981d907e85042e8ca64117"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a1ad99598e03fac97110396cd280d5fd5"><td class="memItemLeft" align="right" valign="top"><a id="a1ad99598e03fac97110396cd280d5fd5" name="a1ad99598e03fac97110396cd280d5fd5"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Blue</b> = {{0.0f, 0.0f, 1.0f, 1.0f}}</td></tr>
-<tr class="separator:a1ad99598e03fac97110396cd280d5fd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2db8bcc404ae8dbe2b262812ae256691"><td class="memItemLeft" align="right" valign="top"><a id="a2db8bcc404ae8dbe2b262812ae256691" name="a2db8bcc404ae8dbe2b262812ae256691"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Magenta</b> = {{1.0f, 0.0f, 1.0f, 1.0f}}</td></tr>
-<tr class="separator:a2db8bcc404ae8dbe2b262812ae256691"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af71cca6c38e60e92c5dc1e8c062aa1a5"><td class="memItemLeft" align="right" valign="top"><a id="af71cca6c38e60e92c5dc1e8c062aa1a5" name="af71cca6c38e60e92c5dc1e8c062aa1a5"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Yellow</b> = {{1.0f, 1.0f, 0.0f, 1.0f}}</td></tr>
-<tr class="separator:af71cca6c38e60e92c5dc1e8c062aa1a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac95a7ecc220e217f0d7b82e78e6dc3de"><td class="memItemLeft" align="right" valign="top"><a id="ac95a7ecc220e217f0d7b82e78e6dc3de" name="ac95a7ecc220e217f0d7b82e78e6dc3de"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Cyan</b> = {{0.0f, 1.0f, 1.0f, 1.0f}}</td></tr>
-<tr class="separator:ac95a7ecc220e217f0d7b82e78e6dc3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4a9d8d60e0f33d09bcae15cb3fe679d"><td class="memItemLeft" align="right" valign="top"><a id="ac4a9d8d60e0f33d09bcae15cb3fe679d" name="ac4a9d8d60e0f33d09bcae15cb3fe679d"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_White</b> = {{1.0f, 1.0f, 1.0f, 1.0f}}</td></tr>
-<tr class="separator:ac4a9d8d60e0f33d09bcae15cb3fe679d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7447303aa457c940441046eb233ba778"><td class="memItemLeft" align="right" valign="top"><a id="a7447303aa457c940441046eb233ba778" name="a7447303aa457c940441046eb233ba778"></a>
-const <a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Black</b> = {{0.0f, 0.0f, 0.0f, 1.0f}}</td></tr>
-<tr class="separator:a7447303aa457c940441046eb233ba778"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacc1d1802e3e3df4859c984f054dad606"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Clear</b> = {{0.0f, 0.0f, 0.0f, 0.0f}}</td></tr>
+<tr class="separator:gacc1d1802e3e3df4859c984f054dad606"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9d7e4bd34448b8261ce206c13ca396e1"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Red</b> = {{1.0f, 0.0f, 0.0f, 1.0f}}</td></tr>
+<tr class="separator:ga9d7e4bd34448b8261ce206c13ca396e1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1fc85d9b20981d907e85042e8ca64117"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Green</b> = {{0.0f, 1.0f, 0.0f, 1.0f}}</td></tr>
+<tr class="separator:ga1fc85d9b20981d907e85042e8ca64117"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1ad99598e03fac97110396cd280d5fd5"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Blue</b> = {{0.0f, 0.0f, 1.0f, 1.0f}}</td></tr>
+<tr class="separator:ga1ad99598e03fac97110396cd280d5fd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2db8bcc404ae8dbe2b262812ae256691"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Magenta</b> = {{1.0f, 0.0f, 1.0f, 1.0f}}</td></tr>
+<tr class="separator:ga2db8bcc404ae8dbe2b262812ae256691"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf71cca6c38e60e92c5dc1e8c062aa1a5"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Yellow</b> = {{1.0f, 1.0f, 0.0f, 1.0f}}</td></tr>
+<tr class="separator:gaf71cca6c38e60e92c5dc1e8c062aa1a5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac95a7ecc220e217f0d7b82e78e6dc3de"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Cyan</b> = {{0.0f, 1.0f, 1.0f, 1.0f}}</td></tr>
+<tr class="separator:gac95a7ecc220e217f0d7b82e78e6dc3de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac4a9d8d60e0f33d09bcae15cb3fe679d"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_White</b> = {{1.0f, 1.0f, 1.0f, 1.0f}}</td></tr>
+<tr class="separator:gac4a9d8d60e0f33d09bcae15cb3fe679d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga7447303aa457c940441046eb233ba778"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="group__GfxModule.html#ga45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td><td class="memItemRight" valign="bottom"><b>gfx_Black</b> = {{0.0f, 0.0f, 0.0f, 1.0f}}</td></tr>
+<tr class="separator:ga7447303aa457c940441046eb233ba778"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae70abe9365b94721c9b8878b2485b344"><td class="memItemLeft" align="right" valign="top">static const EGLint&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="gfx_8c.html#ae70abe9365b94721c9b8878b2485b344">gConfigAttribs</a> []</td></tr>
 <tr class="separator:ae70abe9365b94721c9b8878b2485b344"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab4c57d7accaa10f0984ec7c1187e348a"><td class="memItemLeft" align="right" valign="top"><a id="ab4c57d7accaa10f0984ec7c1187e348a" name="ab4c57d7accaa10f0984ec7c1187e348a"></a>
@@ -369,197 +369,6 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
 
 </div>
 </div>
-<a id="aea92c2650e135af82ef980648ae96e64" name="aea92c2650e135af82ef980648ae96e64"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aea92c2650e135af82ef980648ae96e64">&#9670;&nbsp;</a></span>gfx_beginLayer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gfx_beginLayer </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a9a8118be7780e95363d631cbca7e7800">Layer</a>&#160;</td>
-          <td class="paramname"><em>layer</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Begin drawing to the specified cache layer. </p>
-<p >If necessary, creates the framebuffer and texture objects to receive the draw commands. Draw commands must be followed by <code>gfx_endLayer</code>. The cached texture can be drawn with <code>gfx_drawLayer</code>. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">layer</td><td>The layer cache. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a9bc9c36d3e0424e9b95f688050cb5825" name="a9bc9c36d3e0424e9b95f688050cb5825"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9bc9c36d3e0424e9b95f688050cb5825">&#9670;&nbsp;</a></span>gfx_cleanupGraphics()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gfx_cleanupGraphics </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> *&#160;</td>
-          <td class="paramname"><em>resources</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Cleans up the specified gfx context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">resources</td><td>The gfx context to cleanup. The pointer must be valid, but it may point to a NULL context. On return, the pointer will point to a NULL context. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="aeeaa32d610607f63c9d0be937cb71138" name="aeeaa32d610607f63c9d0be937cb71138"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aeeaa32d610607f63c9d0be937cb71138">&#9670;&nbsp;</a></span>gfx_clearSurface()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gfx_clearSurface </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a45defadce334224a4bba1780971553ac">Color4f</a>&#160;</td>
-          <td class="paramname"><em>clear</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Clears the current drawing surface with the specified color. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">clear</td><td>The clear color. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a0cfc35e1e13ed1602e08a9151c88a55d" name="a0cfc35e1e13ed1602e08a9151c88a55d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0cfc35e1e13ed1602e08a9151c88a55d">&#9670;&nbsp;</a></span>gfx_commitToScreen()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool gfx_commitToScreen </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Commits the current drawing surface to the screen. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if able to write the OpenGL color buffer to the screen. </dd></dl>
-
-</div>
-</div>
-<a id="ab41511ef45de7ae8266ebe31f77a4f75" name="ab41511ef45de7ae8266ebe31f77a4f75"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab41511ef45de7ae8266ebe31f77a4f75">&#9670;&nbsp;</a></span>gfx_dumpSurfaceToPng()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool gfx_dumpSurfaceToPng </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>path</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Dumps the current drawing surface to a PNG image. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>The path to the PNG file. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if write succeeds, false otherwise. </dd></dl>
-
-</div>
-</div>
-<a id="a4378da43c4772073b2e0db91de074eb9" name="a4378da43c4772073b2e0db91de074eb9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a4378da43c4772073b2e0db91de074eb9">&#9670;&nbsp;</a></span>gfx_endLayer()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gfx_endLayer </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Ends cached layer drawing. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="a453edda2e3b8fd2748a7d41d72ec8219" name="a453edda2e3b8fd2748a7d41d72ec8219"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a453edda2e3b8fd2748a7d41d72ec8219">&#9670;&nbsp;</a></span>gfx_getCharacterRenderInfo()</h2>
 
@@ -575,7 +384,7 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a5030a9a7c213c761e2209a0fe3c334f8">Font</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__GfxModule.html#ga5030a9a7c213c761e2209a0fe3c334f8">Font</a>&#160;</td>
           <td class="paramname"><em>font</em>, </td>
         </tr>
         <tr>
@@ -587,7 +396,7 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const <a class="el" href="gfx_8h.html#a815b373c848cf92bb60b906cf278a60a">Point2f</a> *&#160;</td>
+          <td class="paramtype">const <a class="el" href="group__GfxModule.html#ga815b373c848cf92bb60b906cf278a60a">Point2f</a> *&#160;</td>
           <td class="paramname"><em>bottomLeft</em>, </td>
         </tr>
         <tr>
@@ -599,7 +408,7 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a7b3b70fc12e6146ab85b9e877eb5a6f8">CharVertAlign</a>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__GfxModule.html#ga7b3b70fc12e6146ab85b9e877eb5a6f8">CharVertAlign</a>&#160;</td>
           <td class="paramname"><em>valign</em>, </td>
         </tr>
         <tr>
@@ -669,145 +478,6 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
     <tr><td class="paramdir">[in,out]</td><td class="paramname">rsrc</td><td>gfx context to receive the error information. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">file</td><td>File where the error occurred. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">line</td><td>Line number where the error occurred. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a273b88e818611c8cd7bc13c60a2fbddf" name="a273b88e818611c8cd7bc13c60a2fbddf"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a273b88e818611c8cd7bc13c60a2fbddf">&#9670;&nbsp;</a></span>gfx_getFontInfo()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool gfx_getFontInfo </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a5030a9a7c213c761e2209a0fe3c334f8">Font</a>&#160;</td>
-          <td class="paramname"><em>font</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="structCharInfo.html">CharInfo</a> *&#160;</td>
-          <td class="paramname"><em>info</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the character information for a font. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">font</td><td>The font to query. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">info</td><td>The character information. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a30b92426534669ed3712f63c3422b35b" name="a30b92426534669ed3712f63c3422b35b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a30b92426534669ed3712f63c3422b35b">&#9670;&nbsp;</a></span>gfx_getGfxError()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void gfx_getGfxError </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int *&#160;</td>
-          <td class="paramname"><em>error</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char *&#160;</td>
-          <td class="paramname"><em>msg</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>len</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get error information from a gfx context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">error</td><td>The EGL error code. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">msg</td><td>The EGL error message. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">len</td><td>Length of <em>msg</em>. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ae3fe780b8e3fd06722d816c7401b360d" name="ae3fe780b8e3fd06722d816c7401b360d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae3fe780b8e3fd06722d816c7401b360d">&#9670;&nbsp;</a></span>gfx_getIconInfo()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool gfx_getIconInfo </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a>&#160;</td>
-          <td class="paramname"><em>resources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a880cae13d5b4260686b2c8bb663099fb">Icon</a>&#160;</td>
-          <td class="paramname"><em>icon</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="unionVector2f.html">Vector2f</a> *&#160;</td>
-          <td class="paramname"><em>size</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Get the width and height of an icon. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">resources</td><td>The gfx context. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">icon</td><td>The icon to query. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>The icon dimenisons in pixels. </td></tr>
   </table>
   </dd>
 </dl>
@@ -913,51 +583,6 @@ static const <a class="el" href="structIconImage.html">IconImage</a>&#160;</td><
   </table>
   </dd>
 </dl>
-
-</div>
-</div>
-<a id="ae43f24c74e76be6ef8a7ce468e55702c" name="ae43f24c74e76be6ef8a7ce468e55702c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ae43f24c74e76be6ef8a7ce468e55702c">&#9670;&nbsp;</a></span>gfx_initGraphics()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool gfx_initGraphics </td>
-          <td>(</td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>fontResources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *&#160;</td>
-          <td class="paramname"><em>imageResources</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="gfx_8h.html#a8f9084fa48c381705926070ee1b9c784">DrawResources</a> *&#160;</td>
-          <td class="paramname"><em>resources</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Initialize a new gfx context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">fontResources</td><td>The path to PiWx's font resources. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">imageResources</td><td>The path to PiWx's image resources. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">resources</td><td>The new gfx context. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if able to create a new gfx context, false otherwise. </dd></dl>
 
 </div>
 </div>
