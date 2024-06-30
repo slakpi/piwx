@@ -227,18 +227,14 @@ static void drawStationWxString(DrawResources resources, const char *wxString) {
     return;
   }
 
-  // TODO: There's a weird rendering issue with the 8pt font that causes
-  //       distortions in the lettering occasionally. For now, just use the 6pt
-  //       font which does not seem to have the same problems and is still
-  //       legible with shadowing.
-  if (!gfx_getFontInfo(resources, font6pt, &info)) {
+  if (!gfx_getFontInfo(resources, font8pt, &info)) {
     return;
   }
 
   len                = strlen(wxString);
   bottomLeft.coord.x = (GFX_SCREEN_WIDTH - (info.cellSize.v[0] * len)) / 2.0f;
   bottomLeft.coord.y = LOWER_DIV - (LOWER_DIV - UPPER_DIV - info.cellSize.v[1]) / 2.0f;
-  gfx_drawText(resources, font6pt, bottomLeft, wxString, len, gfx_White, vertAlignCell);
+  gfx_drawText(resources, font8pt, bottomLeft, wxString, len, gfx_White, vertAlignCell);
 }
 
 /**
