@@ -371,10 +371,16 @@ static int setupGpio(void) {
     return ret;
   }
 
+  // Setup the buttons for reading.
   for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
     gpioSetMode(gButtonPins[i], PI_INPUT);
     gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
   }
+
+  // Set GPIO18 to output and drive it high. This ensures the PiTFT brightness
+  // is at its maximum.
+  gpioSetMode(18, PI_OUTPUT);
+  gpioWrite(18, 1);
 
   return ret;
 }
