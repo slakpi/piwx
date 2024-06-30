@@ -1,5 +1,7 @@
 /**
  * @file  gfx_prv.h
+ * @defgroup GfxPrvModule Graphics Private Interface
+ * @{
  */
 #if !defined GFX_PRV_H
 #define GFX_PRV_H
@@ -280,4 +282,4 @@ void gfx_setup3DShader(const DrawResources_ *rsrc, Program program, const Transf
                        const TransformMatrix model, const Texture *textures,
                        unsigned int textureCount);
 
-#endif /* GFX_PRV_H */
+#endif /* GFX_PRV_H @} */

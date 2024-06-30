@@ -89,7 +89,7 @@ static unsigned int scanButtons(void);
 static void setupGlobeAnimation(Animation *anim, Position origin, Position target, float duration,
                                 Position *param);
 
-static int setupGpio(void);
+static int setupGpio(bool hasPiTFT);
 
 static void signalHandler(int signo);
 
@@ -175,7 +175,7 @@ static bool go(bool test, bool verbose) {
   openLog(LOG_FILE, cfg->logLevel);
   writeLog(logInfo, "Starting up.");
 
-  if (setupGpio() < 0) {
+  if (setupGpio(cfg->hasPiTFT) < 0) {
     writeLog(logWarning, "Failed to initialize pigpio.\n");
     goto cleanup;
   }
@@ -354,9 +354,10 @@ static void printConfiguration(const PiwxConfig *config) {
 
 /**
  * @brief   Initializes the pigpio library.
+ * @param[in] hasPiTFT Is a PiTFT connected?
  * @returns The result of @a gpioInitialise.
  */
-static int setupGpio(void) {
+static int setupGpio(bool hasPiTFT) {
   int ret, cfg;
 
   // Turn off internal signal handling so that the library does not force an
@@ -371,9 +372,16 @@ static int setupGpio(void) {
     return ret;
   }
 
-  for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
-    gpioSetMode(gButtonPins[i], PI_INPUT);
-    gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
+  if (hasPiTFT) {
+    // Setup the button pins.
+    for (int i = 0; i < COUNTOF(gButtonPins); ++i) {
+      gpioSetMode(gButtonPins[i], PI_INPUT);
+      gpioSetPullUpDown(gButtonPins[i], PI_PUD_UP);
+    }
+
+    // Drive pin 18 high. This forces maximum brightness on the screen.
+    gpioSetMode(18, PI_OUTPUT);
+    gpioWrite(18, 1);
   }
 
   return ret;
