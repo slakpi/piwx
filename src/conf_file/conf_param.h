@@ -22,8 +22,7 @@ typedef enum {
   confLogLevel,
   confDaylight,
   confDrawGlobe,
-  confSortType,
-  confHasPiTFT,
+  confSortType
 } ConfParam;
 
 #endif /* CONF_PARAM_H */

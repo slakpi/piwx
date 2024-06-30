@@ -1,7 +1,5 @@
 /**
  * @file conf_file_prv.h
- * @defgroup ConfFilePrvModule Configuration File Private Interface
- * @{
  */
 #if !defined CONF_FILE_PRV_H
 #define CONF_FILE_PRV_H
@@ -23,7 +21,6 @@
 #define DEFAULT_DAYLIGHT             daylightCivil
 #define DEFAULT_DRAW_GLOBE           true
 #define DEFAULT_SORT_TYPE            sortNone
-#define DEFAULT_HAS_PITFT            false
 
 /**
  * @brief   Parse configuration settings from a file stream.
@@ -33,4 +30,4 @@
  */
 bool conf_parseStream(PiwxConfig *cfg, FILE *cfgFile);
 
-#endif /* CONF_FILE_PRV_H @} */
+#endif /* CONF_FILE_PRV_H */

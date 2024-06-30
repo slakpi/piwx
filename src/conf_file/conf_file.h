@@ -35,7 +35,6 @@ typedef struct {
   DaylightSpan daylight;                      // Daylight span for night dimming
   bool         drawGlobe;                     // Draw day/night globe
   SortType     stationSort;                   // Weather station sort type
-  bool         hasPiTFT;                      // PiTFT screen connected
 } PiwxConfig;
 
 /**

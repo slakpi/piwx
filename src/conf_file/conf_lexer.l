@@ -43,22 +43,12 @@ WS          [\v\r\n\t ]+
 
 "off" {
   yylval->val = 0;
-  return TOKEN_BOOL;
+  return TOKEN_ONOFF;
 }
 
 "on" {
   yylval->val = 1;
-  return TOKEN_BOOL;
-}
-
-"no" {
-  yylval->val = 0;
-  return TOKEN_BOOL;
-}
-
-"yes" {
-  yylval->val = 1;
-  return TOKEN_BOOL;
+  return TOKEN_ONOFF;
 }
 
 "quiet" {
@@ -180,11 +170,6 @@ WS          [\v\r\n\t ]+
 "query" {
   yylval->val = sortQuery;
   return TOKEN_SORT_TYPE;
-}
-
-"haspitft" {
-  yylval->p.param = confHasPiTFT;
-  return TOKEN_PARAM;
 }
 
 "=" { return '='; }

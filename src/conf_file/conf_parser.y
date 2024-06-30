@@ -38,7 +38,7 @@ static SortType makeSortType(int val);
 
 %token<p> TOKEN_PARAM
 %token<str> TOKEN_STRING
-%token<val> TOKEN_VALUE TOKEN_BOOL TOKEN_LOGLEVEL TOKEN_DAYLIGHT_SPAN TOKEN_SORT_TYPE
+%token<val> TOKEN_VALUE TOKEN_ONOFF TOKEN_LOGLEVEL TOKEN_DAYLIGHT_SPAN TOKEN_SORT_TYPE
 %start confFile
 
 %%
@@ -96,14 +96,11 @@ assignment
   case confDrawGlobe:
     cfg->drawGlobe = ($3 != 0);
     break;
-  case confHasPiTFT:
-    cfg->hasPiTFT = ($3 != 0);
-    break;
   default:
     YYERROR;
   }
   }
-| TOKEN_PARAM '=' TOKEN_BOOL ';' {
+| TOKEN_PARAM '=' TOKEN_ONOFF ';' {
   switch ($1.param) {
   case confHighWindSpeed:
     cfg->highWindSpeed = ($3 == 0 ? 0 : DEFAULT_HIGH_WIND_SPEED);
@@ -125,9 +122,6 @@ assignment
     break;
   case confSortType:
     cfg->stationSort = makeSortType($3);
-    break;
-  case confHasPiTFT:
-    cfg->hasPiTFT = ($3 == 0 ? false : true);
     break;
   default:
     YYERROR;

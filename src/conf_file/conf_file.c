@@ -23,8 +23,6 @@ typedef void *yyscan_t;
 
 static char *appendFileToPath(char *path, size_t len, const char *prefix, const char *file);
 
-static void validateConfig(PiwxConfig *cfg);
-
 void conf_freePiwxConfig(PiwxConfig *cfg) {
   if (!cfg) {
     return;
@@ -74,7 +72,6 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
   cfg->daylight           = DEFAULT_DAYLIGHT;
   cfg->drawGlobe          = DEFAULT_DRAW_GLOBE;
   cfg->stationSort        = DEFAULT_SORT_TYPE;
-  cfg->hasPiTFT           = DEFAULT_HAS_PITFT;
 
   cfgFile = fopen(configFile, "r");
 
@@ -85,8 +82,6 @@ PiwxConfig *conf_getPiwxConfig(const char *installPrefix, const char *imageResou
   (void)conf_parseStream(cfg, cfgFile);
 
   fclose(cfgFile);
-
-  validateConfig(cfg);
 
   return cfg;
 }
@@ -155,23 +150,4 @@ static char *appendFileToPath(char *path, size_t len, const char *prefix, const 
   strcat(path, file); // NOLINT -- Size checked above.
 
   return path;
-}
-
-/**
- * @brief   Validate the configuration.
- * @details The LED library only supports pins 12 and 18, so ensure those are
- *          set to valid values. Deconflict the PiTFT from the LED string if
- *          both are present.
- * @param[in,out] cfg The configuration.
- */
-static void validateConfig(PiwxConfig *cfg) {
-  // Only GPIO12 and GPIO18 are support data pins for the LEDs.
-  if (cfg->ledDataPin != 12 && cfg->ledDataPin != 18) {
-    cfg->ledDataPin = DEFAULT_LED_DATA_PIN;
-  }
-
-  // If the PiTFT is connected, the LED data pin cannot be 18.
-  if (cfg->hasPiTFT) {
-    cfg->ledDataPin = 12;
-  }
 }
