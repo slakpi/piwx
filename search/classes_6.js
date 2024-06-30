@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['ledcolor',['LEDColor',['../structLEDColor.html',1,'']]]
+  ['ledcolor_0',['LEDColor',['../structLEDColor.html',1,'']]]
 ];

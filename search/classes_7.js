@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['metarcallbackdata',['METARCallbackData',['../structMETARCallbackData.html',1,'']]]
+  ['metarcallbackdata_0',['METARCallbackData',['../structMETARCallbackData.html',1,'']]]
 ];

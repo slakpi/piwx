@@ -1,21 +1,21 @@
-digraph "src/gfx" {
+digraph "src/gfx"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
   compound=true
-  node [ fontsize="10", fontname="Helvetica"];
-  edge [ labelfontsize="10", labelfontname="Helvetica"];
   subgraph clusterdir_68267d1309a1af8e8297ef4c3efbcdba {
-    graph [ bgcolor="#ddddee", pencolor="black", label="src" fontname="Helvetica", fontsize="10", URL="dir_68267d1309a1af8e8297ef4c3efbcdba.html"]
+    graph [ bgcolor="#edf0f7", pencolor="grey25", style="filled,dashed,", label="src", fontname="Helvetica", fontsize="10", URL="dir_68267d1309a1af8e8297ef4c3efbcdba.html"]
+  dir_b7878ad5ecbf2506f4125b9d34c97e45 [shape=box, label="util", style="filled,", fillcolor="#a2b4d6", color="grey25", URL="dir_b7878ad5ecbf2506f4125b9d34c97e45.html"];
+  dir_b919d449df95dbe7854299847587d1c3 [shape=box, label="geo", style="filled,", fillcolor="#a2b4d6", color="grey25", URL="dir_b919d449df95dbe7854299847587d1c3.html"];
+  dir_dd2a437db4d478662cbd48329f3d2055 [shape=box, label="conf_file", style="filled,", fillcolor="#a2b4d6", color="grey25", URL="dir_dd2a437db4d478662cbd48329f3d2055.html"];
   subgraph clusterdir_c86603f79b902ad390ffc2674fbc4470 {
-    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_c86603f79b902ad390ffc2674fbc4470.html"];
-    dir_c86603f79b902ad390ffc2674fbc4470 [shape=plaintext label="gfx"];
-    dir_2d8afc7bdee584c75495541a7ad3f8ed [shape=box label="shaders" color="black" fillcolor="white" style="filled" URL="dir_2d8afc7bdee584c75495541a7ad3f8ed.html"];
+    graph [ bgcolor="#edf0f7", pencolor="grey25", style="filled,bold,", label="", fontname="Helvetica", fontsize="10", URL="dir_c86603f79b902ad390ffc2674fbc4470.html"]
+    dir_c86603f79b902ad390ffc2674fbc4470 [shape=plaintext, label="gfx"];
+  dir_2d8afc7bdee584c75495541a7ad3f8ed [shape=box, label="shaders", style="filled,", fillcolor="#a2b4d6", color="grey25", URL="dir_2d8afc7bdee584c75495541a7ad3f8ed.html"];
   }
   }
-  dir_b7878ad5ecbf2506f4125b9d34c97e45 [shape=box label="util" URL="dir_b7878ad5ecbf2506f4125b9d34c97e45.html"];
-  dir_b919d449df95dbe7854299847587d1c3 [shape=box label="geo" URL="dir_b919d449df95dbe7854299847587d1c3.html"];
-  dir_dd2a437db4d478662cbd48329f3d2055 [shape=box label="conf_file" URL="dir_dd2a437db4d478662cbd48329f3d2055.html"];
-  dir_b919d449df95dbe7854299847587d1c3->dir_b7878ad5ecbf2506f4125b9d34c97e45 [headlabel="2", labeldistance=1.5 headhref="dir_000002_000007.html"];
-  dir_c86603f79b902ad390ffc2674fbc4470->dir_b7878ad5ecbf2506f4125b9d34c97e45 [headlabel="4", labeldistance=1.5 headhref="dir_000003_000007.html"];
-  dir_c86603f79b902ad390ffc2674fbc4470->dir_b919d449df95dbe7854299847587d1c3 [headlabel="2", labeldistance=1.5 headhref="dir_000003_000002.html"];
-  dir_c86603f79b902ad390ffc2674fbc4470->dir_dd2a437db4d478662cbd48329f3d2055 [headlabel="2", labeldistance=1.5 headhref="dir_000003_000001.html"];
-  dir_dd2a437db4d478662cbd48329f3d2055->dir_b919d449df95dbe7854299847587d1c3 [headlabel="3", labeldistance=1.5 headhref="dir_000001_000002.html"];
+  dir_c86603f79b902ad390ffc2674fbc4470->dir_b7878ad5ecbf2506f4125b9d34c97e45 [headlabel="4", labeldistance=1.5 headhref="dir_000002_000007.html"];
+  dir_c86603f79b902ad390ffc2674fbc4470->dir_b919d449df95dbe7854299847587d1c3 [headlabel="2", labeldistance=1.5 headhref="dir_000002_000001.html"];
+  dir_c86603f79b902ad390ffc2674fbc4470->dir_dd2a437db4d478662cbd48329f3d2055 [headlabel="2", labeldistance=1.5 headhref="dir_000002_000000.html"];
 }
