@@ -1088,13 +1088,13 @@ static void initRender(DrawResources_ *rsrc) {
  * @param[in,out] proj The projection matrix.
  */
 static void makeProjection(TransformMatrix proj) {
-  proj[0][0] = 2.0f / (PROJ_RIGHT - PROJ_LEFT);
+  proj[0][0] = 2.0f / (PROJ_RIGHT - PROJ_LEFT - 1);
   proj[0][1] = 0.0f;
   proj[0][2] = 0.0f;
   proj[0][3] = 0.0f;
 
   proj[1][0] = 0.0f;
-  proj[1][1] = 2.0f / (PROJ_TOP - PROJ_BOTTOM);
+  proj[1][1] = 2.0f / (PROJ_TOP - PROJ_BOTTOM - 1);
   proj[1][2] = 0.0f;
   proj[1][3] = 0.0f;
 
