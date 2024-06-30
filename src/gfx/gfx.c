@@ -86,7 +86,7 @@ static const EGLint gConfigAttribs[] = {EGL_BLUE_SIZE, 8,
                                         EGL_NONE};
 // clang-format on
 
-static const EGLint gContextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE};
+static const EGLint gContextAttribs[] = {EGL_CONTEXT_MAJOR_VERSION, 2, EGL_NONE};
 
 static const FontImage gFontTable[] = {
     {font6pt, "sfmono6.png", {{{16.0f, 31.0f}}, 7.0f, 18.0f, 14.0f, 5.0f}},
