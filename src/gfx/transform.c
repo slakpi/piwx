@@ -1,5 +1,6 @@
 /**
  * @file transform.c
+ * @ingroup GfxModule
  */
 #include "transform.h"
 #include <math.h>

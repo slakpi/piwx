@@ -1,5 +1,7 @@
 /**
  * @file led.h
+ * @defmodule LedModule LED Module
+ * @{
  */
 #if !defined LED_H
 #define LED_H
@@ -29,4 +31,4 @@ typedef struct {
  */
 int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count);
 
-#endif /* LED_H */
+#endif /* LED_H @} */

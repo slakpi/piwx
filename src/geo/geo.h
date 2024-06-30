@@ -1,5 +1,7 @@
 /**
  * @file geo.h
+ * @defgroup GeoModule Geographic Module
+ * @{
  */
 #if !defined GEO_H
 #define GEO_H
@@ -81,4 +83,4 @@ bool geo_isNight(Position pos, time_t obsTime, DaylightSpan daylight);
  */
 void geo_latLonToECEF(Position pos, float *x, float *y, float *z);
 
-#endif /* GEO_H */
+#endif /* GEO_H @} */

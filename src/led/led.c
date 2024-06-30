@@ -1,5 +1,6 @@
 /**
  * @file led.c
+ * @ingroup LedModule
  */
 #include "led.h"
 #include "util.h"

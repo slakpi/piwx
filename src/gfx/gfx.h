@@ -1,5 +1,7 @@
 /**
  * @file gfx.h
+ * @defgroup GfxModule Graphics Module
+ * @{
  */
 #if !defined GFX_H
 #define GFX_H
@@ -275,4 +277,4 @@ void gfx_getGfxError(DrawResources resources, int *error, char *msg, size_t len)
 bool gfx_initGraphics(const char *fontResources, const char *imageResources,
                       DrawResources *resources);
 
-#endif /* GFX_H */
+#endif /* GFX_H @} */

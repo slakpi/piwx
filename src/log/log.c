@@ -1,5 +1,6 @@
 /**
  * @file log.c
+ * @ingroup LogModule
  */
 #include "log.h"
 #include <assert.h>

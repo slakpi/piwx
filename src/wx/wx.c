@@ -1,5 +1,6 @@
 /**
  * @file wx.c
+ * @ingroup WxModule
  */
 #include "wx.h"
 #include "geo.h"

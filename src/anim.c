@@ -1,5 +1,6 @@
 /**
  * @file anim.c
+ * @ingroup Piwx
  */
 #include "anim.h"
 #include <math.h>

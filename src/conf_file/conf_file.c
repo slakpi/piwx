@@ -1,5 +1,6 @@
 /**
  * @file conf_file.c
+ * @ingroup ConfFileModule
  */
 typedef void *yyscan_t;
 

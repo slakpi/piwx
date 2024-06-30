@@ -1,5 +1,6 @@
 /**
  * @file ecef.c
+ * @ingroup GeoModule
  * @see https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
  */
 #include "geo.h"

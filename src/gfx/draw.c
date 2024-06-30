@@ -1,5 +1,6 @@
 /**
  * @file draw.c
+ * @ingroup GfxModule
  */
 #include "gfx.h"
 #include "gfx_prv.h"

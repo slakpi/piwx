@@ -1,5 +1,6 @@
 /**
  * @file display.c
+ * @ingroup Piwx
  */
 #include "display.h"
 #include "geo.h"

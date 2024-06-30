@@ -1,5 +1,7 @@
 /**
  * @file log.h
+ * @defgroup LogModule Log Module
+ * @{
  */
 #if !defined LOG_H
 #define LOG_H
@@ -49,4 +51,4 @@ bool openLog(const char *logFile, LogLevel maxLevel);
  */
 void writeLog(LogLevel level, const char *fmt, ...);
 
-#endif /* LOG_H */
+#endif /* LOG_H @} */

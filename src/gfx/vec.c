@@ -1,5 +1,6 @@
 /**
  * @file vec.c
+ * @ingroup GfxModule
  */
 #include "vec.h"
 #include "util.h"

@@ -1,5 +1,6 @@
 /**
  * @file util.c
+ * @ingroup UtilModule
  */
 #include "util.h"
 #include <string.h>

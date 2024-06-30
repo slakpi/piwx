@@ -1,5 +1,6 @@
 /**
  * @file wx_type.h
+ * @ingroup WxModule
  */
 #if !defined WX_TYPE_H
 #define WX_TYPE_H

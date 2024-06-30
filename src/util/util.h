@@ -1,5 +1,7 @@
 /**
  * @file util.h
+ * @defgroup UtilModule Utility Module
+ * @{
  */
 #if !defined UTIL_H
 #define UTIL_H
@@ -62,4 +64,4 @@ unsigned int umax(unsigned int a, unsigned int b);
  */
 unsigned int umin(unsigned int a, unsigned int b);
 
-#endif /* UTIL_H */
+#endif /* UTIL_H @} */

@@ -1,5 +1,6 @@
 /**
  * @file sun.c
+ * @ingroup GeoModule
  * @see https://github.com/buelowp/sunset/blob/master/src/sunset.cpp
  * @see https://en.wikipedia.org/wiki/Subsolar_point
  * @see https://gml.noaa.gov/grad/solcalc/calcdetails.html

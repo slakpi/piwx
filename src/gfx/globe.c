@@ -1,5 +1,6 @@
 /**
  * @file globe.c
+ * @ingroup GfxModule
  */
 #include "conf_file.h"
 #include "geo.h"

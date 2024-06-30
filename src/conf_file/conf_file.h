@@ -1,5 +1,7 @@
 /**
  * @file conf_file.h
+ * @defgroup ConfFileModule Configuration File Module
+ * @{
  */
 #if !defined CONF_FILE_H
 #define CONF_FILE_H
@@ -80,4 +82,4 @@ char *conf_getPathForFont(char *path, size_t len, const char *fontResources, con
  */
 char *conf_getPathForImage(char *path, size_t len, const char *imageResources, const char *file);
 
-#endif /* CONF_FILE_H */
+#endif /* CONF_FILE_H @} */

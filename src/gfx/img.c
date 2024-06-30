@@ -1,5 +1,6 @@
 /**
  * @file img.c
+ * @ingroup GfxModule
  */
 #include "img.h"
 #include <png.h>

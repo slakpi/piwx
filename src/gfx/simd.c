@@ -1,5 +1,6 @@
 /**
  * @file simd.c
+ * @ingroup GfxModule
  */
 #if defined __ARM_NEON
 #include <arm_neon.h>

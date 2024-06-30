@@ -1,5 +1,7 @@
 /**
  * @file piwx.c
+ * @defgroup Piwx PiWx
+ * @{
  */
 #include "anim.h"
 #include "conf_file.h"
@@ -651,3 +653,5 @@ static void globePositionUpdate(Position pos, void *param) {
   Position *outPos = param;
   *outPos          = pos;
 }
+
+/** @} */

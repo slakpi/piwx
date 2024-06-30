@@ -1,5 +1,7 @@
 /**
  * @file wx.h
+ * @defgroup WxModule Weather Module
+ * @{
  */
 #if !defined WX_H
 #define WX_H
@@ -141,4 +143,4 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
  */
 void wx_updateDayNightState(WxStation *station, DaylightSpan daylight, time_t now);
 
-#endif /* WX_H */
+#endif /* WX_H @} */
