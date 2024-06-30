@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['ditherpixel_0',['ditherPixel',['../simd_8h.html#ac5c351ccd333f538df10628b98450698',1,'simd.h']]],
+  ['ditherpixel_0',['ditherPixel',['../simd_8h.html#ac5c351ccd333f538df10628b98450698',1,'ditherPixel(const uint8_t *p):&#160;simd.c'],['../simd_8c.html#ac5c351ccd333f538df10628b98450698',1,'ditherPixel(const uint8_t *p):&#160;simd.c']]],
   ['ditherpng_1',['ditherPng',['../gfx_8c.html#a40397f094d68307f87d51dff0dbaeb13',1,'gfx.c']]],
   ['drawbackground_2',['drawBackground',['../display_8c.html#acfc8d26189562f5eaecf9c5d2ce2b2d8',1,'display.c']]],
   ['drawcloudlayers_3',['drawCloudLayers',['../display_8c.html#a62915b6f0ffeaf2cb7dbcba5aeed70d7',1,'display.c']]],

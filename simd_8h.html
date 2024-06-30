@@ -115,6 +115,20 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section return"><dt>Returns</dt><dd>The RGB565 value.</dd></dl>
+<p>Convert an RGBA8888 pixel to RGB565 with premultiplied alpha.</p>
+<p >Naively, premultiplying the alpha would require going into floating- point land with a division: </p><pre class="fragment"> A
+</pre><p> C * &mdash; = CA Where C is Red, Green, or Blue 255</p>
+<p >If 256 is used as the denominator instead, the divison can be replaced by shifts:</p>
+<p >C' = C &lt;&lt; 8 Multiply the color component by 256 CA' = C' * A Multiply by the integer alpha CA = CA' &gt;&gt; 16 Divide by 65,536. In terms of bits: .n x 2^16 * .m x 2^8 = (.n x .m) x 2^24 Dividing by 2^16 discards the "fractional" bits leaving the most significant 8-bits.</p>
+<p >Using this method, a color value of 255 with an alpha of 255 equates to a final value of 254. The alternative is adding 1 to the alpha An alpha of 0 would still result in a color value of 0, and an alpha of 255 would keep the same color value. Color values would just be biased up 1-bit in some cases.</p>
+<p >Loading values into NEON vectors is a little unintuitive since it requires shuffing the values around in registers. NEON does not have a uint8x4_t, so the four color values have to be combined into a single lane of a uint32x2_t. They can then be split into a uint8x8_t, promoted to a uint16x8_t, then split again and promoted to a uint32x4_t.</p>
+<p >In experiments, Clang 14 inlines this function when used in a tight loop. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">p</td><td>Pointer to the four color components. </td></tr>
+  </table>
+  </dd>
+</dl>
 <dl class="section return"><dt>Returns</dt><dd>The RGB565 value. </dd></dl>
 
 </div>
