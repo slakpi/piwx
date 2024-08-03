@@ -219,7 +219,7 @@ static bool go(bool test, bool verbose) {
 
       wx           = wx_queryWx(cfg->stationQuery, cfg->stationSort, cfg->daylight, now, &err);
       curStation   = wx;
-      globePos     = curStation->hasPosition ? curStation->pos : gDefPos;
+      globePos     = gDefPos;
       first        = false;
       nextUpdate   = ((now / WX_UPDATE_INTERVAL_SEC) + 1) * WX_UPDATE_INTERVAL_SEC;
       nextWx       = now + cfg->cycleTime;
@@ -230,7 +230,7 @@ static bool go(bool test, bool verbose) {
         updateLayers[i] = true;
       }
 
-      if (!wx) {
+      if (!curStation) {
         drawDownloadError(resources);
         gfx_commitToScreen(resources);
         updateLEDs(cfg, NULL);
@@ -246,10 +246,14 @@ static bool go(bool test, bool verbose) {
         continue;
       }
 
-      updateLEDs(cfg, wx);
+      if (curStation->hasPosition) {
+        globePos = curStation->pos;
+      }
+
+      updateLEDs(cfg, curStation);
     }
 
-    if (wx) {
+    if (curStation) {
       WxStation *lastStation = curStation;
 
       // Check the following:
