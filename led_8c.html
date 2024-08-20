@@ -70,7 +70,7 @@ $(function() {
 <a href="#define-members">Macros</a> &#124;
 <a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
-  <div class="headertitle"><div class="title">led.c File Reference</div></div>
+  <div class="headertitle"><div class="title">led.c File Reference<div class="ingroups"><a class="el" href="group__LedModule.html">LED Module</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="led_8h_source.html">led.h</a>&quot;</code><br />
@@ -108,16 +108,16 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a38e92a397e085db03ec3a633cf52b47c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#a38e92a397e085db03ec3a633cf52b47c">led_init</a> (int dataPin, int dmaChannel, size_t maxLeds)</td></tr>
-<tr class="memdesc:a38e92a397e085db03ec3a633cf52b47c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the LED library.  <a href="led_8c.html#a38e92a397e085db03ec3a633cf52b47c">More...</a><br /></td></tr>
-<tr class="separator:a38e92a397e085db03ec3a633cf52b47c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac4683745d7a2fecc07934c89b3c23bc1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#ac4683745d7a2fecc07934c89b3c23bc1">led_setColors</a> (const <a class="el" href="structLEDColor.html">LEDColor</a> *colors, size_t count)</td></tr>
-<tr class="memdesc:ac4683745d7a2fecc07934c89b3c23bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the LED colors.  <a href="led_8c.html#ac4683745d7a2fecc07934c89b3c23bc1">More...</a><br /></td></tr>
-<tr class="separator:ac4683745d7a2fecc07934c89b3c23bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6923d567b5be5440c8962807a2e3997"><td class="memItemLeft" align="right" valign="top"><a id="ad6923d567b5be5440c8962807a2e3997" name="ad6923d567b5be5440c8962807a2e3997"></a>
+<tr class="memitem:ga38e92a397e085db03ec3a633cf52b47c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__LedModule.html#ga38e92a397e085db03ec3a633cf52b47c">led_init</a> (int dataPin, int dmaChannel, size_t maxLeds)</td></tr>
+<tr class="memdesc:ga38e92a397e085db03ec3a633cf52b47c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the LED library.  <a href="group__LedModule.html#ga38e92a397e085db03ec3a633cf52b47c">More...</a><br /></td></tr>
+<tr class="separator:ga38e92a397e085db03ec3a633cf52b47c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gac4683745d7a2fecc07934c89b3c23bc1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__LedModule.html#gac4683745d7a2fecc07934c89b3c23bc1">led_setColors</a> (const <a class="el" href="structLEDColor.html">LEDColor</a> *colors, size_t count)</td></tr>
+<tr class="memdesc:gac4683745d7a2fecc07934c89b3c23bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the LED colors.  <a href="group__LedModule.html#gac4683745d7a2fecc07934c89b3c23bc1">More...</a><br /></td></tr>
+<tr class="separator:gac4683745d7a2fecc07934c89b3c23bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad6923d567b5be5440c8962807a2e3997"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>led_finalize</b> ()</td></tr>
-<tr class="memdesc:ad6923d567b5be5440c8962807a2e3997"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the LED library. <br /></td></tr>
-<tr class="separator:ad6923d567b5be5440c8962807a2e3997"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:gad6923d567b5be5440c8962807a2e3997"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the LED library. <br /></td></tr>
+<tr class="separator:gad6923d567b5be5440c8962807a2e3997"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -141,90 +141,6 @@ static ws2811_t&#160;</td><td class="memItemRight" valign="bottom"><b>gLedString
       </table>
 </div><div class="memdoc">
 <p >The library is incorrect for some WS2811 strings. The GBR constant is really BRG ordering on the ALITOVE string. </p>
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="a38e92a397e085db03ec3a633cf52b47c" name="a38e92a397e085db03ec3a633cf52b47c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a38e92a397e085db03ec3a633cf52b47c">&#9670;&nbsp;</a></span>led_init()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool led_init </td>
-          <td>(</td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>dataPin</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>dmaChannel</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>maxLeds</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Initialize the LED library. </p>
-<p >Must only be called once at program startup and must be called before <em>led_setColors</em> or <em>led_finalize</em>. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dataPin</td><td>The LED string's GPIO data pin. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dmaChannel</td><td>The DMA channel to use for communication. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">maxLeds</td><td>The maximum number of LEDs expected. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if successful, false otherwise. </dd></dl>
-
-</div>
-</div>
-<a id="ac4683745d7a2fecc07934c89b3c23bc1" name="ac4683745d7a2fecc07934c89b3c23bc1"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac4683745d7a2fecc07934c89b3c23bc1">&#9670;&nbsp;</a></span>led_setColors()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">bool led_setColors </td>
-          <td>(</td>
-          <td class="paramtype">const <a class="el" href="structLEDColor.html">LEDColor</a> *&#160;</td>
-          <td class="paramname"><em>colors</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>count</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Set the LED colors. </p>
-<p >If <em>colors</em> is NULL, <em>count</em> will be ignored and the entire string will be turned off. </p><dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">colors</td><td>The colors to assign. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>The length of the <em>colors</em> array. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>True if successful, false otherwise. </dd></dl>
 
 </div>
 </div>
