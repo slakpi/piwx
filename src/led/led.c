@@ -44,7 +44,7 @@ bool led_init(int dataPin, int dmaChannel, size_t maxLeds) {
     return true;
   }
 
-  memset(&gLedString, 0, sizeof(gLedString));
+  memset(&gLedString, 0, sizeof(gLedString)); // NOLINT -- Size known.
 
   if (maxLeds == 0) {
     return false;
@@ -96,6 +96,7 @@ bool led_setColors(const LEDColor *colors, size_t count) {
     return false;
   }
 
+  // NOLINTNEXTLINE -- LED count validated during initialization.
   memset(gLedString.channel[0].leds, 0,
          sizeof(gLedString.channel[0].leds[0]) * gLedString.channel[0].count);
 
