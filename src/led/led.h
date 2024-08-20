@@ -1,6 +1,6 @@
 /**
  * @file led.h
- * @defmodule LedModule LED Module
+ * @defgroup LedModule LED Module
  * @{
  */
 #if !defined LED_H
