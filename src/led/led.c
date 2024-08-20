@@ -12,9 +12,6 @@
 #endif
 
 #define DEFAULT_TARGET_FREQ WS2811_TARGET_FREQ
-#define DEFAULT_GPIO_PIN    18
-#define DEFAULT_DMA_CHANNEL 10
-#define DEFAULT_LED_COUNT   50
 
 /**
  * The library is incorrect for some WS2811 strings. The GBR constant is
@@ -24,48 +21,48 @@
 
 #define WS2811_COLOR(c) (((c).b << 16) | ((c).r << 8) | (c).g)
 
+static bool gInitialized;
+
+static ws2811_t gLedString;
+
 #if !defined HAS_LED_SUPPORT
-int          led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count) {
-  return 0;
+
+bool led_init(int dataPin, int dmaChannel, size_t maxLeds) {
+  return true;
 }
+
+bool led_setColors(const LEDColor *colors, size_t count) {
+  return true;
+}
+
+void led_finalize() {}
+
 #else
-int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t count) {
-  ws2811_return_t ret;
-  // clang-format off
-  ws2811_t        ledstring = {
-    .freq   = DEFAULT_TARGET_FREQ,
-    .dmanum = DEFAULT_DMA_CHANNEL,
-    .channel =
-      {
-        [0] =
-          {
-            .gpionum    = DEFAULT_GPIO_PIN,
-            .count      = DEFAULT_LED_COUNT,
-            .invert     = 0,
-            // Use full brightness. Each light will control its own brightness
-            // by scaling the color.
-            .brightness = 255,
-            .strip_type = STRIP_TYPE,
-          },
-        [1] =
-          {
-            .gpionum    = 0,
-            .count      = 0,
-            .invert     = 0,
-            .brightness = 0,
-          },
-      },
-  };
-  // clang-format on
+
+bool led_init(int dataPin, int dmaChannel, size_t maxLeds) {
+  if (gInitialized) {
+    return true;
+  }
+
+  memset(&gLedString, 0, sizeof(gLedString));
+
+  if (maxLeds == 0) {
+    return false;
+  }
+
+  gLedString.freq                  = DEFAULT_TARGET_FREQ;
+  gLedString.channel[0].count      = maxLeds;
+  gLedString.channel[0].brightness = 255;
+  gLedString.channel[0].strip_type = STRIP_TYPE;
 
   // Sanity check the data pin.
   switch (dataPin) {
   case 12:
   case 18:
-    ledstring.channel[0].gpionum = dataPin;
+    gLedString.channel[0].gpionum = dataPin;
     break;
   default:
-    return -1;
+    return false;
   }
 
   // Sanity check the DMA channel.
@@ -79,32 +76,48 @@ int led_setColors(int dataPin, int dmaChannel, const LEDColor *colors, size_t co
   case 12:
   case 13:
   case 14:
-    ledstring.dmanum = dmaChannel;
+    gLedString.dmanum = dmaChannel;
     break;
   default:
-    return -1;
+    return false;
   }
 
-  // Initialize the LED string.
-  if (ws2811_init(&ledstring) != WS2811_SUCCESS) {
-    return -1;
+  if (ws2811_init(&gLedString) != WS2811_SUCCESS) {
+    return false;
   }
+
+  gInitialized = true;
+
+  return true;
+}
+
+bool led_setColors(const LEDColor *colors, size_t count) {
+  if (!gInitialized) {
+    return false;
+  }
+
+  memset(gLedString.channel[0].leds, 0,
+         sizeof(gLedString.channel[0].leds[0]) * gLedString.channel[0].count);
 
   // Convert the colors. If colors is NULL, the LEDs will just be zeroed out.
   if (colors) {
-    size_t actualCount = umin(DEFAULT_LED_COUNT, count);
+    size_t actualCount = umin(gLedString.channel[0].count, count);
 
     for (size_t i = 0; i < actualCount; ++i) {
-      ledstring.channel[0].leds[i] = WS2811_COLOR(colors[i]);
+      gLedString.channel[0].leds[i] = WS2811_COLOR(colors[i]);
     }
   }
 
   // Commit the color configuration to the string.
-  ret = ws2811_render(&ledstring);
-
-  // Cleanup.
-  ws2811_fini(&ledstring);
-
-  return (ret == WS2811_SUCCESS ? 0 : -1);
+  return ws2811_render(&gLedString) == WS2811_SUCCESS;
 }
+
+void led_finalize() {
+  if (!gInitialized) {
+    return;
+  }
+
+  ws2811_fini(&gLedString);
+}
+
 #endif

@@ -180,6 +180,11 @@ static bool go(bool test, bool verbose) {
     goto cleanup;
   }
 
+  if (!led_init(cfg->ledDataPin, cfg->ledDMAChannel, CONF_MAX_LEDS)) {
+    writeLog(logWarning, "Failed to initialize LED library.");
+    goto cleanup;
+  }
+
   if (!gfx_initGraphics(cfg->fontResources, cfg->imageResources, &resources)) {
     writeLog(logWarning, "Failed to initialize graphics.");
     goto cleanup;
@@ -320,6 +325,7 @@ cleanup:
   freeAnimation(globeAnim);
 
   updateLEDs(cfg, NULL);
+  led_finalize();
 
   gpioTerminate();
 
@@ -515,7 +521,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
   const WxStation *p                     = stations;
 
   if (!stations) {
-    led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, NULL, 0);
+    led_setColors(NULL, 0);
     return;
   }
 
@@ -536,7 +542,7 @@ static void updateLEDs(const PiwxConfig *cfg, const WxStation *stations) {
     p = p->next;
   } while (p != stations);
 
-  led_setColors(cfg->ledDataPin, cfg->ledDMAChannel, colors, CONF_MAX_LEDS);
+  led_setColors(colors, CONF_MAX_LEDS);
 }
 
 /**
