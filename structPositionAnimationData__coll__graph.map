@@ -1,0 +1,4 @@
+<map id="PositionAnimationData" name="PositionAnimationData">
+<area shape="rect" id="node1" title="Data specific to a position animation." alt="" coords="5,124,177,151"/>
+<area shape="rect" id="node2" href="$structPosition.html" title="Position expressed in degrees of latitude and longitude." alt="" coords="54,5,129,32"/>
+</map>

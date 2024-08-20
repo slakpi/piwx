@@ -68,7 +68,8 @@ $(function() {
 <div class="header">
   <div class="summary">
 <a href="#define-members">Macros</a> &#124;
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">led.c File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -81,6 +82,17 @@ $(function() {
 Include dependency graph for led.c:</div>
 <div class="dyncontent">
 <div class="center"><img src="led_8c__incl.png" border="0" usemap="#asrc_2led_2led_8c" alt=""/></div>
+<map name="asrc_2led_2led_8c" id="asrc_2led_2led_8c">
+<area shape="rect" title=" " alt="" coords="193,5,293,32"/>
+<area shape="rect" href="led_8h.html" title=" " alt="" coords="135,80,190,107"/>
+<area shape="rect" title=" " alt="" coords="5,155,88,181"/>
+<area shape="rect" title=" " alt="" coords="207,155,278,181"/>
+<area shape="rect" href="util_8h.html" title=" " alt="" coords="294,80,349,107"/>
+<area shape="rect" title=" " alt="" coords="373,80,443,107"/>
+<area shape="rect" title=" " alt="" coords="113,155,183,181"/>
+<area shape="rect" title=" " alt="" coords="302,155,370,181"/>
+<area shape="rect" title=" " alt="" coords="395,155,469,181"/>
+</map>
 </div>
 </div><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="define-members" name="define-members"></a>
@@ -88,15 +100,6 @@ Macros</h2></td></tr>
 <tr class="memitem:af7adbede83b91901bad1eb69002cf2e5"><td class="memItemLeft" align="right" valign="top"><a id="af7adbede83b91901bad1eb69002cf2e5" name="af7adbede83b91901bad1eb69002cf2e5"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_TARGET_FREQ</b>&#160;&#160;&#160;WS2811_TARGET_FREQ</td></tr>
 <tr class="separator:af7adbede83b91901bad1eb69002cf2e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0fe15c12b1e69e57460a474395bf7956"><td class="memItemLeft" align="right" valign="top"><a id="a0fe15c12b1e69e57460a474395bf7956" name="a0fe15c12b1e69e57460a474395bf7956"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_GPIO_PIN</b>&#160;&#160;&#160;18</td></tr>
-<tr class="separator:a0fe15c12b1e69e57460a474395bf7956"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aff3f1679456e04fd98eaa51713cecdf0"><td class="memItemLeft" align="right" valign="top"><a id="aff3f1679456e04fd98eaa51713cecdf0" name="aff3f1679456e04fd98eaa51713cecdf0"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_DMA_CHANNEL</b>&#160;&#160;&#160;10</td></tr>
-<tr class="separator:aff3f1679456e04fd98eaa51713cecdf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5a88a082b5b6670c83c9984c5b33f042"><td class="memItemLeft" align="right" valign="top"><a id="a5a88a082b5b6670c83c9984c5b33f042" name="a5a88a082b5b6670c83c9984c5b33f042"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>DEFAULT_LED_COUNT</b>&#160;&#160;&#160;50</td></tr>
-<tr class="separator:a5a88a082b5b6670c83c9984c5b33f042"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6ec5c3ff3f6cd47a66364496875db8de"><td class="memItemLeft" align="right" valign="top">#define&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#a6ec5c3ff3f6cd47a66364496875db8de">STRIP_TYPE</a>&#160;&#160;&#160;WS2811_STRIP_GBR</td></tr>
 <tr class="separator:a6ec5c3ff3f6cd47a66364496875db8de"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6c5c9a0c0df3d01594b623c52fc708a3"><td class="memItemLeft" align="right" valign="top"><a id="a6c5c9a0c0df3d01594b623c52fc708a3" name="a6c5c9a0c0df3d01594b623c52fc708a3"></a>
@@ -105,9 +108,25 @@ Macros</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:a5f905f08cd4a8e276ee3b8b1505de4c6"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#a5f905f08cd4a8e276ee3b8b1505de4c6">led_setColors</a> (int dataPin, int dmaChannel, const <a class="el" href="structLEDColor.html">LEDColor</a> *colors, size_t count)</td></tr>
-<tr class="memdesc:a5f905f08cd4a8e276ee3b8b1505de4c6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the LED colors.  <a href="led_8c.html#a5f905f08cd4a8e276ee3b8b1505de4c6">More...</a><br /></td></tr>
-<tr class="separator:a5f905f08cd4a8e276ee3b8b1505de4c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a38e92a397e085db03ec3a633cf52b47c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#a38e92a397e085db03ec3a633cf52b47c">led_init</a> (int dataPin, int dmaChannel, size_t maxLeds)</td></tr>
+<tr class="memdesc:a38e92a397e085db03ec3a633cf52b47c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initialize the LED library.  <a href="led_8c.html#a38e92a397e085db03ec3a633cf52b47c">More...</a><br /></td></tr>
+<tr class="separator:a38e92a397e085db03ec3a633cf52b47c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4683745d7a2fecc07934c89b3c23bc1"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="led_8c.html#ac4683745d7a2fecc07934c89b3c23bc1">led_setColors</a> (const <a class="el" href="structLEDColor.html">LEDColor</a> *colors, size_t count)</td></tr>
+<tr class="memdesc:ac4683745d7a2fecc07934c89b3c23bc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the LED colors.  <a href="led_8c.html#ac4683745d7a2fecc07934c89b3c23bc1">More...</a><br /></td></tr>
+<tr class="separator:ac4683745d7a2fecc07934c89b3c23bc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6923d567b5be5440c8962807a2e3997"><td class="memItemLeft" align="right" valign="top"><a id="ad6923d567b5be5440c8962807a2e3997" name="ad6923d567b5be5440c8962807a2e3997"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>led_finalize</b> ()</td></tr>
+<tr class="memdesc:ad6923d567b5be5440c8962807a2e3997"><td class="mdescLeft">&#160;</td><td class="mdescRight">Shutdown the LED library. <br /></td></tr>
+<tr class="separator:ad6923d567b5be5440c8962807a2e3997"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a645a9b9af78cf70d4a17af5f73f5b595"><td class="memItemLeft" align="right" valign="top"><a id="a645a9b9af78cf70d4a17af5f73f5b595" name="a645a9b9af78cf70d4a17af5f73f5b595"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>gInitialized</b></td></tr>
+<tr class="separator:a645a9b9af78cf70d4a17af5f73f5b595"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a160c6e5ba6b072536125d5f4469da0af"><td class="memItemLeft" align="right" valign="top"><a id="a160c6e5ba6b072536125d5f4469da0af" name="a160c6e5ba6b072536125d5f4469da0af"></a>
+static ws2811_t&#160;</td><td class="memItemRight" valign="bottom"><b>gLedString</b></td></tr>
+<tr class="separator:a160c6e5ba6b072536125d5f4469da0af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a6ec5c3ff3f6cd47a66364496875db8de" name="a6ec5c3ff3f6cd47a66364496875db8de"></a>
@@ -126,14 +145,14 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="a5f905f08cd4a8e276ee3b8b1505de4c6" name="a5f905f08cd4a8e276ee3b8b1505de4c6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a5f905f08cd4a8e276ee3b8b1505de4c6">&#9670;&nbsp;</a></span>led_setColors()</h2>
+<a id="a38e92a397e085db03ec3a633cf52b47c" name="a38e92a397e085db03ec3a633cf52b47c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38e92a397e085db03ec3a633cf52b47c">&#9670;&nbsp;</a></span>led_init()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">int led_setColors </td>
+          <td class="memname">bool led_init </td>
           <td>(</td>
           <td class="paramtype">int&#160;</td>
           <td class="paramname"><em>dataPin</em>, </td>
@@ -147,6 +166,39 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maxLeds</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initialize the LED library. </p>
+<p >Must only be called once at program startup and must be called before <em>led_setColors</em> or <em>led_finalize</em>. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">dataPin</td><td>The LED string's GPIO data pin. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dmaChannel</td><td>The DMA channel to use for communication. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maxLeds</td><td>The maximum number of LEDs expected. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful, false otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="ac4683745d7a2fecc07934c89b3c23bc1" name="ac4683745d7a2fecc07934c89b3c23bc1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac4683745d7a2fecc07934c89b3c23bc1">&#9670;&nbsp;</a></span>led_setColors()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool led_setColors </td>
+          <td>(</td>
           <td class="paramtype">const <a class="el" href="structLEDColor.html">LEDColor</a> *&#160;</td>
           <td class="paramname"><em>colors</em>, </td>
         </tr>
@@ -167,14 +219,12 @@ Functions</h2></td></tr>
 <p>Set the LED colors. </p>
 <p >If <em>colors</em> is NULL, <em>count</em> will be ignored and the entire string will be turned off. </p><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">dataPin</td><td>The LED string's GPIO data pin. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dmaChannel</td><td>The DMA channel to use for communication. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">colors</td><td>The colors to assign. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>The length of the <em>colors</em> array. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>0 if successful, non-zero otherwise. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>True if successful, false otherwise. </dd></dl>
 
 </div>
 </div>

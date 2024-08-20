@@ -1,0 +1,6 @@
+<map id="Vertex3D" name="Vertex3D">
+<area shape="rect" id="node1" title="Textured, 3D vertex." alt="" coords="102,109,185,136"/>
+<area shape="rect" id="node2" href="$unionVector3f.html" title="3D floating&#45;point vector with convenience accessors." alt="" coords="5,5,81,32"/>
+<area shape="rect" id="node3" href="$unionVector4f.html" title="4D floating&#45;point vector with convenience accessors." alt="" coords="105,5,181,32"/>
+<area shape="rect" id="node4" href="$unionVector2f.html" title="2D floating&#45;point vector with convenience accessors." alt="" coords="205,5,281,32"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="DrawResources_" name="DrawResources_">
+<area shape="rect" id="node1" title="Private implementation of the gfx DrawResources context." alt="" coords="43,213,174,240"/>
+<area shape="rect" id="node2" href="$structProgramInfo.html" title="Shader program information." alt="" coords="5,95,108,121"/>
+<area shape="rect" id="node3" href="$structTexture.html" title="Wrapper for a GL texture." alt="" coords="132,95,203,121"/>
+<area shape="rect" id="node4" href="$unionVector2f.html" title="2D floating&#45;point vector with convenience accessors." alt="" coords="129,5,205,32"/>
+</map>

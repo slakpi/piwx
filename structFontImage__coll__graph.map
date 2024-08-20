@@ -1,0 +1,5 @@
+<map id="FontImage" name="FontImage">
+<area shape="rect" id="node1" title="Font table entry." alt="" coords="5,184,96,211"/>
+<area shape="rect" id="node2" href="$structCharInfo.html" title="Font character information in pixels." alt="" coords="12,95,89,121"/>
+<area shape="rect" id="node3" href="$unionVector2f.html" title="2D floating&#45;point vector with convenience accessors." alt="" coords="13,5,89,32"/>
+</map>

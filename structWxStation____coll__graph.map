@@ -1,0 +1,5 @@
+<map id="WxStation_" name="WxStation_">
+<area shape="rect" id="node1" title=" " alt="" coords="52,96,148,123"/>
+<area shape="rect" id="node2" href="$structPosition.html" title="Position expressed in degrees of latitude and longitude." alt="" coords="5,5,80,32"/>
+<area shape="rect" id="node3" href="$structSkyCondition.html" title="METAR cloud layer entry." alt="" coords="104,5,211,32"/>
+</map>

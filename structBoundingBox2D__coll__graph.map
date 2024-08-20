@@ -1,0 +1,4 @@
+<map id="BoundingBox2D" name="BoundingBox2D">
+<area shape="rect" id="node1" title="A rectangular bounding box in pixels." alt="" coords="5,109,132,136"/>
+<area shape="rect" id="node2" href="$unionVector2f.html" title="2D floating&#45;point vector with convenience accessors." alt="" coords="31,5,107,32"/>
+</map>
