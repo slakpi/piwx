@@ -246,13 +246,10 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
   // within the last hour and a half. It is possible some stations lag more than
   // an hour, but typically not more than an hour and a half.
   count = strncpy_safe(url, COUNTOF(url),
-                       "https://aviationweather.gov/cgi-bin/data/dataserver.php?"
-                       "requestType=retrieve&"
-                       "dataSource=metars&"
-                       "hoursBeforeNow=1.5&"
-                       "mostRecentForEachStation=constraint&"
+                       "https://aviationweather.gov/api/data/metar?"
+                       "hours=1.5&"
                        "format=xml&"
-                       "stationString=");
+                       "ids=");
 
   assertLog(count < COUNTOF(url), "Base URL is too large.");
   count = COUNTOF(url) - strlen(url);
