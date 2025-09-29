@@ -247,7 +247,6 @@ WxStation *wx_queryWx(const char *stations, SortType sort, DaylightSpan daylight
   // an hour, but typically not more than an hour and a half.
   count = strncpy_safe(url, COUNTOF(url),
                        "https://aviationweather.gov/api/data/metar?"
-                       "hours=1.5&"
                        "format=xml&"
                        "ids=");
 
