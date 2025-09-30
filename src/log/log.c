@@ -110,10 +110,13 @@ static void writeLogV(LogLevel level, const char *fmt, va_list args) {
   now = time(NULL);
   localtime_r(&now, &nowTime);
   strftime(logTime, COUNTOF(logTime), "%a, %d %b %Y %H:%M:%S %z ", &nowTime);
+// NOLINTNEXTLINE -- Ignore fprintf_s() warnings.
   fprintf(gLog, "[%s] %s\n   ", getLevelText(level), logTime);
 
   vfprintf(gLog, fmt, args);
 
+// NOLINTNEXTLINE -- Ignore fprintf_s() warnings.
   fprintf(gLog, "\n");
   fflush(gLog);
 }
+
